@@ -17,6 +17,7 @@ proxy:
     - jenkins:jenkins
     - selenium-hub:selenium-hub 
     - elk:elk
+    - nexus:nexus
   #log_driver: "syslog"
   #log_opt:
   #  syslog-address: "tcp://${TARGET_HOST}:514"
@@ -307,7 +308,7 @@ nexus:
   restart: always
   image:  accenture/adop-nexus:0.1.0
   expose:
-    - "80"
+    - "8081"
   links:
    - ldap:ldap
   #log_driver: "syslog"
@@ -318,10 +319,10 @@ nexus:
   environment:
     SERVICE_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:80/"
     SERVICE_8081_NAME: "nexus"
-    NEXUS_BASE_URL: "http://nexus.XXX.xip.io"
+    NEXUS_BASE_URL: "http://nexus.${TARGET_HOST}.xip.io"
     LDAP_SEARCH_BASE: "dc=adop,dc=accenture,dc=com"
     ADOP_LDAP_ENABLED: "true"
-    LDAP_URL: "ldap.service.adop.consul"
+    LDAP_URL: "ldap"
     LDAP_BIND_DN: "cn=admin,dc=adop,dc=accenture,dc=com"
     LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
     LDAP_USER_BASE_DN: "ou=people"
