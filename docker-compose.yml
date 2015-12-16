@@ -87,7 +87,7 @@ gerrit:
     SERVICE_8080_NAME: "gerrit"
     SERVICE_29418_NAME: "gerrit-ssh"
     REPO_PATH: "/var/git/repos"
-    WEBURL: "${TARGET_HOST}/gerrit"
+    WEBURL: "http://${TARGET_HOST}/gerrit"
     DATABASE_TYPE: "mysql"
     DB_HOSTNAME: "gerrit-mysql"
     DB_PORT: "3306"
@@ -191,7 +191,7 @@ jenkins:
   environment:
     SERVICE_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:8010/jenkins"
     SERVICE_8080_NAME: "jenkins"
-    JENKINS_OPT: "--prefix=/jenkins"
+    JENKINS_OPTS: "--prefix=/jenkins"
     ROOT_URL: "http://proxy/jenkins/"
     LDAP_SERVER: "ldap:389"
     LDAP_ROOTDN: "dc=adop,dc=accenture,dc=com"
