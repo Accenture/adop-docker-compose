@@ -75,6 +75,7 @@ gerrit:
     - "29418"
   links:
     - gerrit-mysql:gerrit-mysql
+    - ldap:ldap
   volumes:
     - ./volumes/git-repos-vol:/var/git/repos 
     - ./volumes/gerrit-site-vol:/var/gerrit/review_site 
