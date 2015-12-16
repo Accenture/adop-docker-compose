@@ -40,7 +40,7 @@ ldap:
 
 ldap-init:
   #build: ../images/docker-ldap/
-  image: docker.accenture.com/adop/ldap:0.0.7
+  image: docker.accenture.com/adop/ldap:0.0.8
   links:
     - ldap:ldap
   #log_driver: "syslog"
@@ -225,7 +225,7 @@ jenkins:
 jenkins-init:
   #restart: always
   #build: ../images/docker-jenkins/
-  image: docker.accenture.com/adop/jenkins:0.0.6
+  image: docker.accenture.com/adop/jenkins:0.0.9
   #log_driver: "syslog"
   #log_opt:
   #  syslog-address: "tcp://${TARGET_HOST}:514"
@@ -307,6 +307,8 @@ nexus:
   image:  accenture/adop-nexus:0.1.0
   expose:
     - "80"
+  links:
+   - ldap:ldap
   #log_driver: "syslog"
   #log_opt:
   #  syslog-address: "tcp://${TARGET_HOST}:514"
