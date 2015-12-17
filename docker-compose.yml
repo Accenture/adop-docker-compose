@@ -250,7 +250,7 @@ selenium-node-chrome:
   restart: always
   image: selenium/node-chrome:2.46.0
   links:
-    - selenium-hub:selenium-hub
+    - selenium-hub:hub
   #log_driver: "syslog"
   #log_opt:
   #  syslog-address: "tcp://${TARGET_HOST}:514"
@@ -263,7 +263,7 @@ selenium-node-firefox:
   restart: always
   image: selenium/node-firefox:2.46.0
   links:
-    - selenium-hub:selenium-hub
+    - selenium-hub:hub
   #log_driver: "syslog"
   #log_opt:
   #  syslog-address: "tcp://${TARGET_HOST}:514"
@@ -276,7 +276,7 @@ selenium-phantomjs:
   restart: always
   image: stevenalexander/node-phantomjs:2.46.0
   links:
-    - selenium-hub:selenium-hub
+    - selenium-hub:hub
   #log_driver: "syslog"
   #log_opt:
   #  syslog-address: "tcp://${TARGET_HOST}:514"
