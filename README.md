@@ -10,6 +10,20 @@ These instructions are only required until the data deployment and init steps ha
 - Run from compose host: docker exec dockercompose\_gerrit\_1 bash -c '/var/gerrit/adop\_scripts/create\_user.sh -u gerrit -p gerrit && /var/gerrit/adop\_scripts/create\_user.sh -u jenkins -p jenkins && /var/gerrit/adop\_scripts/create\_user.sh -u john.smith -p Password01 && /var/gerrit/adop\_scripts/add\_user\_to\_group.sh -A gerrit -P gerrit -u jenkins -g "Non-Interactive Users" && /var/gerrit/adop\_scripts/add\_user\_to\_group.sh -A gerrit -P gerrit -u john.smith -g Administrators'
 - Restart everything once the previous steps have been carried out so that Nginx, Gerrit, and Jenkins start correctly
 
+# Required environment variable on the host
+
+- TARGET_HOST the dns/ip of proxy
+- LAGSTASH_HOST the dns/ip of logstash
+
+# Temporary define default index pattern
+
+As described on [this|https://alm.accenture.com/jira/browse/DA-1359?focusedCommentId=132808&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-132808] comment, Kibana 4 does not provide a configuration property that allow to define the default index pattern for this reason while issue [DA-1401|https://alm.accenture.com/jira/browse/DA-1401] is prioritized the following manual procedure should be adopted in order to define an index pattern:
+
+- Navidate to Settings > Indices using Kibana dashboard
+- Set index name or pattern as "logstash-*"
+- For the below drop-down select @timestamp for the Time-field name
+- Click on create button
+
 # Status
 
 This is still WIP and does not work full yet.
