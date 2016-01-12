@@ -3,5 +3,4 @@ elk-data-vol
 nexus-data-vol
 gerrit-site-vol
 volumes/elasticsearch-data-vol/elasticsearch/
-volumes/jenkins-home-vol/.java/
-volumes/jenkins-home-vol/monitoring/
+volumes/jenkins-home-vol
