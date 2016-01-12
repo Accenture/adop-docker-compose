@@ -302,8 +302,7 @@ lasticsearch:
 
 logstash:
   restart: always
-  image: logstash:2.1.1-1
-  command: logstash -e 'input { tcp { port => 5000 } gelf { port => 12201 } syslog { port => 25826 }  } filter { if "docker/" in [program] { mutate { add_field => { "container_id" => "%{program}" } } mutate { gsub => [ "container_id", "docker/", ""  ]  } mutate { update => [ "program", "docker"  ]  } } }  output { elasticsearch { hosts => "elasticsearch:9200" } }'
+  image: docker.accenture.com/adop/logstash:0.0.1
   links:
     - elasticsearch
   environment:
