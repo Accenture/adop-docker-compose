@@ -1,0 +1,68 @@
+proxy:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/nginx_config:/etc/nginx:ro
+    - ${NFS_HOST}/nfs/nginx_releasenote:/usr/share/nginx/html
+
+ldap:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/ldap_slapd:/etc/ldap/slapd.d
+    - ${NFS_HOST}/nfs/ldap_ssl:/etc/ldap/ssl
+    - ${NFS_HOST}/nfs/ldap_db:/var/lib/ldap
+
+gerrit-mysql:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/gerrit_mysql_data:/var/lib/mysql
+
+gerrit:
+  user: root
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/git_repos:/var/git/repos 
+    - ${NFS_HOST}/nfs/gerrit_review_site:/var/gerrit/review_site 
+
+sonar-mysql:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/sonar_mysql_data:/var/lib/mysql 
+
+sonar:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/sonar_data:/opt/sonarqube/data
+    - ${NFS_HOST}/nfs/sonar_extensions:/opt/sonarqube/extensions
+    - ${NFS_HOST}/nfs/sonar_extensions_plugins:/opt/sonarqube/extensions/plugins
+    - ${NFS_HOST}/nfs/sonar_logs:/opt/sonarqube/logs
+
+jenkins:
+  user: root 
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/jenkins_home:/var/jenkins_home 
+
+selenium-node-chrome:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/selenium_config:/var/selenium-config
+
+selenium-node-firefox:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/selenium_config:/var/selenium-config
+
+selenium-phantomjs:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/selenium_config:/var/selenium-config
+
+elasticsearch:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/elasticsearch_data:/usr/share/elasticsearch/data
+
+nexus:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/nexus_sonatype_work:/sonatype-work
