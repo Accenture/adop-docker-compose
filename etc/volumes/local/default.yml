@@ -1,0 +1,56 @@
+proxy:
+  volumes:
+    - ./volumes/nginx-configuration-vol:/etc/nginx:ro
+    - ./volumes/nginx-releasenote-vol:/usr/share/nginx/html
+
+ldap:
+  volumes:
+      - ldap_slapd:/etc/ldap/slapd.d
+      - ldap_ssl:/etc/ldap/ssl
+      - ldap_db:/var/lib/ldap
+
+gerrit-mysql:
+  volumes:
+    - gerrit_mysql_data:/var/lib/mysql
+
+gerrit:
+  user: root
+  volumes:
+    - git_repos:/var/git/repos 
+    - gerrit_review_site:/var/gerrit/review_site 
+
+sonar-mysql:
+  volumes:
+    - sonar_mysql_data:/var/lib/mysql 
+
+sonar:
+  volumes:
+    - sonar_data:/opt/sonarqube/data
+    - sonar_extensions:/opt/sonarqube/extensions 
+    - sonar_logs:/opt/sonarqube/logs
+
+jenkins:
+  user: root 
+  volumes:
+    - jenkins_home:/var/jenkins_home 
+    - /var/run/docker.sock:/var/run/docker.sock
+
+selenium-node-chrome:
+  volumes:
+    - ./volumes/selenium-config-vol:/var/selenium-config
+
+selenium-node-firefox:
+  volumes:
+    - ./volumes/selenium-config-vol:/var/selenium-config
+
+selenium-phantomjs:
+  volumes:
+    - ./volumes/selenium-config-vol:/var/selenium-config
+
+elasticsearch:
+  volumes:
+    - elasticsearch_data:/usr/share/elasticsearch/data
+
+nexus:
+  volumes:
+    - nexus_sonatype_work:/sonatype-work
