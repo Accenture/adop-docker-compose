@@ -3,16 +3,20 @@
 These instructions are only required until the data deployment and init steps have been integrated into the main Docker image.
 
 - [OPTIONAL] Create a Docker Engine in AWS: docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KEY --amazonec2-secret-key YOUR\_SECRET\_KEY --amazonec2-vpc-id vpc-27d43742 --amazonec2-instance-type t2.large --amazonec2-region eu-west-1 YOUR\_MACHINE\_NAME
-- Use the "docker-compose-no-init.yml" compose file 
+- Set any required environment variables
 - Transfer "volumes/nginx-configuration-vol" and "volumes/nginx-releasenote-vol" directories to the target host location - without this Nginx will not start
-- Run this on the target host from within the "volumes" directory: chown -R 1000:1000 gerrit-site-vol jenkins-home-vol git-repos-vol
-- Run from compose host: docker exec dockercompose\_gerrit\_1 bash -c '/var/gerrit/adop\_scripts/create\_user.sh -u gerrit -p gerrit && /var/gerrit/adop\_scripts/create\_user.sh -u jenkins -p jenkins && /var/gerrit/adop\_scripts/create\_user.sh -u john.smith -p Password01 && /var/gerrit/adop\_scripts/add\_user\_to\_group.sh -A gerrit -P gerrit -u jenkins -g "Non-Interactive Users" && /var/gerrit/adop\_scripts/add\_user\_to\_group.sh -A gerrit -P gerrit -u john.smith -g Administrators'
-- Restart everything once the previous steps have been carried out so that Nginx, Gerrit, and Jenkins start correctly
+- Create a custom network: docker network create <CUSTOM_NETWORK_NAME>
+- Choose a volume driver - either "local" or "nfs" are provided, and if the latter is chosen then an NFS server is expected along with the NFS_HOST environment variable
+- Run: docker-compose -f docker-compose-no-init.yml -f etc/volumes/<VOLUME_DRIVER>/default.yml up -d
+- Run from compose host: docker exec gerrit bash -c '/var/gerrit/adop\_scripts/create\_user.sh -u gerrit -p gerrit && /var/gerrit/adop\_scripts/create\_user.sh -u jenkins -p jenkins && /var/gerrit/adop\_scripts/create\_user.sh -u john.smith -p Password01 && /var/gerrit/adop\_scripts/add\_user\_to\_group.sh -A gerrit -P gerrit -u jenkins -g "Non-Interactive Users" && /var/gerrit/adop\_scripts/add\_user\_to\_group.sh -A gerrit -P gerrit -u john.smith -g Administrators'
+- Restart everything once the previous steps have been carried out so that Nginx, Gerrit, and Jenkins start correctly - this is mostly to make sure they work properly against LDAP
 
 # Required environment variable on the host
 
 - TARGET_HOST the dns/ip of proxy
 - LAGSTASH_HOST the dns/ip of logstash
+- CUSTOM_NETWORK_NAME: The name of the pre-created custom network to use
+- [OPTIONAL] NFS_HOST: The DNS/IP of your NFS server
 
 # Temporary define default index pattern
 
