@@ -33,7 +33,6 @@ sonar:
   volumes:
     - ${NFS_HOST}/nfs/sonar_data:/opt/sonarqube/data
     - ${NFS_HOST}/nfs/sonar_extensions:/opt/sonarqube/extensions
-    - ${NFS_HOST}/nfs/sonar_extensions_plugins:/opt/sonarqube/extensions/plugins
     - ${NFS_HOST}/nfs/sonar_logs:/opt/sonarqube/logs
 
 jenkins:
