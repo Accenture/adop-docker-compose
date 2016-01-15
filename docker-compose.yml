@@ -1,90 +1,62 @@
 # set TARGET_HOST to dns/ip of proxy
+# set LOGSTASH_HOST to dns/ip of logstash host
 
 proxy:
+  container_name: proxy
   restart: always
   image: accenture/adop-nginx:0.1.0
   #build: ../images/docker-nginx/
+  net: ${CUSTOM_NETWORK_NAME}
   ports:
     - "80:80"
     - "443:443"
-  volumes:
-    - ./volumes/nginx-configuration-vol:/etc/nginx:ro
-    - ./volumes/nginx-releasenote-vol:/usr/share/nginx/html
-  links:
-    - "gerrit:gerrit"
-    - "ldap:ldap"
-    - "sonar:sonar"
-    - "jenkins:jenkins"
-    - "selenium-hub:selenium-hub" 
-    - "logstash:logstash"
-    - "elasticsearch:elasticsearch"
-    - "kibana:kibana"
-    - "nexus:nexus"
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "proxy"
 
 ldap:
+  container_name: ldap
   restart: always
   #build: ../images/docker-ldap/
   image: accenture/adop-ldap:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "389"
-  # ADDING THE VOUMES PREVENTS LDAP STARTING!
-  #  volumes:
-  #    - ./volumes/ldap-configuration-vol:/etc/ldap/slapd.d
-  #    - ./volumes/ldap-ssl-vol:/etc/ldap/ssl
-  #    - ./volumes/ldap-db-vol:/var/lib/ldap
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
   environment:
     LDAP_ADMIN_PASSWORD: "***REMOVED***"
-
-ldap-init:
-  #build: ../images/docker-ldap/
-  image: docker.accenture.com/adop/ldap:0.0.8
-  links:
-    - ldap:ldap
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
-  command: "bash -c '/usr/local/bin/load_ldif.sh -h ldap -u cn=admin,dc=adop,dc=accenture,dc=com -p ***REMOVED*** -b dc=adop,dc=accenture,dc=com -f /tmp/structure.ldif'"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "ldap"
 
 gerrit-mysql:
+  container_name: gerrit-mysql
   restart: always
   image: mysql:5.6.25
+  net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "3306"
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
   environment:
     MYSQL_ROOT_PASSWORD: "***REMOVED***"
     MYSQL_USER: "gerrit"
     MYSQL_PASSWORD: "***REMOVED***"
     MYSQL_DATABASE: "gerrit"
     #SERVICE_3306_NAME: gerrit-mysql
-  # MC - Again volume seems to break this too
-  #volumes:
-  #  - ./volumes/gerrit-mysql-vol:/var/lib/mysql
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "gerrit-mysql"
 
 gerrit:
+  container_name: gerrit
   restart: always
   #build: ../images/docker-gerrit/
   image: accenture/adop-gerrit:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "8080"
     - "29418"
-  links:
-    - gerrit-mysql:gerrit-mysql
-    - ldap:ldap
-  volumes:
-    - ./volumes/git-repos-vol:/var/git/repos 
-    - ./volumes/gerrit-site-vol:/var/gerrit/review_site 
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
   environment:
     SERVICE_8080_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:8030/gerrit"
     SERVICE_8080_NAME: "gerrit"
@@ -112,51 +84,103 @@ gerrit:
     HTTPD_LISTENURL: "proxy-http://0.0.0.0:8080/gerrit"
     USER_NAME: "Gerrit Code Review" 
     USER_EMAIL: "gerrit@adop" 
-    DOWNLOAD_SCHEME: "http"  
+    DOWNLOAD_SCHEME: "http"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "gerrit"
 
-gerrit-init:
-  #restart: always
-  #build: ../images/docker-gerrit/
-  image: docker.accenture.com/adop/gerrit:0.0.6
-  links:
-    - gerrit:gerrit
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
-  command: bash -c "/var/gerrit/adop_scripts/create_user.sh -u gerrit -p gerrit && /var/gerrit/adop_scripts/create_user.sh -u jenkins -p jenkins && /var/gerrit/adop_scripts/create_user.sh -u john.smith -p Password01 && /var/gerrit/adop_scripts/add_user_to_group.sh -A gerrit -P gerrit -u jenkins -g 'Non-Interactive Users' && /var/gerrit/adop_scripts/add_user_to_group.sh -A gerrit -P gerrit -u john.smith -g Administrators"
-    # && /var/gerrit/adop_scripts/upload_ssh_key.sh -c ${TARGET_HOST} -p 8500 -A gerrit -P gerrit -k adop/core/jenkins/ssh/public_key -u jenkins"
+sensu-uchiwa:
+  container_name: sensu-uchiwa
+  restart: always
+  image: sstarcher/uchiwa
+  net: ${CUSTOM_NETWORK_NAME}
+  environment:
+    SENSU_HOSTNAME: sensu-api
+  expose:
+    - "3000"
+
+sensu-api:
+  container_name: sensu-api
+  restart: always
+  image: accenture/adop-sensu:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
+  command: api
+  expose:
+    - "4567"
+  environment:
+    RABBITMQ_HOST: sensu-rabbitmq
+    REDIS_HOST: sensu-redis
+
+sensu-server:
+  container_name: sensu-server
+  restart: always
+  image: accenture/adop-sensu:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
+  command: server
+  environment:
+    CLIENT_NAME: core
+    API_HOST: sensu-api
+    RABBITMQ_HOST: sensu-rabbitmq
+    REDIS_HOST: sensu-redis
+
+sensu-client:
+  container_name: sensu-client
+  restart: always
+  image: accenture/adop-sensu:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
+  command: client
+  environment:
+    CLIENT_NAME: core
+    RABBITMQ_HOST: sensu-rabbitmq
+    JENKINS_PREFIX: jenkins
+    CLIENT_SUBSCRIPTIONS: "proxy,gerrit,jenkins,nexus,sonarqube,sensu,kibana"
+
+sensu-rabbitmq:
+  container_name: sensu-rabbitmq
+  restart: always
+  image: rabbitmq:3.5.7-management
+  net: ${CUSTOM_NETWORK_NAME}
+  expose:
+    - "5672"
+    - "5671"
+    - "15672"
+    - "15671"
+
+sensu-redis:
+  container_name: sensu-redis
+  restart: always
+  image: redis:3.0.7
+  net: ${CUSTOM_NETWORK_NAME}
+  expose:
+    - "6379"
 
 sonar-mysql:
+  container_name: sonar-mysql
   restart: always
   image: mysql:5.6.25
+  net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "3306"
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
-  #volumes:
-  #  - /data/sonar-mysql/data_dir:/var/lib/mysql 
   environment: 
     SERVICE_3306_NAME: "sonar-mysql"
     MYSQL_ROOT_PASSWORD: "***REMOVED***"
     MYSQL_USER: "sonar"
     MYSQL_PASSWORD: "***REMOVED***"
     MYSQL_DATABASE: "sonar"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "sonar-mysql"
 
 sonar:
+  container_name: sonar
   restart: always
   image: accenture/adop-sonar:0.1.0
   #build: ../images/docker-sonar/
-  volumes:
-    - ./volumes/sonar-plugins-vol:/opt/sonarqube/extensions/plugins 
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
+  net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "9000"
-  links:
-    - ldap:ldap
-    - sonar-mysql:sonar-mysql
   environment:
     SERVICE_9000_NAME: "sonar"
     SERVICE_9000_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:8020/sonar"  
@@ -171,26 +195,21 @@ sonar:
     LDAP_GROUP_REQUEST: "(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))" 
     LDAP_GROUP_ID_ATTRIBUTE: "cn"
     SONARQUBE_JDBC_URL: "jdbc:mysql://sonar-mysql:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "sonar"
 
 jenkins:
+  container_name: jenkins
   restart: always
   image: accenture/adop-jenkins:0.1.0
   #build: ../images/docker-jenkins/
+  net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "8080"
     - "50000"
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
   privileged: true
-  links:
-    - gerrit:gerrit
-    - ldap:ldap
-    - sonar:sonar
-    - sonar-mysql:sonar-mysql
-  volumes:
-    - ./volumes/jenkins-home-vol:/var/jenkins_home 
-    - /var/run/docker.sock:/var/run/docker.sock
   environment:
     SERVICE_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:8010/jenkins"
     SERVICE_8080_NAME: "jenkins"
@@ -225,73 +244,79 @@ jenkins:
     NODEJS_VERSION: "0.12.2"
     NODEJS_GLOBAL_PACKAGES: "grunt-cli@~0.1.13 bower@~1.3.12 plato@~1.2.1"
     NODEJS_PACKAGES_REFRESH_HOURS: "72"
-
-jenkins-init:
-  #restart: always
-  #build: ../images/docker-jenkins/
-  image: docker.accenture.com/adop/jenkins:0.0.9
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "jenkins"
+    
+jenkins-slave:
+  container_name: jenkins-slave
+  restart: always
+  image: accenture/adop-jenkins-slave:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
   volumes:
-    - ./volumes/jenkins-home-vol:/var/jenkins_home
-  command: "/usr/share/jenkins/ref/adop_scripts/generate_key.sh -c ${TARGET_HOST} -p 8500"
+    - /var/run/docker.sock:/var/run/docker.sock
+  privileged: true
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "jenkins-slave"
 
 selenium-hub:
+  container_name: selenium-hub
   restart: always
   image: selenium/hub:2.46.0
+  net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "4444"
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
   environment:
     SERVICE_4444_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:4444/grid/console"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "selenium-hub"
 
 selenium-node-chrome:
+  container_name: selenium-node-chrome
   restart: always
   image: selenium/node-chrome:2.46.0
-  links:
-    - selenium-hub:hub
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
-  volumes:
-    - ./volumes/selenium-config-vol:/var/selenium-config
+  net: ${CUSTOM_NETWORK_NAME}
   environment:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-chrome.json"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "selenium-node-chrome"
 
 selenium-node-firefox:
+  container_name: selenium-node-firefox
   restart: always
   image: selenium/node-firefox:2.46.0
-  links:
-    - selenium-hub:hub
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
-  volumes:
-    - ./volumes/selenium-config-vol:/var/selenium-config
+  net: ${CUSTOM_NETWORK_NAME}
   environment:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-firefox.json"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "selenium-node-firefox"
 
 selenium-phantomjs:
+  container_name: selenium-phantomjs
   restart: always
   image: stevenalexander/node-phantomjs:2.46.0
-  links:
-    - selenium-hub:hub
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
-  volumes:
-    - ./volumes/selenium-config-vol:/var/selenium-config
+  net: ${CUSTOM_NETWORK_NAME}
   environment:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-phantomjs.json"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "selenium-phantomjs"
 
-lasticsearch:
+elasticsearch:
+  container_name: elasticsearch
   restart: always
   image: elasticsearch:2.1.1
-  volumes:
-    - "./volumes/elasticsearch-data-vol:/usr/share/elasticsearch/data"
+  net: ${CUSTOM_NETWORK_NAME}
   command: elasticsearch -Des.network.host=0.0.0.0
   ports:
     - "9200:9200"
@@ -301,10 +326,10 @@ lasticsearch:
     syslog-tag: "elasticsearch"
 
 logstash:
+  container_name: logstash
   restart: always
   image: docker.accenture.com/adop/logstash:0.0.1
-  links:
-    - elasticsearch
+  net: ${CUSTOM_NETWORK_NAME}
   environment:
     - LS_HEAP_SIZE=1024m
   ports:
@@ -317,11 +342,13 @@ logstash:
     syslog-tag: "logstash"
 
 kibana:
+  container_name: kibana
   restart: always
   image: kibana:4.3.1
-  links:
-    - elasticsearch
+  net: ${CUSTOM_NETWORK_NAME}
   command: kibana
+  environment:
+    - ELASTICSEARCH_URL=http://elasticsearch:9200
   ports:
     - "5601:5601"
   log_driver: "syslog"
@@ -330,17 +357,12 @@ kibana:
     syslog-tag: "kibana"
 
 nexus:
+  container_name: nexus
   restart: always
   image:  accenture/adop-nexus:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "8081"
-  links:
-   - ldap:ldap
-  #log_driver: "syslog"
-  #log_opt:
-  #  syslog-address: "tcp://${TARGET_HOST}:514"
-  volumes:
-    - ./volumes/nexus-data-vol:/sonatype-work
   environment:
     SERVICE_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:80/"
     SERVICE_8081_NAME: "nexus"
@@ -353,3 +375,7 @@ nexus:
     LDAP_USER_BASE_DN: "ou=people"
     LDAP_GROUP_BASE_DN: "ou=groups"
     LDAP_BIND_PASSWORD: "***REMOVED***"
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "nexus"

@@ -19,6 +19,26 @@ gerrit:
     - git_repos:/var/git/repos 
     - gerrit_review_site:/var/gerrit/review_site 
 
+sensu-api:
+  volumes:
+    - sensu_api_conf:/etc/sensu/conf.d
+
+sensu-server:
+  volumes:
+    - sensu_server_conf:/etc/sensu/conf.d
+
+sensu-client:
+  volumes:
+    - sensu_client_conf:/etc/sensu/conf.d
+
+sensu-rabbitmq:
+  volumes:
+    - sensu_rabbitmq_data:/var/lib/rabbitmq
+
+sensu-redis:
+  volumes:
+    - sensu_redis_data:/data
+
 sonar-mysql:
   volumes:
     - sonar_mysql_data:/var/lib/mysql 
