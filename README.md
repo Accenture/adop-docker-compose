@@ -7,7 +7,7 @@ These instructions are only required until the data deployment and init steps ha
 - Transfer "volumes/nginx-configuration-vol" and "volumes/nginx-releasenote-vol" directories to the target host location - without this Nginx will not start
 - Create a custom network: docker network create <CUSTOM_NETWORK_NAME>
 - Choose a volume driver - either "local" or "nfs" are provided, and if the latter is chosen then an NFS server is expected along with the NFS_HOST environment variable
-- Run: docker-compose -f docker-compose-no-init.yml -f etc/volumes/<VOLUME_DRIVER>/default.yml up -d
+- Run: docker-compose -f docker-compose.yml -f etc/volumes/<VOLUME_DRIVER>/default.yml up -d
 - Restart everything once the previous steps have been carried out so that Nginx, Gerrit, and Jenkins start correctly - this is mostly to make sure they work properly against LDAP
 
 # Required environment variable on the host
