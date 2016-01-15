@@ -283,6 +283,8 @@ selenium-node-chrome:
   net: ${CUSTOM_NETWORK_NAME}
   environment:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-chrome.json"
+    HUB_PORT_4444_TCP_ADDR: "selenium-hub"
+    HUB_PORT_4444_TCP_PORT: "4444"
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
@@ -295,6 +297,8 @@ selenium-node-firefox:
   net: ${CUSTOM_NETWORK_NAME}
   environment:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-firefox.json"
+    HUB_PORT_4444_TCP_ADDR: "selenium-hub"
+    HUB_PORT_4444_TCP_PORT: "4444"
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
@@ -307,6 +311,8 @@ selenium-phantomjs:
   net: ${CUSTOM_NETWORK_NAME}
   environment:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-phantomjs.json"
+    HUB_PORT_4444_TCP_ADDR: "selenium-hub"
+    HUB_PORT_4444_TCP_PORT: "4444"
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
