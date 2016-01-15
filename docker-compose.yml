@@ -304,20 +304,6 @@ selenium-node-firefox:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
     syslog-tag: "selenium-node-firefox"
 
-selenium-phantomjs:
-  container_name: selenium-phantomjs
-  restart: always
-  image: stevenalexander/node-phantomjs:2.46.0
-  net: ${CUSTOM_NETWORK_NAME}
-  environment:
-    SE_OPTS: "-nodeConfig /var/selenium-config/config-phantomjs.json"
-    HUB_PORT_4444_TCP_ADDR: "selenium-hub"
-    HUB_PORT_4444_TCP_PORT: "4444"
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "selenium-phantomjs"
-
 elasticsearch:
   container_name: elasticsearch
   restart: always
