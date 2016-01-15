@@ -6,7 +6,6 @@ These instructions are only required until the data deployment and init steps ha
 - Use the "docker-compose-no-init.yml" compose file 
 - Transfer "volumes/nginx-configuration-vol" and "volumes/nginx-releasenote-vol" directories to the target host location - without this Nginx will not start
 - Run this on the target host from within the "volumes" directory: chown -R 1000:1000 gerrit-site-vol jenkins-home-vol git-repos-vol
-- Run from compose host: docker exec dockercompose\_ldap\_1 bash -c '/usr/local/bin/load\_ldif.sh -h $(hostname) -u cn=admin,dc=adop,dc=accenture,dc=com -p ***REMOVED*** -b dc=adop,dc=accenture,dc=com -f /tmp/structure.ldif'
 - Run from compose host: docker exec dockercompose\_gerrit\_1 bash -c '/var/gerrit/adop\_scripts/create\_user.sh -u gerrit -p gerrit && /var/gerrit/adop\_scripts/create\_user.sh -u jenkins -p jenkins && /var/gerrit/adop\_scripts/create\_user.sh -u john.smith -p Password01 && /var/gerrit/adop\_scripts/add\_user\_to\_group.sh -A gerrit -P gerrit -u jenkins -g "Non-Interactive Users" && /var/gerrit/adop\_scripts/add\_user\_to\_group.sh -A gerrit -P gerrit -u john.smith -g Administrators'
 - Restart everything once the previous steps have been carried out so that Nginx, Gerrit, and Jenkins start correctly
 
