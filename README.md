@@ -8,7 +8,6 @@ These instructions are only required until the data deployment and init steps ha
 - Create a custom network: docker network create <CUSTOM_NETWORK_NAME>
 - Choose a volume driver - either "local" or "nfs" are provided, and if the latter is chosen then an NFS server is expected along with the NFS_HOST environment variable
 - Run: docker-compose -f docker-compose-no-init.yml -f etc/volumes/<VOLUME_DRIVER>/default.yml up -d
-- Run from compose host: docker exec gerrit bash -c '/var/gerrit/adop\_scripts/create\_user.sh -u gerrit -p gerrit && /var/gerrit/adop\_scripts/create\_user.sh -u jenkins -p jenkins && /var/gerrit/adop\_scripts/create\_user.sh -u john.smith -p Password01 && /var/gerrit/adop\_scripts/add\_user\_to\_group.sh -A gerrit -P gerrit -u jenkins -g "Non-Interactive Users" && /var/gerrit/adop\_scripts/add\_user\_to\_group.sh -A gerrit -P gerrit -u john.smith -g Administrators'
 - Restart everything once the previous steps have been carried out so that Nginx, Gerrit, and Jenkins start correctly - this is mostly to make sure they work properly against LDAP
 
 # Required environment variable on the host
