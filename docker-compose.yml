@@ -25,6 +25,7 @@ ldap:
     - "389"
   environment:
     LDAP_ADMIN_PASSWORD: "***REMOVED***"
+    LDAP_LOG_LEVEL: 0
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
