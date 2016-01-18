@@ -356,7 +356,7 @@ nexus:
   environment:
     SERVICE_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:80/"
     SERVICE_8081_NAME: "nexus"
-    NEXUS_BASE_URL: "http://nexus.${TARGET_HOST}.xip.io"
+    NEXUS_BASE_URL: "http://${TARGET_HOST}/nexus"
     LDAP_SEARCH_BASE: "dc=adop,dc=accenture,dc=com"
     ADOP_LDAP_ENABLED: "true"
     LDAP_URL: "ldap"
