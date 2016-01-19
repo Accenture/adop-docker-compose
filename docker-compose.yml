@@ -230,7 +230,7 @@ jenkins:
     LDAP_DISPLAY_NAME_ATTRIBUTE_NAME: "displayName"
     LDAP_MAIL_ADDRESS_ATTRIBUTE_NAME: "mail"
     GERRIT_HOST_NAME: "gerrit"
-    GERRIT_FRONT_END_URL: "http://gerrit/gerrit"
+    GERRIT_FRONT_END_URL: "http://gerrit:8080/gerrit"
     SONAR_SERVER_URL: "http://sonar:9000/sonar/"
     SONAR_ACCOUNT_LOGIN: "jenkins"
     SONAR_ACCOUNT_PASSWORD: "jenkins"
