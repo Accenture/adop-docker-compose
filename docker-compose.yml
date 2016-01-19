@@ -10,6 +10,14 @@ proxy:
   ports:
     - "80:80"
     - "443:443"
+  environment:
+    LDAP_SERVER: "ldap:389"
+    LDAP_USERNAME: "cn=admin,dc=adop,dc=accenture,dc=com"
+    LDAP_PASSWORD: "***REMOVED***"
+    LDAP_USER_BASE_DN: "ou=people,dc=adop,dc=accenture,dc=com"
+    LDAP_GROUP_ATTRIBUTE: "member"
+    LDAP_USER_ID_ATTRIBUTE: "cn"
+    LDAP_USER_OBJECT_CLASS: "inetOrgPerson"
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"

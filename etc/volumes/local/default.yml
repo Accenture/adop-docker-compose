@@ -1,7 +1,7 @@
 proxy:
   volumes:
-    - ./volumes/nginx-configuration-vol:/etc/nginx:ro
-    - ./volumes/nginx-releasenote-vol:/usr/share/nginx/html
+    - nginx_config:/etc/nginx
+    - nginx_releasenote:/usr/share/nginx/html
 
 ldap:
   volumes:

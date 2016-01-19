@@ -4,11 +4,9 @@ These instructions are only required until the data deployment and init steps ha
 
 - [OPTIONAL] Create a Docker Engine in AWS: docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KEY --amazonec2-secret-key YOUR\_SECRET\_KEY --amazonec2-vpc-id vpc-27d43742 --amazonec2-instance-type t2.large --amazonec2-region eu-west-1 YOUR\_MACHINE\_NAME
 - Set any required environment variables
-- Transfer "volumes/nginx-configuration-vol" and "volumes/nginx-releasenote-vol" directories to the target host location - without this Nginx will not start
 - Create a custom network: docker network create \<CUSTOM\_NETWORK\_NAME\>
 - Choose a volume driver - either "local" or "nfs" are provided, and if the latter is chosen then an NFS server is expected along with the NFS\_HOST environment variable
 - Run: docker-compose -f docker-compose.yml -f etc/volumes/\<VOLUME_DRIVER\>/default.yml up -d
-- Restart everything once the previous steps have been carried out so that Nginx, Gerrit, and Jenkins start correctly - this is mostly to make sure they work properly against LDAP
 
 # Required environment variable on the host
 

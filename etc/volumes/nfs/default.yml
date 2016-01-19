@@ -1,7 +1,7 @@
 proxy:
   volume_driver: nfs
   volumes:
-    - ${NFS_HOST}/nfs/nginx_config:/etc/nginx:ro
+    - ${NFS_HOST}/nfs/nginx_config:/etc/nginx
     - ${NFS_HOST}/nfs/nginx_releasenote:/usr/share/nginx/html
 
 ldap:
