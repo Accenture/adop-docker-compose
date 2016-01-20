@@ -76,11 +76,6 @@ selenium-node-firefox:
   volumes:
     - ${NFS_HOST}/nfs/selenium_config:/var/selenium-config
 
-elasticsearch:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/elasticsearch_data:/usr/share/elasticsearch/data
-
 nexus:
   volume_driver: nfs
   volumes:
