@@ -63,10 +63,6 @@ selenium-node-firefox:
   volumes:
     - ./volumes/selenium-config-vol:/var/selenium-config
 
-elasticsearch:
-  volumes:
-    - elasticsearch_data:/usr/share/elasticsearch/data
-
 nexus:
   volumes:
     - nexus_sonatype_work:/sonatype-work

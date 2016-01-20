@@ -18,10 +18,6 @@ proxy:
     LDAP_GROUP_ATTRIBUTE: "member"
     LDAP_USER_ID_ATTRIBUTE: "cn"
     LDAP_USER_OBJECT_CLASS: "inetOrgPerson"
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "proxy"
 
 ldap:
   container_name: ldap
@@ -34,10 +30,6 @@ ldap:
   environment:
     LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
     LDAP_LOG_LEVEL: ${LDAP_LOG_LEVEL}
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "ldap"
 
 gerrit-mysql:
   container_name: gerrit-mysql
@@ -51,10 +43,7 @@ gerrit-mysql:
     MYSQL_USER: ${MYSQL_USER}
     MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     MYSQL_DATABASE: ${MYSQL_DATABASE}
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "gerrit-mysql"
+    #SERVICE_3306_NAME: gerrit-mysql
 
 gerrit:
   container_name: gerrit
@@ -93,10 +82,6 @@ gerrit:
     USER_NAME: ${USER_NAME}
     USER_EMAIL: ${USER_EMAIL}
     DOWNLOAD_SCHEME: "http"
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "gerrit"
 
 sensu-uchiwa:
   container_name: sensu-uchiwa
@@ -176,10 +161,6 @@ sonar-mysql:
     MYSQL_USER: ${MYSQL_USER}
     MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     MYSQL_DATABASE: ${MYSQL_DATABASE}
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "sonar-mysql"
 
 sonar:
   container_name: sonar
@@ -203,10 +184,6 @@ sonar:
     LDAP_GROUP_REQUEST: "(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))" 
     LDAP_GROUP_ID_ATTRIBUTE: "cn"
     SONARQUBE_JDBC_URL: "jdbc:mysql://sonar-mysql:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "sonar"
 
 jenkins:
   container_name: jenkins
@@ -263,10 +240,6 @@ jenkins-slave:
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
   privileged: true
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "jenkins-slave"
 
 selenium-hub:
   container_name: selenium-hub
@@ -277,10 +250,6 @@ selenium-hub:
     - "4444"
   environment:
     SERVICE_4444_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:4444/grid/console"
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "selenium-hub"
 
 selenium-node-chrome:
   container_name: selenium-node-chrome
@@ -291,10 +260,6 @@ selenium-node-chrome:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-chrome.json"
     HUB_PORT_4444_TCP_ADDR: "selenium-hub"
     HUB_PORT_4444_TCP_PORT: "4444"
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "selenium-node-chrome"
 
 selenium-node-firefox:
   container_name: selenium-node-firefox
@@ -305,54 +270,6 @@ selenium-node-firefox:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-firefox.json"
     HUB_PORT_4444_TCP_ADDR: "selenium-hub"
     HUB_PORT_4444_TCP_PORT: "4444"
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "selenium-node-firefox"
-
-elasticsearch:
-  container_name: elasticsearch
-  restart: always
-  image: elasticsearch:2.1.1
-  net: ${CUSTOM_NETWORK_NAME}
-  command: elasticsearch -Des.network.host=0.0.0.0
-  ports:
-    - "9200:9200"
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "elasticsearch"
-
-logstash:
-  container_name: logstash
-  restart: always
-  image: docker.accenture.com/adop/logstash:0.0.1
-  net: ${CUSTOM_NETWORK_NAME}
-  environment:
-    - LS_HEAP_SIZE=${LS_HEAP_SIZE}
-  ports:
-    - "12201:12201/udp"
-    - "25826:25826/udp"
-    - "5000:5000/tcp"
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "logstash"
-
-kibana:
-  container_name: kibana
-  restart: always
-  image: kibana:4.3.1
-  net: ${CUSTOM_NETWORK_NAME}
-  command: kibana
-  environment:
-    - ELASTICSEARCH_URL=http://elasticsearch:9200
-  ports:
-    - "5601:5601"
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "kibana"
 
 nexus:
   container_name: nexus
@@ -373,7 +290,3 @@ nexus:
     LDAP_USER_BASE_DN: "ou=people"
     LDAP_GROUP_BASE_DN: "ou=groups"
     LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD}
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "nexus"
