@@ -223,7 +223,7 @@ jenkins:
     SERVICE_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:8010/jenkins"
     SERVICE_8080_NAME: "jenkins"
     JENKINS_OPTS: "--prefix=/jenkins"
-    ROOT_URL: "http://proxy/jenkins/"
+    ROOT_URL: "http://${TARGET_HOST}/jenkins/"
     LDAP_SERVER: "ldap:389"
     LDAP_ROOTDN: "dc=adop,dc=accenture,dc=com"
     LDAP_USER_SEARCH_BASE: "ou=people"
