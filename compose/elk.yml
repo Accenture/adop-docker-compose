@@ -17,6 +17,7 @@ logstash:
   image: accenture/adop-logstash:0.1.0
   net: ${CUSTOM_NETWORK_NAME}
   environment:
+    - "constraint:tier==public"
     - LS_HEAP_SIZE=1024m
   ports:
     - "12201:12201/udp"

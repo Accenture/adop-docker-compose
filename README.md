@@ -15,6 +15,10 @@ docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KE
 ## To run locally
 Create a docker machine and set up you local environment variables to point docker-machine to your new instance
 
+## To run with Docker Swarm
+
+Create a Docker Swarm that has a publicly accessible Engine with the label "tier=public" to bind Nginx and Logstash to that node
+
 ## Launching
 - TODO:REMOVE this line - log on to docker.accenture.com
 
