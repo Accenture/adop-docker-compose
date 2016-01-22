@@ -1,6 +1,5 @@
 # Temporary Getting Started Instructions
 
-These instructions are only required until the data deployment and init steps have been integrated into the main Docker image.
 
 - [OPTIONAL] Create a Docker Engine in AWS: docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KEY --amazonec2-secret-key YOUR\_SECRET\_KEY --amazonec2-vpc-id vpc-27d43742 --amazonec2-instance-type t2.large --amazonec2-region eu-west-1 YOUR\_MACHINE\_NAME
 - Run: export TARGET\_HOST=\<IP\_OF\_PUBLIC\_HOST\>
