@@ -13,7 +13,7 @@ proxy:
   environment:
     LDAP_SERVER: "ldap:389"
     LDAP_USERNAME: "cn=admin,dc=adop,dc=accenture,dc=com"
-    LDAP_PASSWORD: "Sw4syJSWQRx2AK6KE3vbhpmL"
+    LDAP_PASSWORD: ${LDAP_PASSWORD}
     LDAP_USER_BASE_DN: "ou=people,dc=adop,dc=accenture,dc=com"
     LDAP_GROUP_ATTRIBUTE: "member"
     LDAP_USER_ID_ATTRIBUTE: "cn"
@@ -32,8 +32,8 @@ ldap:
   expose:
     - "389"
   environment:
-    LDAP_ADMIN_PASSWORD: "Sw4syJSWQRx2AK6KE3vbhpmL"
-    LDAP_LOG_LEVEL: 0
+    LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+    LDAP_LOG_LEVEL: ${LDAP_LOG_LEVEL}
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
@@ -47,11 +47,10 @@ gerrit-mysql:
   expose:
     - "3306"
   environment:
-    MYSQL_ROOT_PASSWORD: "Password01"
-    MYSQL_USER: "gerrit"
-    MYSQL_PASSWORD: "gerrit"
-    MYSQL_DATABASE: "gerrit"
-    #SERVICE_3306_NAME: gerrit-mysql
+    MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    MYSQL_USER: ${MYSQL_USER}
+    MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    MYSQL_DATABASE: ${MYSQL_DATABASE}
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
@@ -74,10 +73,10 @@ gerrit:
     WEBURL: "http://${TARGET_HOST}/gerrit"
     DATABASE_TYPE: "mysql"
     DB_HOSTNAME: "gerrit-mysql"
-    DB_PORT: "3306"
-    DB_NAME: "gerrit"
-    DB_USER: "gerrit"
-    DB_PASSWORD: "gerrit"
+    DB_PORT: ${DB_PORT}
+    DB_NAME: ${DB_NAME}
+    DB_USER: ${DB_USER}
+    DB_PASSWORD: ${DB_PASSWORD}
     AUTH_LOGOUTURL: "http://${TARGET_HOST}/gerrit"
     AUTH_TYPE: "LDAP"
     LDAP_SERVER: "ldap:389"
@@ -86,13 +85,13 @@ gerrit:
     LDAP_ACCOUNTFULLNAME: "$${cn}"
     LDAP_ACCOUNTEMAILADDRESS: "mail"
     LDAP_USERNAME: "cn=admin,dc=adop,dc=accenture,dc=com"
-    LDAP_PASSWORD: "Sw4syJSWQRx2AK6KE3vbhpmL"
+    LDAP_PASSWORD: ${LDAP_PASSWORD}
     LDAP_GROUPBASE: "ou=groups,dc=adop,dc=accenture,dc=com"
     LDAP_GROUPPATTERN: "(cn=$${groupname})"
     LDAP_GROUPMEMBERPATTERN: "(uniqueMember=$${dn})"
     HTTPD_LISTENURL: "proxy-http://0.0.0.0:8080/gerrit"
-    USER_NAME: "Gerrit Code Review" 
-    USER_EMAIL: "gerrit@adop" 
+    USER_NAME: ${USER_NAME}
+    USER_EMAIL: ${USER_EMAIL}
     DOWNLOAD_SCHEME: "http"
   log_driver: "syslog"
   log_opt:
@@ -173,10 +172,10 @@ sonar-mysql:
     - "3306"
   environment: 
     SERVICE_3306_NAME: "sonar-mysql"
-    MYSQL_ROOT_PASSWORD: "sonar"
-    MYSQL_USER: "sonar"
-    MYSQL_PASSWORD: "sonar"
-    MYSQL_DATABASE: "sonar"
+    MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    MYSQL_USER: ${MYSQL_USER}
+    MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    MYSQL_DATABASE: ${MYSQL_DATABASE}
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
@@ -195,12 +194,12 @@ sonar:
     SERVICE_9000_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:8020/sonar"  
     LDAP_URL: "ldap://ldap:389"
     LDAP_BIND_DN: "cn=admin,dc=adop,dc=accenture,dc=com"
-    LDAP_BIND_PASSWORD: "Sw4syJSWQRx2AK6KE3vbhpmL" 
-    LDAP_USER_BASE_DN: "ou=people,dc=adop,dc=accenture,dc=com" 
+    LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD}
+    LDAP_USER_BASE_DN: "ou=people,dc=adop,dc=accenture,dc=com"
     LDAP_USER_REQUEST: "(&(objectClass=inetOrgPerson)(uid={login}))" 
     LDAP_USER_REAL_NAME_ATTRIBUTE: "displayName"
     LDAP_USER_EMAIL_ATTRIBUTE: "mail"
-    LDAP_GROUP_BASE_DN: "ou=groups,dc=adop,dc=accenture,dc=com" 
+    LDAP_GROUP_BASE_DN: "ou=groups,dc=adop,dc=accenture,dc=com"
     LDAP_GROUP_REQUEST: "(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))" 
     LDAP_GROUP_ID_ATTRIBUTE: "cn"
     SONARQUBE_JDBC_URL: "jdbc:mysql://sonar-mysql:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
@@ -232,7 +231,7 @@ jenkins:
     LDAP_GROUP_SEARCH_FILTER: ""
     LDAP_GROUP_MEMBERSHIP_FILTER: ""
     LDAP_MANAGER_DN: "cn=admin,dc=adop,dc=accenture,dc=com"
-    LDAP_MANAGER_PASSWORD: "Sw4syJSWQRx2AK6KE3vbhpmL"
+    LDAP_MANAGER_PASSWORD: ${LDAP_MANAGER_PASSWORD}
     LDAP_INHIBIT_INFER_ROOTDN: "false"
     LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"
     LDAP_DISPLAY_NAME_ATTRIBUTE_NAME: "displayName"
@@ -240,22 +239,22 @@ jenkins:
     GERRIT_HOST_NAME: "gerrit"
     GERRIT_FRONT_END_URL: "http://gerrit:8080/gerrit"
     SONAR_SERVER_URL: "http://sonar:9000/sonar/"
-    SONAR_ACCOUNT_LOGIN: "jenkins"
-    SONAR_ACCOUNT_PASSWORD: "jenkins"
+    SONAR_ACCOUNT_LOGIN: ${SONAR_ACCOUNT_LOGIN}
+    SONAR_ACCOUNT_PASSWORD: ${SONAR_ACCOUNT_PASSWORD}
     SONAR_DB_URL: "jdbc:mysql://sonar-mysql:3306/sonar?useUnicode=true&amp;characterEncoding=utf8"
-    SONAR_DB_LOGIN: "sonar"
-    SONAR_DB_PASSWORD: "sonar"
-    SONAR_PLUGIN_VERSION: ""
-    SONAR_ADDITIONAL_PROPS: ""
-    SONAR_RUNNER_VERSION: "2.4"
-    ANT_VERSION: "1.9.4"
-    MAVEN_VERSION: "3.0.5"
-    NODEJS_VERSION: "0.12.2"
-    NODEJS_GLOBAL_PACKAGES: "grunt-cli@~0.1.13 bower@~1.3.12 plato@~1.2.1"
-    NODEJS_PACKAGES_REFRESH_HOURS: "72"
+    SONAR_DB_LOGIN: ${SONAR_DB_LOGIN}
+    SONAR_DB_PASSWORD: ${SONAR_DB_PASSWORD}
+    SONAR_PLUGIN_VERSION: ${SONAR_PLUGIN_VERSION}
+    SONAR_ADDITIONAL_PROPS: ${SONAR_ADDITIONAL_PROPS}
+    SONAR_RUNNER_VERSION: ${SONAR_RUNNER_VERSION}
+    ANT_VERSION: ${ANT_VERSION}
+    MAVEN_VERSION: ${MAVEN_VERSION}
+    NODEJS_VERSION: ${NODEJS_VERSION}
+    NODEJS_GLOBAL_PACKAGES: ${NODEJS_GLOBAL_PACKAGES}
+    NODEJS_PACKAGES_REFRESH_HOURS: ${NODEJS_PACKAGES_REFRESH_HOURS}
     GIT_GLOBAL_CONFIG_NAME: "ADOP Jenkins"
     GIT_GLOBAL_CONFIG_EMAIL: "jenkins@adop.accenture.com"
-    
+
 jenkins-slave:
   container_name: jenkins-slave
   restart: always
@@ -330,7 +329,7 @@ logstash:
   image: docker.accenture.com/adop/logstash:0.0.1
   net: ${CUSTOM_NETWORK_NAME}
   environment:
-    - LS_HEAP_SIZE=1024m
+    - LS_HEAP_SIZE=${LS_HEAP_SIZE}
   ports:
     - "12201:12201/udp"
     - "25826:25826/udp"
@@ -373,7 +372,7 @@ nexus:
     LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
     LDAP_USER_BASE_DN: "ou=people"
     LDAP_GROUP_BASE_DN: "ou=groups"
-    LDAP_BIND_PASSWORD: "Sw4syJSWQRx2AK6KE3vbhpmL"
+    LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD}
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
