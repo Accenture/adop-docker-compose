@@ -9,6 +9,7 @@ These instructions are only required until the data deployment and init steps ha
 - Run: docker-compose -f compose/elk.yml up -d
 - Run: export LOGSTASH\_HOST=\<IP\_OF\_LOGSTASH\_HOST\>
 - Choose a volume driver - either "local" or "nfs" are provided, and if the latter is chosen then an NFS server is expected along with the NFS\_HOST environment variable
+- Pull the images first (this is because we can't set dependencies in Compose yet so we want everything to start at the same time): docker-compose pull
 - Run (logging driver file optional): docker-compose -f docker-compose.yml -f etc/volumes/\<VOLUME_DRIVER\>/default.yml -f etc/logging/syslog/default.yml up -d
 
 # Required environment variable on the host
