@@ -42,9 +42,20 @@ while getopts "m:n:a:s:c:r:f:" opt; do
     *)
       echo "Invalid parameter(s) or option(s)."
       usage
+      exit 1
       ;;
   esac
 done
+
+if [ -z $MACHINE_NAME ] | \
+16	
+	[ -z $CUSTOM_NETWORK_NAME ] | \
+	[ -z $AWS_ACCESS_KEY ] | \
+	[ -z $VPC_ID ] | \
+	[ -z $REGION ]; then
+  usage
+  exit 1
+fi
 
 source env.config.sh
 
