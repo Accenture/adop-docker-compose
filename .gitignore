@@ -4,3 +4,6 @@ nexus-data-vol
 gerrit-site-vol
 volumes/elasticsearch-data-vol/elasticsearch/
 volumes/jenkins-home-vol
+*~
+*.swp
+*.swo

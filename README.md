@@ -1,10 +1,26 @@
 # Temporary Getting Started Instructions
 
+## To run in AWS (single instance)
 
-- [OPTIONAL] Create a Docker Engine in AWS: docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KEY --amazonec2-secret-key YOUR\_SECRET\_KEY --amazonec2-vpc-id vpc-27d43742 --amazonec2-instance-type t2.large --amazonec2-region eu-west-1 YOUR\_MACHINE\_NAME
+- Create a VPC using the VPC wizard in the AWS console by selecting the first option with 1 public subnet
+
+- Create a Docker Engine in AWS: 
+
+docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KEY --amazonec2-secret-key YOUR\_SECRET\_KEY --amazonec2-vpc-id vpc-YOUR_ID --amazonec2-instance-type t2.large --amazonec2-region REGION IN THIS FORMAT: eu-west-1   YOUR\_MACHINE\_NAME
+
+- Update the docker-machine security group to permit inbound http traffic on port 80
+
+- Set your local environment variables to point docker-machine to your new instance
+
+## To run locally
+Create a docker machine and set up you local environment variables to point docker-machine to your new instance
+
+## Launching
+- TODO:REMOVE this line - log on to docker.accenture.com
+
 - Run: export TARGET\_HOST=\<IP\_OF\_PUBLIC\_HOST\>
-- Create a custom network: docker network create \<CUSTOM\_NETWORK\_NAME\>
 - Run: export CUSTOM\_NETWORK\_NAME=\<CUSTOM\_NETWORK\_NAME\>
+- Create a custom network: docker network create $CUSTOM\_NETWORK\_NAME
 - Run: docker-compose -f compose/elk.yml up -d
 - Run: export LOGSTASH\_HOST=\<IP\_OF\_LOGSTASH\_HOST\>
 - Run: source env.config.sh
