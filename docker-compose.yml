@@ -13,7 +13,7 @@ proxy:
   environment:
     LDAP_SERVER: "ldap:389"
     LDAP_USERNAME: "cn=admin,dc=adop,dc=accenture,dc=com"
-    LDAP_PASSWORD: ${LDAP_PASSWORD}
+    LDAP_PASSWORD: ${LDAP_PWD}
     LDAP_USER_BASE_DN: "ou=people,dc=adop,dc=accenture,dc=com"
     LDAP_GROUP_ATTRIBUTE: "member"
     LDAP_USER_ID_ATTRIBUTE: "cn"
@@ -28,7 +28,7 @@ ldap:
   expose:
     - "389"
   environment:
-    LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+    LDAP_ADMIN_PASSWORD: ${LDAP_PWD}
     LDAP_LOG_LEVEL: ${LDAP_LOG_LEVEL}
 
 gerrit-mysql:
@@ -39,17 +39,17 @@ gerrit-mysql:
   expose:
     - "3306"
   environment:
-    MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    MYSQL_USER: ${MYSQL_USER}
-    MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    MYSQL_DATABASE: ${MYSQL_DATABASE}
-    #SERVICE_3306_NAME: gerrit-mysql
+    MYSQL_ROOT_PASSWORD: "***REMOVED***"
+    MYSQL_USER: ${GERRIT_MYSQL_USER}
+    MYSQL_PASSWORD: ${GERRIT_MYSQL_PASSWORD}
+    MYSQL_DATABASE: ${GERRIT_MYSQL_DATABASE}
 
 gerrit:
   container_name: gerrit
   restart: always
   #build: ../images/docker-gerrit/
   image: accenture/adop-gerrit:0.1.0
+  privileged: true
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "8080"
@@ -62,7 +62,7 @@ gerrit:
     WEBURL: "http://${TARGET_HOST}/gerrit"
     DATABASE_TYPE: "mysql"
     DB_HOSTNAME: "gerrit-mysql"
-    DB_PORT: ${DB_PORT}
+    DB_PORT: "3306"
     DB_NAME: ${DB_NAME}
     DB_USER: ${DB_USER}
     DB_PASSWORD: ${DB_PASSWORD}
@@ -74,7 +74,7 @@ gerrit:
     LDAP_ACCOUNTFULLNAME: "$${cn}"
     LDAP_ACCOUNTEMAILADDRESS: "mail"
     LDAP_USERNAME: "cn=admin,dc=adop,dc=accenture,dc=com"
-    LDAP_PASSWORD: ${LDAP_PASSWORD}
+    LDAP_PASSWORD: ${LDAP_PWD}
     LDAP_GROUPBASE: "ou=groups,dc=adop,dc=accenture,dc=com"
     LDAP_GROUPPATTERN: "(cn=$${groupname})"
     LDAP_GROUPMEMBERPATTERN: "(uniqueMember=$${dn})"
@@ -157,10 +157,10 @@ sonar-mysql:
     - "3306"
   environment: 
     SERVICE_3306_NAME: "sonar-mysql"
-    MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    MYSQL_USER: ${MYSQL_USER}
-    MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    MYSQL_DATABASE: ${MYSQL_DATABASE}
+    MYSQL_ROOT_PASSWORD: "***REMOVED***"
+    MYSQL_USER: ${SONAR_MYSQL_USER}
+    MYSQL_PASSWORD: ${SONAR_MYSQL_PASSWORD}
+    MYSQL_DATABASE: ${SONAR_MYSQL_DATABASE}
 
 sonar:
   container_name: sonar
@@ -175,7 +175,7 @@ sonar:
     SERVICE_9000_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:8020/sonar"  
     LDAP_URL: "ldap://ldap:389"
     LDAP_BIND_DN: "cn=admin,dc=adop,dc=accenture,dc=com"
-    LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD}
+    LDAP_BIND_PASSWORD: ${LDAP_PWD}
     LDAP_USER_BASE_DN: "ou=people,dc=adop,dc=accenture,dc=com"
     LDAP_USER_REQUEST: "(&(objectClass=inetOrgPerson)(uid={login}))" 
     LDAP_USER_REAL_NAME_ATTRIBUTE: "displayName"
@@ -183,7 +183,7 @@ sonar:
     LDAP_GROUP_BASE_DN: "ou=groups,dc=adop,dc=accenture,dc=com"
     LDAP_GROUP_REQUEST: "(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))" 
     LDAP_GROUP_ID_ATTRIBUTE: "cn"
-    SONARQUBE_JDBC_URL: "jdbc:mysql://sonar-mysql:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
+    SONARQUBE_JDBC_URL: "jdbc:mysql://sonar-mysql:3306/${SONAR_MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
 
 jenkins:
   container_name: jenkins
@@ -208,7 +208,7 @@ jenkins:
     LDAP_GROUP_SEARCH_FILTER: ""
     LDAP_GROUP_MEMBERSHIP_FILTER: ""
     LDAP_MANAGER_DN: "cn=admin,dc=adop,dc=accenture,dc=com"
-    LDAP_MANAGER_PASSWORD: ${LDAP_MANAGER_PASSWORD}
+    LDAP_MANAGER_PASSWORD: ${LDAP_PWD}
     LDAP_INHIBIT_INFER_ROOTDN: "false"
     LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"
     LDAP_DISPLAY_NAME_ATTRIBUTE_NAME: "displayName"
@@ -289,4 +289,4 @@ nexus:
     LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
     LDAP_USER_BASE_DN: "ou=people"
     LDAP_GROUP_BASE_DN: "ou=groups"
-    LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD}
+    LDAP_BIND_PASSWORD: ${LDAP_PWD}
