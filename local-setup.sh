@@ -24,7 +24,7 @@ export TARGET_HOST=$( docker-machine ip $DOCKER_MACHINE )
 export LOGSTASH_HOST=$( docker-machine ip $DOCKER_MACHINE )
 export CUSTOM_NETWORK_NAME=adop
 
-if ( docker network ls | grep -q " $DOCKER_MACHINE " ) ; then 
+if ( docker network ls | grep -q " $CUSTOM_NETWORK_NAME " ) ; then 
   echo "$0: network exists, no need to create."
 else
   docker network create $CUSTOM_NETWORK_NAME
