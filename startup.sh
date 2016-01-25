@@ -3,17 +3,7 @@
 OVERRIDES=
 
 usage(){
-	echo " 
-Usage: $ startup.sh <MACHINE_NAME> <CUSTOM_NETWORK_NAME> <VOLUME_DRIVER> <AWS_ACCESS_KEY> <AWS_SECRET_ACCESS_KEY> <VPC_ID> <REGION>
-
-	MACHINE_NAME name the instance that will be created in AWS (anything you like)
-	CUSTOM_NETWORK_NAME name the Docker network that will be created (anything you like)
-	VOLUME_DRIVER use local unless you have an available nfs server 
-	AWS_ACCESS_KEY your aws credentials (needs IAM permissions to create EC2)
-	AWS_SECRET_ACCESS_KEY your aws credentials (needs IAM permissions to create EC2)
-	VPC_ID name of a pre-existing VPC in which to create the instance (by default the instance will be placed into the default subnet in this).  Needs to have a public subnet so that you can access the ADOP instance.
-	REGION target AWS region (in the format like: eu-west-1)
-"
+	echo "Usage: ./startup.sh -m <MACHINE_NAME> -n <CUSTOM_NETWORK_NAME> -a <AWS_ACCESS_KEY> -s <AWS_SECRET_ACCESS_KEY> -c <VPC_ID> -r <REGION> -f path/to/override1.yml -f path/to/override2.yml ..."
 }
 
 while getopts "m:n:a:s:c:r:f:" opt; do
