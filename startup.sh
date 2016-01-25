@@ -48,7 +48,6 @@ while getopts "m:n:a:s:c:r:f:" opt; do
 done
 
 if [ -z $MACHINE_NAME ] | \
-16	
 	[ -z $CUSTOM_NETWORK_NAME ] | \
 	[ -z $AWS_ACCESS_KEY ] | \
 	[ -z $VPC_ID ] | \
