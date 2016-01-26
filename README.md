@@ -8,7 +8,7 @@
 
 docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KEY --amazonec2-secret-key YOUR\_SECRET\_KEY --amazonec2-vpc-id vpc-YOUR_ID --amazonec2-instance-type t2.large --amazonec2-region REGION IN THIS FORMAT: eu-west-1   YOUR\_MACHINE\_NAME
 
-- Update the docker-machine security group to permit inbound http traffic on port 80
+- Update the docker-machine security group to permit inbound http traffic on port 80 (from the machine(s) from which you want to have access only), and TCP on 2376, UDP on 25826, and UDP on 12201 (from 127.0.0.1/32)
 
 - Set your local environment variables to point docker-machine to your new instance
 
