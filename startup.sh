@@ -67,9 +67,10 @@ export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
 export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
 docker network create $CUSTOM_NETWORK_NAME
 docker-compose -f compose/elk.yml pull
-docker-compose -f docker-compose.yml ${OVERRIDES} -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE pull
+docker-compose -f docker-compose.yml -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE ${OVERRIDES} pull
 set -x
 docker-compose -f compose/elk.yml up -d
+docker-compose -f docker-compose.yml -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE ${OVERRIDES} up -d
 set +x
 
 echo "Run this command in your shell: eval \"$(docker-machine env $MACHINE_NAME)\""
