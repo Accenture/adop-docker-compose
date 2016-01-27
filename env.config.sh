@@ -6,7 +6,8 @@ export LDAP_PWD="***REMOVED***"
 
 # LDAP
 
-export LDAP_LOG_LEVEL=0
+export LDAP_DOMAIN="ldap.example.com"
+export LDAP_FULL_DOMAIN="dc=ldap,dc=example,dc=com"
 
 # Gerrit MySQL
 

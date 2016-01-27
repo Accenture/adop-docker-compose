@@ -12,9 +12,9 @@ proxy:
     - "443:443"
   environment:
     LDAP_SERVER: "ldap:389"
-    LDAP_USERNAME: "cn=admin,dc=adop,dc=accenture,dc=com"
+    LDAP_USERNAME: "cn=admin,${LDAP_FULL_DOMAIN}"
     LDAP_PASSWORD: ${LDAP_PWD}
-    LDAP_USER_BASE_DN: "ou=people,dc=adop,dc=accenture,dc=com"
+    LDAP_USER_BASE_DN: "ou=people,${LDAP_FULL_DOMAIN}"
     LDAP_GROUP_ATTRIBUTE: "member"
     LDAP_USER_ID_ATTRIBUTE: "cn"
     LDAP_USER_OBJECT_CLASS: "inetOrgPerson"
@@ -28,8 +28,9 @@ ldap:
   expose:
     - "389"
   environment:
-    LDAP_ADMIN_PASSWORD: ${LDAP_PWD}
-    LDAP_LOG_LEVEL: ${LDAP_LOG_LEVEL}
+    SLAPD_PASSWORD: ${LDAP_PWD}
+    SLAPD_DOMAIN: ${LDAP_DOMAIN}
+    SLAPD_FULL_DOMAIN: ${LDAP_FULL_DOMAIN}
 
 gerrit-mysql:
   container_name: gerrit-mysql
@@ -69,13 +70,13 @@ gerrit:
     AUTH_LOGOUTURL: "http://${TARGET_HOST}/gerrit"
     AUTH_TYPE: "LDAP"
     LDAP_SERVER: "ldap:389"
-    LDAP_ACCOUNTBASE: "dc=adop,dc=accenture,dc=com"
+    LDAP_ACCOUNTBASE: "${LDAP_FULL_DOMAIN}"
     LDAP_ACCOUNTPATTERN: "(cn=$${username})"
     LDAP_ACCOUNTFULLNAME: "$${cn}"
     LDAP_ACCOUNTEMAILADDRESS: "mail"
-    LDAP_USERNAME: "cn=admin,dc=adop,dc=accenture,dc=com"
+    LDAP_USERNAME: "cn=admin,${LDAP_FULL_DOMAIN}"
     LDAP_PASSWORD: ${LDAP_PWD}
-    LDAP_GROUPBASE: "ou=groups,dc=adop,dc=accenture,dc=com"
+    LDAP_GROUPBASE: "ou=groups,${LDAP_FULL_DOMAIN}"
     LDAP_GROUPPATTERN: "(cn=$${groupname})"
     LDAP_GROUPMEMBERPATTERN: "(uniqueMember=$${dn})"
     HTTPD_LISTENURL: "proxy-http://0.0.0.0:8080/gerrit"
@@ -174,13 +175,13 @@ sonar:
     SERVICE_9000_NAME: "sonar"
     SERVICE_9000_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:8020/sonar"  
     LDAP_URL: "ldap://ldap:389"
-    LDAP_BIND_DN: "cn=admin,dc=adop,dc=accenture,dc=com"
+    LDAP_BIND_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
     LDAP_BIND_PASSWORD: ${LDAP_PWD}
-    LDAP_USER_BASE_DN: "ou=people,dc=adop,dc=accenture,dc=com"
+    LDAP_USER_BASE_DN: "ou=people,${LDAP_FULL_DOMAIN}"
     LDAP_USER_REQUEST: "(&(objectClass=inetOrgPerson)(uid={login}))" 
     LDAP_USER_REAL_NAME_ATTRIBUTE: "displayName"
     LDAP_USER_EMAIL_ATTRIBUTE: "mail"
-    LDAP_GROUP_BASE_DN: "ou=groups,dc=adop,dc=accenture,dc=com"
+    LDAP_GROUP_BASE_DN: "ou=groups,${LDAP_FULL_DOMAIN}"
     LDAP_GROUP_REQUEST: "(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))" 
     LDAP_GROUP_ID_ATTRIBUTE: "cn"
     SONARQUBE_JDBC_URL: "jdbc:mysql://sonar-mysql:3306/${SONAR_MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
@@ -201,13 +202,13 @@ jenkins:
     JENKINS_OPTS: "--prefix=/jenkins"
     ROOT_URL: "http://${TARGET_HOST}/jenkins/"
     LDAP_SERVER: "ldap:389"
-    LDAP_ROOTDN: "dc=adop,dc=accenture,dc=com"
+    LDAP_ROOTDN: "${LDAP_FULL_DOMAIN}"
     LDAP_USER_SEARCH_BASE: "ou=people"
     LDAP_USER_SEARCH: "uid={0}"
     LDAP_GROUP_SEARCH_BASE: "ou=groups"
     LDAP_GROUP_SEARCH_FILTER: ""
     LDAP_GROUP_MEMBERSHIP_FILTER: ""
-    LDAP_MANAGER_DN: "cn=admin,dc=adop,dc=accenture,dc=com"
+    LDAP_MANAGER_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
     LDAP_MANAGER_PASSWORD: ${LDAP_PWD}
     LDAP_INHIBIT_INFER_ROOTDN: "false"
     LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"
@@ -230,7 +231,7 @@ jenkins:
     NODEJS_GLOBAL_PACKAGES: "grunt-cli@~0.1.13 bower@~1.3.12 plato@~1.2.1"
     NODEJS_PACKAGES_REFRESH_HOURS: "72"
     GIT_GLOBAL_CONFIG_NAME: "ADOP Jenkins"
-    GIT_GLOBAL_CONFIG_EMAIL: "jenkins@adop.accenture.com"
+    GIT_GLOBAL_CONFIG_EMAIL: "jenkins@${LDAP_DOMAIN}"
 
 jenkins-slave:
   container_name: jenkins-slave
@@ -282,10 +283,10 @@ nexus:
     SERVICE_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:80/"
     SERVICE_8081_NAME: "nexus"
     NEXUS_BASE_URL: "http://${TARGET_HOST}/nexus"
-    LDAP_SEARCH_BASE: "dc=adop,dc=accenture,dc=com"
+    LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
     ADOP_LDAP_ENABLED: "true"
     LDAP_URL: "ldap"
-    LDAP_BIND_DN: "cn=admin,dc=adop,dc=accenture,dc=com"
+    LDAP_BIND_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
     LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
     LDAP_USER_BASE_DN: "ou=people"
     LDAP_GROUP_BASE_DN: "ou=groups"
