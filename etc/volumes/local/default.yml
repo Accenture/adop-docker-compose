@@ -5,9 +5,8 @@ proxy:
 
 ldap:
   volumes:
-      - ldap_slapd:/etc/ldap/slapd.d
-      - ldap_ssl:/etc/ldap/ssl
       - ldap_db:/var/lib/ldap
+      - ldap_static:/etc/ldap
 
 gerrit-mysql:
   volumes:

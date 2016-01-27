@@ -7,9 +7,8 @@ proxy:
 ldap:
   volume_driver: nfs
   volumes:
-    - ${NFS_HOST}/nfs/ldap_slapd:/etc/ldap/slapd.d
-    - ${NFS_HOST}/nfs/ldap_ssl:/etc/ldap/ssl
     - ${NFS_HOST}/nfs/ldap_db:/var/lib/ldap
+    - ${NFS_HOST}/nfs/ldap_static:/etc/ldap
 
 gerrit-mysql:
   volume_driver: nfs
