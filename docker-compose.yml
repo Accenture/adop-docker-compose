@@ -284,7 +284,7 @@ nexus:
     SERVICE_8081_NAME: "nexus"
     NEXUS_BASE_URL: "http://${TARGET_HOST}/nexus"
     LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
-    ADOP_LDAP_ENABLED: "true"
+    LDAP_ENABLED: "true"
     LDAP_URL: "ldap"
     LDAP_BIND_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
     LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
