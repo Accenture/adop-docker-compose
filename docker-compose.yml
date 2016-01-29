@@ -65,9 +65,9 @@ gerrit:
     DATABASE_TYPE: "mysql"
     DB_HOSTNAME: "gerrit-mysql"
     DB_PORT: "3306"
-    DB_NAME: ${DB_NAME}
-    DB_USER: ${DB_USER}
-    DB_PASSWORD: ${DB_PASSWORD}
+    DB_NAME: ${GERRIT_MYSQL_DATABASE}
+    DB_USER: ${GERRIT_MYSQL_USER}
+    DB_PASSWORD: ${GERRIT_MYSQL_PASSWORD}
     AUTH_LOGOUTURL: "http://${TARGET_HOST}/gerrit"
     AUTH_TYPE: "LDAP"
     LDAP_SERVER: "ldap:389"
@@ -81,8 +81,8 @@ gerrit:
     LDAP_GROUPPATTERN: "(cn=$${groupname})"
     LDAP_GROUPMEMBERPATTERN: "(uniqueMember=$${dn})"
     HTTPD_LISTENURL: "proxy-http://0.0.0.0:8080/gerrit"
-    USER_NAME: ${USER_NAME}
-    USER_EMAIL: ${USER_EMAIL}
+    USER_NAME: ${GERRIT_USER_NAME}
+    USER_EMAIL: ${GERRIT_USER_EMAIL}
     DOWNLOAD_SCHEME: "http"
 
 sensu-uchiwa:
