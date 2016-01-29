@@ -17,11 +17,8 @@ export GERRIT_MYSQL_DATABASE="gerrit"
 
 # Gerrit
 
-export DB_NAME=${GERRIT_MYSQL_DATABASE}
-export DB_USER=${GERRIT_MYSQL_USER}
-export DB_PASSWORD=${GERRIT_MYSQL_PASSWORD}
-export USER_NAME="Gerrit Code Review" 
-export USER_EMAIL="gerrit@adop"
+export GERRIT_USER_NAME="Gerrit Code Review" 
+export GERRIT_USER_EMAIL="gerrit@adop"
 
 # Sonar MySQL
 
