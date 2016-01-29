@@ -174,19 +174,20 @@ sonar:
   expose:
     - "9000"
   environment:
-    SERVICE_9000_NAME: "sonar"
-    SERVICE_9000_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:8020/sonar"  
-    LDAP_URL: "ldap://ldap:389"
-    LDAP_BIND_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
-    LDAP_BIND_PASSWORD: ${LDAP_PWD}
-    LDAP_USER_BASE_DN: "ou=people,${LDAP_FULL_DOMAIN}"
-    LDAP_USER_REQUEST: "(&(objectClass=inetOrgPerson)(uid={login}))" 
-    LDAP_USER_REAL_NAME_ATTRIBUTE: "displayName"
-    LDAP_USER_EMAIL_ATTRIBUTE: "mail"
-    LDAP_GROUP_BASE_DN: "ou=groups,${LDAP_FULL_DOMAIN}"
-    LDAP_GROUP_REQUEST: "(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))" 
-    LDAP_GROUP_ID_ATTRIBUTE: "cn"
-    SONARQUBE_JDBC_URL: "jdbc:mysql://sonar-mysql:3306/${SONAR_MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
+    - "affinity:container==sonar-mysql"
+    - "SERVICE_9000_NAME=sonar"
+    - "SERVICE_9000_CHECK_SCRIPT=curl --silent --fail ${TARGET_HOST}:8020/sonar"
+    - "LDAP_URL=ldap://ldap:389"
+    - "LDAP_BIND_DN=cn=admin,${LDAP_FULL_DOMAIN}"
+    - "LDAP_BIND_PASSWORD=${LDAP_PWD}"
+    - "LDAP_USER_BASE_DN=ou=people,${LDAP_FULL_DOMAIN}"
+    - "LDAP_USER_REQUEST=(&(objectClass=inetOrgPerson)(uid={login}))"
+    - "LDAP_USER_REAL_NAME_ATTRIBUTE=displayName"
+    - "LDAP_USER_EMAIL_ATTRIBUTE=mail"
+    - "LDAP_GROUP_BASE_DN=ou=groups,${LDAP_FULL_DOMAIN}"
+    - "LDAP_GROUP_REQUEST=(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))"
+    - "LDAP_GROUP_ID_ATTRIBUTE=cn"
+    - "SONARQUBE_JDBC_URL=jdbc:mysql://sonar-mysql:3306/${SONAR_MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
 
 jenkins:
   container_name: jenkins
