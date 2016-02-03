@@ -60,12 +60,19 @@ fi
 
 source env.config.sh
 
-docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $REGION $MACHINE_NAME
+# Create Docker machine if one doesn't already exist with the same name
+if ! docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $REGION $MACHINE_NAME; then
+	echo "Docker machine '$MACHINE_NAME' already exists"
+fi
 
+# Create Docker network if one doesn't already exist with the same name
 eval "$(docker-machine env $MACHINE_NAME)"
+if ! docker network create $CUSTOM_NETWORK_NAME; then
+	echo "Docker network '$CUSTOM_NETWORK_NAME' already exists"
+fi
+
 export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
 export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
-docker network create $CUSTOM_NETWORK_NAME
 docker-compose -f compose/elk.yml pull
 docker-compose -f docker-compose.yml -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE ${OVERRIDES} pull
 set -x
