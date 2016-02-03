@@ -35,6 +35,25 @@ Create a docker machine and set up you local environment variables to point dock
 - CUSTOM\_NETWORK\_NAME: The name of the pre-created custom network to use
 - [OPTIONAL] NFS_HOST: The DNS/IP of your NFS server
 
+# Using the paltform 
+
+* Access the target host url `http://<TARGET_HOST>`
+ * This page presents the links to all the tools.
+* Click: Jenkins link.
+* Run: Load\_Platform job
+ * Once the Load\_Platform job and other downstream jobs are finished your platform is ready to be used.
+ * This job generates a example workspace folder, example project folder and jenkins jobs/pipelines for java reference application.
+* Create environment to deploy the reference application
+ * Navigate to `http://<TARGET_HOST>/jenkins/job/ExampleWorkspace/job/ExampleProject/job/Create_Environment`
+ * Build with Parameters keeping the default value.
+* Run Example pipeline
+ * Navigate to `http://<TARGET_HOST>/jenkins/job/ExampleWorkspace/job/ExampleProject/view/Java_Reference_Application/`
+ * Click on run.
+* Browse the environment
+ * Click on the url for your environment from deploy job.
+ * You should be able to see the spring petclinic application.
+* Now, you can clone the repository from gerrit and make a code change to see the example pipeline triggered automatically.
+
 # Temporary define default index pattern
 
 As described on https://alm.accenture.com/jira/browse/DA-1359?focusedCommentId=132808&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-132808 comment, Kibana 4 does not provide a configuration property that allow to define the default index pattern for this reason while issue [DA-1401|https://alm.accenture.com/jira/browse/DA-1401] is prioritized the following manual procedure should be adopted in order to define an index pattern:

@@ -232,6 +232,10 @@ jenkins:
     NODEJS_PACKAGES_REFRESH_HOURS: "72"
     GIT_GLOBAL_CONFIG_NAME: "ADOP Jenkins"
     GIT_GLOBAL_CONFIG_EMAIL: "jenkins@${LDAP_DOMAIN}"
+    DOCKER_TLS_VERIFY: ${DOCKER_TLS_VERIFY}
+    DOCKER_HOST: ${DOCKER_HOST}
+    DOCKER_CLIENT_CERT_PATH: ${DOCKER_CLIENT_CERT_PATH}
+    DOCKER_NETWORK_NAME: ${CUSTOM_NETWORK_NAME}
 
 jenkins-slave:
   container_name: jenkins-slave
@@ -241,6 +245,8 @@ jenkins-slave:
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
   privileged: true
+  environment:
+    SLAVE_LABELS: "aws ldap java8 docker"
 
 selenium-hub:
   container_name: selenium-hub

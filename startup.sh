@@ -58,6 +58,10 @@ if [ -z $MACHINE_NAME ] | \
   exit 1
 fi
 
+if [ -z ${DOCKER_CLIENT_CERT_PATH} ]; then
+     export DOCKER_CLIENT_CERT_PATH="/root/.docker/"
+fi
+
 source env.config.sh
 
 # Create Docker machine if one doesn't already exist with the same name
@@ -89,3 +93,6 @@ docker exec jenkins curl -X POST jenkins:jenkins@localhost:8080/jenkins/job/Load
 	--data token=gAsuE35s \
 
 echo "Run this command in your shell: eval \"$(docker-machine env $MACHINE_NAME)\""
+
+# Generate and copy the certificates to jenkins slave
+$(pwd)/generate_client_certs.sh ${DOCKER_CLIENT_CERT_PATH} >/dev/null 2>&1
