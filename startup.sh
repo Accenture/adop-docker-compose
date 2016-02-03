@@ -6,7 +6,7 @@ usage(){
 	echo "Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY> -s <AWS_SECRET_ACCESS_KEY> -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER> -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
 }
 
-#Defaults
+# Defaults
 VOLUME_DRIVER=local
 LOGGING_OVERRIDE=' -f etc/logging/syslog/default.yml'
 CUSTOM_NETWORK_NAME=adopnetwork
@@ -79,5 +79,13 @@ set -x
 docker-compose -f compose/elk.yml up -d
 docker-compose -f docker-compose.yml -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE ${OVERRIDES} up -d
 set +x
+
+# Wait for Jenkins and Gerrit to come up before proceeding
+until [ $(docker exec jenkins curl -I -s jenkins:jenkins@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) = 200 ]; do echo \"Jenkins unavailable, sleeping for 60s\"; sleep 60; done
+until [ $(docker exec gerrit curl -I -s gerrit:gerrit@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) = 200 ]; do echo \"Gerrit unavailable, sleeping for 60s\"; sleep 60; done
+
+# Trigger Load_Platform in Jenkins
+docker exec jenkins curl -X POST jenkins:jenkins@localhost:8080/jenkins/job/Load_Platform/buildWithParameters \
+	--data token=gAsuE35s \
 
 echo "Run this command in your shell: eval \"$(docker-machine env $MACHINE_NAME)\""
