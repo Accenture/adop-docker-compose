@@ -59,7 +59,7 @@ if [ -z $MACHINE_NAME ] | \
 fi
 
 if [ -z ${DOCKER_CLIENT_CERT_PATH} ]; then
-     export DOCKER_CLIENT_CERT_PATH="/root/.docker/"
+     export DOCKER_CLIENT_CERT_PATH="//root/.docker/"
 fi
 
 source env.config.sh
