@@ -37,9 +37,18 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 - TARGET\_HOST the dns/ip of proxy
 - LOGSTASH\_HOST the dns/ip of logstash
 - CUSTOM\_NETWORK\_NAME: The name of the pre-created custom network to use
-- [OPTIONAL] NFS_HOST: The DNS/IP of your NFS server
+- [OPTIONAL] NFS\_HOST: The DNS/IP of your NFS server
 
 # Using the paltform 
+
+###### Generate ssl certificate
+
+Create ssl certificate for jenkins to allow connectivity with docker engine.
+
+* RUN : source env.config.sh
+* RUN : ./generate\_client\_certs.sh ${DOCKER\_CLIENT\_CERT\_PATH}
+
+###### Load platform
 
 * Access the target host url `http://<TARGET_HOST>`
  * This page presents the links to all the tools.

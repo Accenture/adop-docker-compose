@@ -18,6 +18,11 @@ if [ -z ${CERT_PATH} ]; then
     exit 1
 fi
 
+####
+# Windows Git bash terminal identifies 
+# /CN=client as a path and appends the absolute path 
+# of parent directory to it
+####
 HOST_OS=$(uname)
 CLIENT_SUBJ="/CN=client"
 if echo "${HOST_OS}" | grep -E "MINGW*" >/dev/null
@@ -53,3 +58,4 @@ set +e
 docker exec jenkins-slave rm -rf ${CERT_PATH}
 docker cp ${TEMP_CERT_PATH} jenkins-slave:${CERT_PATH}
 set -e
+
