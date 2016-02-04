@@ -58,9 +58,6 @@ gerrit:
     - "29418"
   environment:
     - "affinity:container==gerrit-mysql"
-    - "SERVICE_8080_CHECK_SCRIPT=curl --silent --fail ${TARGET_HOST}:8030/gerrit"
-    - "SERVICE_8080_NAME=gerrit"
-    - "SERVICE_29418_NAME=gerrit-ssh"
     - "REPO_PATH=/var/git/repos"
     - "WEBURL=http://${TARGET_HOST}/gerrit"
     - "DATABASE_TYPE=mysql"
@@ -159,7 +156,6 @@ sonar-mysql:
   expose:
     - "3306"
   environment: 
-    SERVICE_3306_NAME: "sonar-mysql"
     MYSQL_ROOT_PASSWORD: "sonar"
     MYSQL_USER: ${SONAR_MYSQL_USER}
     MYSQL_PASSWORD: ${SONAR_MYSQL_PASSWORD}
@@ -175,8 +171,6 @@ sonar:
     - "9000"
   environment:
     - "affinity:container==sonar-mysql"
-    - "SERVICE_9000_NAME=sonar"
-    - "SERVICE_9000_CHECK_SCRIPT=curl --silent --fail ${TARGET_HOST}:8020/sonar"
     - "LDAP_URL=ldap://ldap:389"
     - "LDAP_BIND_DN=cn=admin,${LDAP_FULL_DOMAIN}"
     - "LDAP_BIND_PASSWORD=${LDAP_PWD}"
@@ -200,8 +194,6 @@ jenkins:
     - "50000"
   privileged: true
   environment:
-    SERVICE_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:8010/jenkins"
-    SERVICE_8080_NAME: "jenkins"
     JENKINS_OPTS: "--prefix=/jenkins"
     ROOT_URL: "http://${TARGET_HOST}/jenkins/"
     LDAP_SERVER: "ldap:389"
@@ -258,8 +250,6 @@ selenium-hub:
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "4444"
-  environment:
-    SERVICE_4444_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:4444/grid/console"
 
 selenium-node-chrome:
   container_name: selenium-node-chrome
@@ -289,8 +279,6 @@ nexus:
   expose:
     - "8081"
   environment:
-    SERVICE_CHECK_SCRIPT: "curl --silent --fail ${TARGET_HOST}:80/"
-    SERVICE_8081_NAME: "nexus"
     NEXUS_BASE_URL: "http://${TARGET_HOST}/nexus"
     LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
     LDAP_ENABLED: "true"
