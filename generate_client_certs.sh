@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 CERT_PATH=$1
+echo ${CERT_PATH}
 if [ -z ${CERT_PATH} ]; then
     echo "
 	  Usage : 
@@ -17,10 +18,17 @@ if [ -z ${CERT_PATH} ]; then
     exit 1
 fi
 
+HOST_OS=$(uname)
+CLIENT_SUBJ="/CN=client"
+if echo "${HOST_OS}" | grep -E "MINGW*" >/dev/null
+then
+	CLIENT_SUBJ="//CN=client"
+fi
+
 ####
 # Fresh start
 #### 
-TEMP_CERT_PATH="/tmp/docker_certs"
+TEMP_CERT_PATH="${HOME}/docker_certs"
 rm -rf ${TEMP_CERT_PATH}
 mkdir -p ${TEMP_CERT_PATH}
 
@@ -30,11 +38,11 @@ mkdir -p ${TEMP_CERT_PATH}
 # * Generate the client certificate
 ####
 openssl genrsa -out ${TEMP_CERT_PATH}/key.pem 4096
-openssl req -subj '/CN=client' -new -key ${TEMP_CERT_PATH}/key.pem -out ${TEMP_CERT_PATH}/client.csr
+openssl req -subj "${CLIENT_SUBJ}" -new -key ${TEMP_CERT_PATH}/key.pem -out ${TEMP_CERT_PATH}/client.csr
 echo "extendedKeyUsage = clientAuth" >  ${TEMP_CERT_PATH}/extfile.cnf
-openssl x509 -req -days 365 -sha256 -in ${TEMP_CERT_PATH}/client.csr -CA /root/.docker/machine/certs/ca.pem -CAkey /root/.docker/machine/certs/ca-key.pem -CAcreateserial -out ${TEMP_CERT_PATH}/cert.pem -extfile ${TEMP_CERT_PATH}/extfile.cnf
-cp /root/.docker/machine/certs/ca.pem ${TEMP_CERT_PATH}/ca.pem
-docker --tlsverify --tlscacert=/root/.docker/machine/certs/ca.pem --tlscert=${TEMP_CERT_PATH}/cert.pem --tlskey=${TEMP_CERT_PATH}/key.pem -H=${DOCKER_HOST} version
+openssl x509 -req -days 365 -sha256 -in ${TEMP_CERT_PATH}/client.csr -CA ${HOME}/.docker/machine/certs/ca.pem -CAkey ${HOME}/.docker/machine/certs/ca-key.pem -CAcreateserial -out ${TEMP_CERT_PATH}/cert.pem -extfile ${TEMP_CERT_PATH}/extfile.cnf
+cp ${HOME}/.docker/machine/certs/ca.pem ${TEMP_CERT_PATH}/ca.pem
+docker --tlsverify --tlscacert=${HOME}/.docker/machine/certs/ca.pem --tlscert=${TEMP_CERT_PATH}/cert.pem --tlskey=${TEMP_CERT_PATH}/key.pem -H=${DOCKER_HOST} version
 
 ####
 # * Remove unnecessary files
