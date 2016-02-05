@@ -48,6 +48,8 @@ Create ssl certificate for jenkins to allow connectivity with docker engine.
 * RUN : source env.config.sh
 * RUN : ./generate\_client\_certs.sh ${DOCKER\_CLIENT\_CERT\_PATH}
 
+Note : For windows run the generate\_client\_certs.sh script from a terminal (Git Bash) as administrator.
+
 ###### Load platform
 
 * Access the target host url `http://<TARGET_HOST>`
