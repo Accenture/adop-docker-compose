@@ -1,4 +1,4 @@
-# Temporary Getting Started Instructions
+# Getting Started Instructions
 
 ## To run in AWS (single instance)
 
@@ -20,7 +20,6 @@ Create a docker machine and set up you local environment variables to point dock
 Create a Docker Swarm that has a publicly accessible Engine with the label "tier=public" to bind Nginx and Logstash to that node
 
 ## Launching
-- TODO:REMOVE this line - log on to docker.accenture.com
 
 - Run: export TARGET\_HOST=\<IP\_OF\_PUBLIC\_HOST\>
 - Run: export CUSTOM\_NETWORK\_NAME=\<CUSTOM\_NETWORK\_NAME\>
@@ -50,9 +49,9 @@ Create ssl certificate for jenkins to allow connectivity with docker engine.
 
 Note : For windows run the generate\_client\_certs.sh script from a terminal (Git Bash) as administrator.
 
-###### Load platform
+###### Load Platform
 
-* Access the target host url `http://<TARGET_HOST>`
+* Access the target host url `http://<TARGET_HOST>` with the user `john.smith` and password `Password01`
  * This page presents the links to all the tools.
 * Click: Jenkins link.
 * Run: Load\_Platform job
@@ -69,28 +68,24 @@ Note : For windows run the generate\_client\_certs.sh script from a terminal (Gi
  * You should be able to see the spring petclinic application.
 * Now, you can clone the repository from gerrit and make a code change to see the example pipeline triggered automatically.
 
-# Temporary define default index pattern
+# Define Default Elastic Search Index Pattern
 
-As described on https://alm.accenture.com/jira/browse/DA-1359?focusedCommentId=132808&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-132808 comment, Kibana 4 does not provide a configuration property that allow to define the default index pattern for this reason while issue [DA-1401|https://alm.accenture.com/jira/browse/DA-1401] is prioritized the following manual procedure should be adopted in order to define an index pattern:
+Kibana 4 does not provide a configuration property that allow to define the default index pattern so the following manual procedure should be adopted in order to define an index pattern:
 
 - Navidate to Settings > Indices using Kibana dashboard
 - Set index name or pattern as "logstash-*"
 - For the below drop-down select @timestamp for the Time-field name
 - Click on create button
 
-# Status
+# User feedback
 
-This is still WIP and does not work full yet.
+## Documentation
+Documentaion can be found under the [`docker-library/docs` GitHub repo](https://github.com/docker-library/docs). Be sure to familiarize yourself with the [repository's `README.md` file](https://github.com/docker-library/docs/blob/master/README.md) before attempting a pull request.
 
-# Assumes a directory structure of
+## Issues
+If you have any problems with or questions about this image, please contact us through a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues).
 
-BASE/adop
+## Contribute
+You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can.
 
-BASE/images/*all the image repos*
--  docker-gerrit
--  docker-jenkins
--  docker-ldap
--  docker-nginx
--  docker-sonar
-
-BASE/volumes
+Before you start to code, we recommend discussing your plans through a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues), especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.
