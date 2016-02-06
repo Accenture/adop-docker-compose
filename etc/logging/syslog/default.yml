@@ -28,7 +28,37 @@ sensu-uchiwa:
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    syslog-tag: "sensu"
+    syslog-tag: "sensu-uchiwa"
+
+sensu-api:
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "sensu-api"
+
+sensu-server:
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "sensu-server"
+
+sensu-client:
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "sensu-client"
+
+sensu-rabbitmq:
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "sensu-rabbitmq"
+
+sensu-redis:
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    syslog-tag: "sensu-redis"
 
 sonar-mysql:
   log_driver: "syslog"
