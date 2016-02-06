@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/Accenture/adop-docker-compose.svg?branch=master)](https://travis-ci.org/Accenture/adop-docker-compose)
+
 # Getting Started Instructions
 
 ## To run in AWS (single instance)
