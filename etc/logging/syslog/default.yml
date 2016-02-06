@@ -24,7 +24,7 @@ gerrit:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
     syslog-tag: "gerrit"
 
-sensu:
+sensu-uchiwa:
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
