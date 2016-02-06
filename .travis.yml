@@ -1,0 +1,25 @@
+language: bash
+
+sudo: required
+services:
+  - docker
+
+env:
+  DOCKER_COMPOSE_VERSION: 1.6.0
+  CUSTOM_NETWORK_NAME: local_network
+  TARGET_HOST: localhost
+
+before_install:
+ - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+ - chmod +x docker-compose
+ - sudo mv docker-compose /usr/local/bin
+ 
+before_script:
+  - docker network create ${CUSTOM_NETWORK_NAME}
+  - docker-compose pull
+
+script:
+  - source env.config.sh
+  - docker-compose -f docker-compose.yml -f etc/volumes/local/default.yml up -d
+  - docker-compose ps
+  - docker ps
