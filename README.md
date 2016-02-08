@@ -2,7 +2,7 @@
 
 The DevOps Platform is a tools environment for continuously testing, releasing and maintaining applications. Reference code, delivery pipelines, automated testing and environments can be loaded in via the concept of Cartridges.
 
-![HomePage](https://github.com/accenture/docker-compose/raw/master/img/home.png)
+![HomePage](https://raw.githubusercontent.com/accenture/adop-docker-compose/master/img/home.png)
 
 Once you have a stack up and running, the default username and password to log in are:
 ```sh
