@@ -6,7 +6,7 @@ The DevOps Platform is a tools environment for continuously testing, releasing a
 
 Once you have a stack up and running, the default username and password to log in are:
 ```sh
-john.smith / Passwor01
+john.smith / Password01
 ```
 
 # Getting Started Instructions
@@ -52,7 +52,7 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 - CUSTOM\_NETWORK\_NAME: The name of the pre-created custom network to use
 - [OPTIONAL] NFS\_HOST: The DNS/IP of your NFS server
 
-# Using the paltform 
+# Using the platform 
 
 ###### Generate ssl certificate
 
