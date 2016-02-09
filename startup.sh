@@ -7,9 +7,9 @@ usage(){
 }
 
 # Defaults
-VOLUME_DRIVER=local
-LOGGING_OVERRIDE=' -f etc/logging/syslog/default.yml'
-CUSTOM_NETWORK_NAME=adopnetwork
+export VOLUME_DRIVER=local
+export LOGGING_OVERRIDE=' -f etc/logging/syslog/default.yml'
+export CUSTOM_NETWORK_NAME=adopnetwork
 
 
 while getopts "m:n:a:s:c:r:f:v:l:" opt; do
