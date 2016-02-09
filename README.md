@@ -1,14 +1,28 @@
+# The DevOps Plaform: Overview
+
+The DevOps Platform is a tools environment for continuously testing, releasing and maintaining applications. Reference code, delivery pipelines, automated testing and environments can be loaded in via the concept of Cartridges.
+
+![HomePage](https://raw.githubusercontent.com/accenture/adop-docker-compose/master/img/home.png)
+
+Once you have a stack up and running, the default username and password to log in are:
+```sh
+john.smith / Passwor01
+```
+
 # Getting Started Instructions
+
+The platform is designed to run on any container platform. 
 
 ## To run in AWS (single instance)
 
 - Create a VPC using the VPC wizard in the AWS console by selecting the first option with 1 public subnet
 
 - Create a Docker Engine in AWS: 
-
+```sh
 docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KEY --amazonec2-secret-key YOUR\_SECRET\_KEY --amazonec2-vpc-id vpc-YOUR_ID --amazonec2-instance-type t2.large --amazonec2-region REGION IN THIS FORMAT: eu-west-1   YOUR\_MACHINE\_NAME
+```
 
-- Update the docker-machine security group to permit inbound http traffic on port 80 (from the machine(s) from which you want to have access only), and TCP on 2376, UDP on 25826, and UDP on 12201 (from 127.0.0.1/32)
+- Update the docker-machine security group to permit inbound http traffic on port 80 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32
 
 - Set your local environment variables to point docker-machine to your new instance
 
