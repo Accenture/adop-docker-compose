@@ -2,14 +2,25 @@
 
 OVERRIDES=
 
+
+echo ' 
+      ###    ########   #######  ########  
+     ## ##   ##     ## ##     ## ##     ## 
+    ##   ##  ##     ## ##     ## ##     ## 
+   ##     ## ##     ## ##     ## ########  
+   ######### ##     ## ##     ## ##        
+   ##     ## ##     ## ##     ## ##        
+   ##     ## ########   #######  ##        
+'
+
 usage(){
 	echo "Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY> -s <AWS_SECRET_ACCESS_KEY> -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER> -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
 }
 
 # Defaults
-VOLUME_DRIVER=local
-LOGGING_OVERRIDE=' -f etc/logging/syslog/default.yml'
-CUSTOM_NETWORK_NAME=adopnetwork
+export VOLUME_DRIVER=local
+export LOGGING_OVERRIDE=' -f etc/logging/syslog/default.yml'
+export CUSTOM_NETWORK_NAME=adopnetwork
 
 
 while getopts "m:n:a:s:c:r:f:v:l:" opt; do
