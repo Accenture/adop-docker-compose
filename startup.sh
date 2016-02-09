@@ -2,8 +2,19 @@
 
 OVERRIDES=
 
+
+echo ' 
+      ###    ########   #######  ########  
+     ## ##   ##     ## ##     ## ##     ## 
+    ##   ##  ##     ## ##     ## ##     ## 
+   ##     ## ##     ## ##     ## ########  
+   ######### ##     ## ##     ## ##        
+   ##     ## ##     ## ##     ## ##        
+   ##     ## ########   #######  ##        
+'
+
 usage(){
-	echo "Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY> -s <AWS_SECRET_ACCESS_KEY> -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER> -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
+	echo "Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY> -s <AWS_SECRET_ACCESS_KEY> -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
 }
 
 # Defaults
@@ -73,14 +84,13 @@ if ! docker network create $CUSTOM_NETWORK_NAME; then
 	echo "Docker network '$CUSTOM_NETWORK_NAME' already exists"
 fi
 
+# Run the Docker compose commands
 export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
 export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
 docker-compose -f compose/elk.yml pull
 docker-compose -f docker-compose.yml -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE ${OVERRIDES} pull
-set -x
 docker-compose -f compose/elk.yml up -d
 docker-compose -f docker-compose.yml -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE ${OVERRIDES} up -d
-set +x
 
 # Wait for Jenkins and Gerrit to come up before proceeding
 until [[ $(docker exec jenkins curl -I -s jenkins:jenkins@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo \"Jenkins unavailable, sleeping for 60s\"; sleep 60; done
@@ -90,8 +100,18 @@ until [[ $(docker exec gerrit curl -I -s gerrit:gerrit@localhost:8080/gerrit/|he
 docker exec jenkins curl -X POST jenkins:jenkins@localhost:8080/jenkins/job/Load_Platform/buildWithParameters \
 	--data token=gAsuE35s \
 
-echo "Run this command in your shell: eval \"$(docker-machine env $MACHINE_NAME)\""
-
 # Generate and copy the certificates to jenkins slave
 $(pwd)/generate_client_certs.sh ${DOCKER_CLIENT_CERT_PATH} >/dev/null 2>&1
+
+# Tell the user something useful
+echo
+echo '##########################################################'
+echo
+echo SUCCESS, your new ADOP instance is ready!
+echo
+echo Run these commands in your shell:
+echo '  eval \"$(docker-machine env $MACHINE_NAME)\"'
+echo '  source env.config.sh'
+echo
+echo Navigate to http://$TARGET_HOST in your browser to use your new DevOps Platform!
 
