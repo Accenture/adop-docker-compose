@@ -1,4 +1,4 @@
-# The DevOps Plaform: Overview
+# The DevOps Platform: Overview
 
 The DevOps Platform is a tools environment for continuously testing, releasing and maintaining applications. Reference code, delivery pipelines, automated testing and environments can be loaded in via the concept of Cartridges.
 
@@ -9,11 +9,49 @@ Once you have a stack up and running, the default username and password to log i
 john.smith / Passwor01
 ```
 
-# Getting Started Instructions
+# Quickstart instructions
+
+These instructions will spin up an instance in a single server in AWS (for evaluation purposes).
+
+1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet
+1. Note the VPC ID (e.g. vpc-1ed3sfgw)
+1. Clone this repository and then in a terminal window (this has been tested in GitBash) run:
+```bash
+$ ./startup.sh
+Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY> -s <AWS_SECRET_ACCESS_KEY> -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER> -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ...
+```
+* You will need to supply:
+    - a machine name (anything you want)
+    - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html))
+    - the target VPC
+    - the AWS region id in this format: eu-west-1
+For example
+```bash
+./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1
+```
+4. If all goes well you will see the following output and you can view the DevOps Platform in your browser
+```bash
+##########################################################
+
+SUCCESS, your new ADOP instance is ready!
+
+Run these commands in your shell:
+  eval \"$(docker-machine env $MACHINE_NAME)\"
+  source env.config.sh
+
+Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
+```
+5. Log in using:
+```sh
+john.smith / Passwor01
+```
+
+
+# General Getting Started Instructions
 
 The platform is designed to run on any container platform. 
 
-## To run in AWS (single instance)
+## To run in AWS (single instance) manually
 
 - Create a VPC using the VPC wizard in the AWS console by selecting the first option with 1 public subnet
 
@@ -27,7 +65,7 @@ docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KE
 - Set your local environment variables to point docker-machine to your new instance
 
 ## To run locally
-Create a docker machine and set up you local environment variables to point docker-machine to your new instance
+Create a docker machine and set up your local environment variables to point docker-machine to your new instance
 
 ## To run with Docker Swarm
 
@@ -103,3 +141,5 @@ If you have any problems with or questions about this image, please contact us t
 You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can.
 
 Before you start to code, we recommend discussing your plans through a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues), especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.
+
+
