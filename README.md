@@ -45,7 +45,7 @@ Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
 ```
 5. Log in using:
 ```sh
-john.smith / Passwor01
+john.smith / Password01
 ```
 
 
