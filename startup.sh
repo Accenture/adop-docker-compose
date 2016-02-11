@@ -14,7 +14,7 @@ echo '
 '
 
 usage(){
-	echo "Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY> -s <AWS_SECRET_ACCESS_KEY> -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
+  echo "Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
 }
 
 # Defaults
@@ -62,11 +62,15 @@ done
 
 if [ -z $MACHINE_NAME ] | \
 	[ -z $CUSTOM_NETWORK_NAME ] | \
-	[ -z $AWS_ACCESS_KEY ] | \
 	[ -z $VPC_ID ] | \
 	[ -z $REGION ]; then
   usage
   exit 1
+fi
+
+if [ -z $AWS_ACCESS_KEY ];
+then
+  echo "Using default AWS credentials from ~/.aws/credentials"
 fi
 
 source env.config.sh
@@ -75,7 +79,7 @@ source env.config.sh
 if $(docker-machine env $MACHINE_NAME > /dev/null 2>&1) ; then
 	echo "Docker machine '$MACHINE_NAME' already exists"
 else
-  docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $REGION $MACHINE_NAME
+  docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $REGION $MACHINE_NAME
 fi
 
 # Create Docker network if one doesn't already exist with the same name
