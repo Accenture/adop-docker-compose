@@ -14,7 +14,7 @@ echo '
 '
 
 usage(){
-  echo "Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
+  echo "Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY_ID>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -c <VPC_ID> -r <AWS_DEFAULT_REGION>(optional) -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l <LOGGING_DRIVER>(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
 }
 
 # Defaults
@@ -32,7 +32,7 @@ while getopts "m:n:a:s:c:r:f:v:l:" opt; do
       export CUSTOM_NETWORK_NAME=${OPTARG}
       ;;
     a)
-      export AWS_ACCESS_KEY=${OPTARG}
+      export AWS_ACCESS_KEY_ID=${OPTARG}
       ;;
     s)
       export AWS_SECRET_ACCESS_KEY=${OPTARG}
@@ -41,7 +41,7 @@ while getopts "m:n:a:s:c:r:f:v:l:" opt; do
       export VPC_ID=${OPTARG}
       ;;
     r)
-      export REGION=${OPTARG}
+      export AWS_DEFAULT_REGION=${OPTARG}
       ;;
     v)
       export VOLUME_DRIVER=${OPTARG}
@@ -62,15 +62,23 @@ done
 
 if [ -z $MACHINE_NAME ] | \
 	[ -z $CUSTOM_NETWORK_NAME ] | \
-	[ -z $VPC_ID ] | \
-	[ -z $REGION ]; then
+	[ -z $VPC_ID ]; then
   usage
   exit 1
 fi
 
-if [ -z $AWS_ACCESS_KEY ];
+if [ -z $AWS_ACCESS_KEY_ID ] & \
+    [ -f ~/.aws/credentials ];
 then
   echo "Using default AWS credentials from ~/.aws/credentials"
+  eval $(grep -v '^\[' ~/.aws/credentials | sed 's/^\(.*\)\s=\s/export \U\1=/')
+fi
+
+if [ -z $AWS_DEFAULT_REGION ] & \
+    [ -f ~/.aws/config ];
+then
+  echo "Using default AWS region from ~/.aws/config"
+  eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s=\s/export AWS_DEFAULT_REGION=/')
 fi
 
 source env.config.sh
@@ -79,10 +87,10 @@ source env.config.sh
 if $(docker-machine env $MACHINE_NAME > /dev/null 2>&1) ; then
 	echo "Docker machine '$MACHINE_NAME' already exists"
 else
-  if [ -z $AWS_ACCESS_KEY ]; then
-    docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $REGION $MACHINE_NAME
+  if [ -z $AWS_ACCESS_KEY_ID ]; then
+    docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large $MACHINE_NAME
   else
-    docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $REGION $MACHINE_NAME
+    docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY_ID --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $AWS_DEFAULT_REGION $MACHINE_NAME
   fi
 fi
 
