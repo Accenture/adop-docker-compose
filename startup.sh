@@ -41,7 +41,7 @@ while getopts "m:n:a:s:c:r:f:v:l:" opt; do
       export VPC_ID=${OPTARG}
       ;;
     r)
-      export REGION=${OPTARG}
+      export AWS_DEFAULT_REGION=${OPTARG}
       ;;
     v)
       export VOLUME_DRIVER=${OPTARG}
@@ -62,8 +62,7 @@ done
 
 if [ -z $MACHINE_NAME ] | \
 	[ -z $CUSTOM_NETWORK_NAME ] | \
-	[ -z $VPC_ID ] | \
-	[ -z $REGION ]; then
+	[ -z $VPC_ID ]; then
   usage
   exit 1
 fi
@@ -71,6 +70,13 @@ fi
 if [ -z $AWS_ACCESS_KEY ];
 then
   echo "Using default AWS credentials from ~/.aws/credentials"
+  eval $(grep -v '^\[' ~/.aws/credentials | sed 's/^\(.*\)\s=\s/export \U\1=/')
+fi
+
+if [ -z $AWS_DEFAULT_REGION ];
+then
+  echo "Using default AWS region from ~/.aws/config"
+  eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s=\s/export AWS_DEFAULT_REGION=/')
 fi
 
 source env.config.sh
@@ -79,7 +85,7 @@ source env.config.sh
 if $(docker-machine env $MACHINE_NAME > /dev/null 2>&1) ; then
 	echo "Docker machine '$MACHINE_NAME' already exists"
 else
-  docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $REGION $MACHINE_NAME
+  docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large $MACHINE_NAME
 fi
 
 # Create Docker network if one doesn't already exist with the same name
