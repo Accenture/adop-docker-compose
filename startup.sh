@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 OVERRIDES=
 
@@ -79,7 +79,11 @@ source env.config.sh
 if $(docker-machine env $MACHINE_NAME > /dev/null 2>&1) ; then
 	echo "Docker machine '$MACHINE_NAME' already exists"
 else
-  docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $REGION $MACHINE_NAME
+  if [ -z $AWS_ACCESS_KEY ]; then
+    docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $REGION $MACHINE_NAME
+  else
+    docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $REGION $MACHINE_NAME
+  fi
 fi
 
 # Create Docker network if one doesn't already exist with the same name

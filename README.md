@@ -20,7 +20,7 @@ These instructions will spin up an instance in a single server in AWS (for evalu
 1. Clone this repository and then in a terminal window (this has been tested in GitBash) run:
 ```bash
 $ ./startup.sh
-Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER> -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ...
+Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ...
 ```
 * You will need to supply:
     - a machine name (anything you want)
