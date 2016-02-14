@@ -20,7 +20,7 @@ These instructions will spin up an instance in a single server in AWS (for evalu
 1. Clone this repository and then in a terminal window (this has been tested in GitBash) run:
 ```bash
 $ ./startup.sh
-Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -c <VPC_ID> -r <REGION> -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ...
+Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY_ID>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -c <VPC_ID> -r <AWS_DEFAULT_REGION>(optional) -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l <LOGGING_DRIVER>(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ...
 ```
 * You will need to supply:
     - a machine name (anything you want)
@@ -134,7 +134,7 @@ Kibana 4 does not provide a configuration property that allow to define the defa
 # User feedback
 
 ## Documentation
-Documentaion can be found under the [`docker-library/docs` GitHub repo](https://github.com/docker-library/docs). Be sure to familiarize yourself with the [repository's `README.md` file](https://github.com/docker-library/docs/blob/master/README.md) before attempting a pull request.
+Documentation can be found under the [`docker-library/docs` GitHub repo](https://github.com/docker-library/docs). Be sure to familiarize yourself with the [repository's `README.md` file](https://github.com/docker-library/docs/blob/master/README.md) before attempting a pull request.
 
 ## Issues
 If you have any problems with or questions about this image, please contact us through a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues).
