@@ -20,14 +20,25 @@ These instructions will spin up an instance in a single server in AWS (for evalu
 1. Clone this repository and then in a terminal window (this has been tested in GitBash) run:
 ```bash
 $ ./startup.sh
-Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY_ID>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -c <VPC_ID> -r <AWS_DEFAULT_REGION>(optional) -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l <LOGGING_DRIVER>(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ...
+Usage: ./startup.sh -m <MACHINE_NAME>  
+                    -c <VPC_ID> 
+                    -r <REGION>(optional) 
+                    -a <AWS_ACCESS_KEY>(optional) 
+                    -s <AWS_SECRET_ACCESS_EY>(optional) 
+                    -v <VOLUME_DRIVER>(optional) 
+                    -n <CUSTOM_NETWORK_NAME>(optional) 
+                    -l LOGGING_DRIVER(optional) 
+                    -f path/to/additional_override1.yml(optional) 
+                    -f path/to/additional_override2.yml(optional) ...
 ```
 * You will need to supply:
     - a machine name (anything you want)
-    - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using aws configure 
     - the target VPC
-    - the AWS region id in this format: eu-west-1
-For example
+    - If you don't have your AWS credentials and default region [stored locally in ~/.aws](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) you will also need to supply:
+        - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using aws configure 
+        - the AWS region id in this format: eu-west-1
+
+For example (if you don't have ~/.aws set up)
 ```bash
 ./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1
 ```

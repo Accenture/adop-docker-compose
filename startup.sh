@@ -14,7 +14,7 @@ echo '
 '
 
 usage(){
-  echo "Usage: ./startup.sh -m <MACHINE_NAME> -a <AWS_ACCESS_KEY_ID>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -c <VPC_ID> -r <AWS_DEFAULT_REGION>(optional) -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l <LOGGING_DRIVER>(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
+  echo "Usage: ./startup.sh -m <MACHINE_NAME> -c <VPC_ID> -r <REGION>(optional) -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
 }
 
 # Defaults
@@ -78,7 +78,7 @@ if [ -z $AWS_DEFAULT_REGION ] & \
     [ -f ~/.aws/config ];
 then
   echo "Using default AWS region from ~/.aws/config"
-  eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s=\s/export AWS_DEFAULT_REGION=/')
+  eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s\?=\s\?/export AWS_DEFAULT_REGION=/')
 fi
 
 source env.config.sh
@@ -117,7 +117,7 @@ docker exec jenkins curl -X POST jenkins:jenkins@localhost:8080/jenkins/job/Load
 	--data token=gAsuE35s \
 
 # Generate and copy the certificates to jenkins slave
-$(pwd)/generate_client_certs.sh ${DOCKER_CLIENT_CERT_PATH} >/dev/null 2>&1
+$(pwd)/generate_client_certs.sh ${DOCKER_CLIENT_CERT_PATH} 1> /dev/null
 
 # Tell the user something useful
 echo
