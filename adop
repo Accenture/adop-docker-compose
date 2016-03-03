@@ -1,0 +1,43 @@
+#!/bin/bash -e
+
+CMD_NAME=`basename "$0"`
+
+# The sed expression here replaces all backslashes by forward slashes.
+# This helps our Windows users, while not bothering our Unix users.
+export CLI_DIR=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
+export CONF_DIR="${CLI_DIR}"
+CLI_CMD_DIR="${CLI_DIR}/cmd"
+
+usage() {
+    echo "usage: ${CMD_NAME} <subcommand>"
+    echo
+    echo "Available subcommands are:"
+    for command in $(ls $CLI_DIR/cmd)
+    do
+        printf "    %-10s   $(. ${CLI_CMD_DIR}/${command} cmd_desc)" "${command}"
+        echo
+    done
+    echo
+    echo "Try '${CMD_NAME} <subcommand> help' for details."
+    echo "HINT: Run '${CMD_NAME} compose init' to start the platform"
+    echo
+}
+
+main() {
+    if [ $# -lt 1 ]; then
+        usage
+        exit 1
+    fi
+
+    SUBCOMMAND="$1"; shift
+
+    if [ ! -e "${CLI_CMD_DIR}/$SUBCOMMAND" ]; then
+        usage
+        exit 1
+    fi
+
+    # run command
+    . "${CLI_CMD_DIR}/$SUBCOMMAND" "$@"
+}
+
+main "$@"
