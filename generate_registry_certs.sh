@@ -2,6 +2,7 @@
 
 CERT_PATH=$1
 REGISTRY_HOST=$2
+MACHINE_NAME=$3
 echo ${CERT_PATH}
 if [ -z ${CERT_PATH} ]; then
     echo "
@@ -58,6 +59,7 @@ set -e
 ####
 # * Copy the certificates to underlying host 
 ####
-ssh
-mkdir HOST_IP:5000/
-cp
+ssh -i ${HOME}/.docker/machine/machines/${MACHINE_NAME}/id_rsa "
+sudo mkdir -p /etc/docker/certs.d/${REGISTRY_HOST}:5000/
+cp /var/lib/docker/volumes/docker_registry_certs/* /etc/docker/certs.d/${REGISTRY_HOST}:5000/
+"
