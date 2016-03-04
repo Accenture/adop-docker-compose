@@ -79,3 +79,9 @@ nexus:
   volume_driver: nfs
   volumes:
     - ${NFS_HOST}/nfs/nexus_sonatype_work:/sonatype-work
+    
+docker-registry:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/docker-registry:/var/lib/registry
+    - ${NFS_HOST}/nfs/docker-registry-certs:/certs

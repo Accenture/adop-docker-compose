@@ -288,3 +288,15 @@ nexus:
     LDAP_USER_BASE_DN: "ou=people"
     LDAP_GROUP_BASE_DN: "ou=groups"
     LDAP_BIND_PASSWORD: ${LDAP_PWD}
+
+docker-registry:
+  container_name: docker-registry
+  restart: always
+  image:  registry:2
+  net: ${CUSTOM_NETWORK_NAME}
+  expose:
+    - "5000"
+  environment:
+    REGISTRY_HTTP_TLS_CERTIFICATE: "/certs/domain.crt"
+    REGISTRY_HTTP_TLS_KEY: "/certs/domain.key"
+    
