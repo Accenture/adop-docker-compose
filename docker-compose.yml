@@ -24,11 +24,15 @@ ldap:
   container_name: ldap
   restart: always
   #build: ../images/docker-ldap/
-  image: accenture/adop-ldap:0.1.0
+  image: accenture/adop-ldap:0.1.1
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "389"
   environment:
+    INITIAL_ADMIN_USER: ${ADMIN_USER}
+    INITIAL_ADMIN_PASSWORD: ${ADMIN_PWD}
+    JENKINS_PASSWORD: ${JENKINS_PWD}
+    GERRIT_PASSWORD: ${GERRIT_PWD}
     SLAPD_PASSWORD: ${LDAP_PWD}
     SLAPD_DOMAIN: ${LDAP_DOMAIN}
     SLAPD_FULL_DOMAIN: ${LDAP_FULL_DOMAIN}
@@ -41,7 +45,7 @@ gerrit-mysql:
   expose:
     - "3306"
   environment:
-    MYSQL_ROOT_PASSWORD: "***REMOVED***"
+    MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
     MYSQL_USER: ${GERRIT_MYSQL_USER}
     MYSQL_PASSWORD: ${GERRIT_MYSQL_PASSWORD}
     MYSQL_DATABASE: ${GERRIT_MYSQL_DATABASE}
@@ -50,7 +54,7 @@ gerrit:
   container_name: gerrit
   restart: always
   #build: ../images/docker-gerrit/
-  image: accenture/adop-gerrit:0.1.0
+  image: accenture/adop-gerrit:0.1.1
   privileged: true
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -68,6 +72,10 @@ gerrit:
     - "DB_PASSWORD=${GERRIT_MYSQL_PASSWORD}"
     - "AUTH_LOGOUTURL=http://${TARGET_HOST}/gerrit"
     - "AUTH_TYPE=LDAP"
+    - "GERRIT_PASSWORD=${PASSWORD_GERRIT}"
+    - "JENKINS_PASSWORD=${PASSWORD_JENKINS}"
+    - "INITIAL_ADMIN_USER=${ADMIN_USER}"
+    - "INITIAL_ADMIN_PASSWORD=${PASSWORD}"
     - "LDAP_SERVER=ldap:389"
     - "LDAP_ACCOUNTBASE=${LDAP_FULL_DOMAIN}"
     - "LDAP_ACCOUNTPATTERN=(cn=$${username})"
@@ -156,7 +164,7 @@ sonar-mysql:
   expose:
     - "3306"
   environment: 
-    MYSQL_ROOT_PASSWORD: "***REMOVED***"
+    MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
     MYSQL_USER: ${SONAR_MYSQL_USER}
     MYSQL_PASSWORD: ${SONAR_MYSQL_PASSWORD}
     MYSQL_DATABASE: ${SONAR_MYSQL_DATABASE}
@@ -186,7 +194,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.1.0
+  image: accenture/adop-jenkins:0.1.1
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -209,8 +217,12 @@ jenkins:
     LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"
     LDAP_DISPLAY_NAME_ATTRIBUTE_NAME: "displayName"
     LDAP_MAIL_ADDRESS_ATTRIBUTE_NAME: "mail"
+    INITIAL_ADMIN_USER: ${ADMIN_USER}
+    INITIAL_ADMIN_PASSWORD: ${PASSWORD}
     GERRIT_HOST_NAME: "gerrit"
     GERRIT_FRONT_END_URL: "http://gerrit:8080/gerrit"
+    GERRIT_JENKINS_USERNAME: "jenkins"
+    GERRIT_JENKINS_PASSWORD: ${PASSWORD_JENKINS}
     SONAR_SERVER_URL: "http://sonar:9000/sonar/"
     SONAR_ACCOUNT_LOGIN: ${SONAR_ACCOUNT_LOGIN}
     SONAR_ACCOUNT_PASSWORD: ${SONAR_ACCOUNT_PASSWORD}
@@ -240,6 +252,9 @@ jenkins-slave:
   privileged: true
   environment:
     SLAVE_LABELS: "aws ldap java8 docker"
+    SWARM_PASSWORD: ${PASSWORD_JENKINS}
+    INITIAL_ADMIN_USER: ${ADMIN_USER}
+    INITIAL_ADMIN_PASSWORD: ${PASSWORD}
 
 selenium-hub:
   container_name: selenium-hub

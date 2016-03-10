@@ -14,7 +14,7 @@ echo '
 '
 
 usage(){
-  echo "Usage: ./startup.sh -m <MACHINE_NAME> -c <VPC_ID> -r <REGION>(optional) -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) ..."
+  echo "Usage: ./startup.sh -m <MACHINE_NAME> -c <VPC_ID> -r <REGION>(optional) -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) -u <INITIAL_ADMIN_USER>(optional) -p <INITIAL_ADMIN_PASSWORD>(optional)..."
 }
 
 # Defaults
@@ -23,13 +23,13 @@ export LOGGING_OVERRIDE=' -f etc/logging/syslog/default.yml'
 export CUSTOM_NETWORK_NAME=adopnetwork
 
 
-while getopts "m:n:a:s:c:r:f:v:l:" opt; do
+while getopts "m:n:a:s:c:r:f:v:l:u:p:" opt; do
   case $opt in
     m)
       export MACHINE_NAME=${OPTARG}
       ;;
     n)
-      export CUSTOM_NETWORK_NAME=${OPTARG}
+      ${OPTARG}
       ;;
     a)
       export AWS_ACCESS_KEY_ID=${OPTARG}
@@ -51,6 +51,12 @@ while getopts "m:n:a:s:c:r:f:v:l:" opt; do
       ;;
     l)
       export LOGGING_OVERRIDE=" -f ${OPTARG}"
+      ;;
+	u)
+      export ADMIN_USER=${OPTARG}
+      ;;
+    p)
+      export PASSWORD=${OPTARG}
       ;;
     *)
       echo "Invalid parameter(s) or option(s)."
@@ -81,7 +87,11 @@ then
   eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s\?=\s\?/export AWS_DEFAULT_REGION=/')
 fi
 
+
+# Source environment variables and set up default admin credentials
+source credentials.config.sh
 source env.config.sh
+
 
 # Create Docker machine if one doesn't already exist with the same name
 if $(docker-machine env $MACHINE_NAME > /dev/null 2>&1) ; then
@@ -113,7 +123,7 @@ until [[ $(docker exec jenkins curl -I -s jenkins:jenkins@localhost:8080/jenkins
 until [[ $(docker exec gerrit curl -I -s gerrit:gerrit@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo \"Gerrit unavailable, sleeping for 60s\"; sleep 60; done
 
 # Trigger Load_Platform in Jenkins
-docker exec jenkins curl -X POST jenkins:jenkins@localhost:8080/jenkins/job/Load_Platform/buildWithParameters \
+docker exec jenkins curl -X POST jenkins:$PASSWORD_JENKINS@localhost:8080/jenkins/job/Load_Platform/buildWithParameters \
 	--data token=gAsuE35s \
 
 # Generate and copy the certificates to jenkins slave
