@@ -237,8 +237,6 @@ jenkins-slave:
   restart: always
   image: accenture/adop-jenkins-slave:0.1.3
   net: ${CUSTOM_NETWORK_NAME}
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
   privileged: true
   environment:
     SLAVE_LABELS: "aws ldap java8 docker"
