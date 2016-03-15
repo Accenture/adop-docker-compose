@@ -84,4 +84,4 @@ docker-registry:
   volume_driver: nfs
   volumes:
     - ${NFS_HOST}/nfs/docker-registry:/var/lib/registry
-    - ${NFS_HOST}/nfs/docker-registry-certs:/certs
+    - ${NFS_HOST}/nfs/docker-registry-certs:/registry-certs

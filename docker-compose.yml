@@ -290,13 +290,28 @@ nexus:
     LDAP_BIND_PASSWORD: ${LDAP_PWD}
 
 docker-registry:
-  container_name: docker-registry
+  container_name: registry
   restart: always
-  image:  registry:2
+  image:  gogodi91/adop-registry:0.0.1
   net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "5000"
+  volumes:
+    - /etc/docker:/certs
+  ports:
+    - "5500:5000"
   environment:
-    REGISTRY_HTTP_TLS_CERTIFICATE: "/certs/domain.crt"
-    REGISTRY_HTTP_TLS_KEY: "/certs/domain.key"
-    
+    REGISTRY_HTTP_TLS_CERTIFICATE: "/registry_certs/registry.crt"
+    REGISTRY_HTTP_TLS_KEY: "/registry_certs/registry.key"
+    #REGISTRY_IP: ${REGISTRY_HOST}
+    #PASS_ROOT: ADOPROOT
+    #PASS_INTERMEDIATE: ADOPINTER
+    #PASS_REGISTRY: ADOPREG
+    #COUNTRY: GB
+    #STATE: England
+    #LOCALITY: London
+    #ORGANIZATION: Accenture
+    #UNIT: DCSC
+    #ROOT_COMMON_NAME: REGISTRY-ROOT-CA
+    #INTERMEDIATE_COMMON_NAME: REGISTRY-INTER-CA
+    #EMAIL: dcsc@accenture.com
+  entrypoint: /bin/bash
+  command: /bin/startup.sh

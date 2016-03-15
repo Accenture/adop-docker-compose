@@ -119,12 +119,6 @@ docker exec jenkins curl -X POST jenkins:jenkins@localhost:8080/jenkins/job/Load
 # Generate and copy the certificates to jenkins slave
 $(pwd)/generate_client_certs.sh ${DOCKER_CLIENT_CERT_PATH} 1> /dev/null
 
-
-# Generate and copy the certificates to docker-registry
-export DOCKER_REGISTRY_CERT_PATH=/certs # Need to make this path dynamic
-export DOCKER_REGISTRY_HOST=$(docker-machine ip $MACHINE_NAME) # Using the default machine for now
-$(pwd)/generate_registry_certs.sh ${DOCKER_REGISTRY_CERT_PATH} ${DOCKER_REGISTRY_HOST} ${MACHINE_NAME} 1> /dev/null
-
 # Tell the user something useful
 echo
 echo '##########################################################'

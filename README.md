@@ -88,6 +88,7 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 
 - Run: export TARGET\_HOST=\<IP\_OF\_PUBLIC\_HOST\>
 - Run: export CUSTOM\_NETWORK\_NAME=\<CUSTOM\_NETWORK\_NAME\>
+- [OPTIONAL] Run: export REGISTRY\_IP=\<IP\_OF\_DOCKER\_HOST\> # For a 1 host configuration REGISTRY\_IP=TARGET\_HOST
 - Create a custom network: docker network create $CUSTOM\_NETWORK\_NAME
 - Run: docker-compose -f compose/elk.yml up -d
 - Run: export LOGSTASH\_HOST=\<IP\_OF\_LOGSTASH\_HOST\>
@@ -102,6 +103,7 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 - LOGSTASH\_HOST the dns/ip of logstash
 - CUSTOM\_NETWORK\_NAME: The name of the pre-created custom network to use
 - [OPTIONAL] NFS\_HOST: The DNS/IP of your NFS server
+- [OPTIONAL] REGISTRY\_IP the dns/ip of Docker Registry
 
 # Using the platform 
 

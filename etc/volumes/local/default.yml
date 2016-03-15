@@ -68,5 +68,5 @@ nexus:
 
 docker-registry:
   volumes:
-    - docker_registry:/var/lib/registry
-    - docker_registry_certs:/certs
+    - docker-registry:/var/lib/registry
+    - docker-registry-certs:/registry-certs
