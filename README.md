@@ -6,10 +6,7 @@ The DevOps Platform is a tools environment for continuously testing, releasing a
 
 ![HomePage](https://raw.githubusercontent.com/accenture/adop-docker-compose/master/img/home.png)
 
-Once you have a stack up and running, the default username and password to log in are:
-```sh
-john.smith / Password01
-```
+Once you have a stack up and running, please log in with the username and password created upon startup.
 
 # Quickstart instructions
 
@@ -29,7 +26,9 @@ Usage: ./startup.sh -m <MACHINE_NAME>
                     -n <CUSTOM_NETWORK_NAME>(optional) 
                     -l LOGGING_DRIVER(optional) 
                     -f path/to/additional_override1.yml(optional) 
-                    -f path/to/additional_override2.yml(optional) ...
+                    -f path/to/additional_override2.yml(optional) 
+                    -u <ADMIN_USER>
+                    -p <PASSWORD>(optional) ...
 ```
 * You will need to supply:
     - a machine name (anything you want)
@@ -37,10 +36,11 @@ Usage: ./startup.sh -m <MACHINE_NAME>
     - If you don't have your AWS credentials and default region [stored locally in ~/.aws](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) you will also need to supply:
         - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using aws configure 
         - the AWS region id in this format: eu-west-1
+    - a username and password to act as credentials for the initial admin user
 
 For example (if you don't have ~/.aws set up)
 ```bash
-./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1
+./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword
 ```
 4. If all goes well you will see the following output and you can view the DevOps Platform in your browser
 ```bash
@@ -54,9 +54,9 @@ Run these commands in your shell:
 
 Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
 ```
-5. Log in using:
+5. Log in using the username and password you created in the startup script:
 ```sh
-john.smith / Password01
+<ADMIN_USER>/ <PASSWORD>
 ```
 
 
@@ -91,6 +91,7 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 - Create a custom network: docker network create $CUSTOM\_NETWORK\_NAME
 - Run: docker-compose -f compose/elk.yml up -d
 - Run: export LOGSTASH\_HOST=\<IP\_OF\_LOGSTASH\_HOST\>
+- Run: source credentials.config.sh **\[Note: Only run this script once or else new credentials will be generated and you will not have access to the tools.\]**
 - Run: source env.config.sh
 - Choose a volume driver - either "local" or "nfs" are provided, and if the latter is chosen then an NFS server is expected along with the NFS\_HOST environment variable
 - Pull the images first (this is because we can't set dependencies in Compose yet so we want everything to start at the same time): docker-compose pull
@@ -98,6 +99,7 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 
 # Required environment variable on the host
 
+- MACHINE_NAME the name of your docker machine
 - TARGET\_HOST the dns/ip of proxy
 - LOGSTASH\_HOST the dns/ip of logstash
 - CUSTOM\_NETWORK\_NAME: The name of the pre-created custom network to use
@@ -116,7 +118,7 @@ Note : For windows run the generate\_client\_certs.sh script from a terminal (Gi
 
 ###### Load Platform
 
-* Access the target host url `http://<TARGET_HOST>` with the user `john.smith` and password `Password01`
+* Access the target host url `http://<TARGET_HOST>` with the your username and password
  * This page presents the links to all the tools.
 * Click: Jenkins link.
 * Run: Load\_Platform job
