@@ -10,6 +10,7 @@ env:
     - CUSTOM_NETWORK_NAME=local_network
     - TARGET_HOST=localhost
     - LOGSTASH_HOST=localhost
+    - ADMIN_USER=admin.user
   matrix:
     - DOCKER_COMPOSE_TOOLS="-f docker-compose.yml" DOCKER_COMPOSE_VOLUMES="-f etc/volumes/local/default.yml" DOCKER_COMPOSE_LOGGING=""
     - DOCKER_COMPOSE_TOOLS="-f docker-compose.yml" DOCKER_COMPOSE_VOLUMES="-f etc/volumes/local/default.yml" DOCKER_COMPOSE_LOGGING="-f etc/logging/syslog/default.yml"
@@ -25,6 +26,7 @@ before_script:
   - docker-compose pull
 
 script:
+  - source credentials.config.sh
   - source env.config.sh
   - docker-compose ${DOCKER_COMPOSE_TOOLS} ${DOCKER_COMPOSE_VOLUMES} ${DOCKER_COMPOSE_LOGGING} up -d
   - docker-compose ps

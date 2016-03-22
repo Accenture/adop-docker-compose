@@ -1,9 +1,11 @@
 #!/bin/bash -e
 #
 # 
-# usage local-setup.sh [docker-machine]
+# usage local-setup.sh [docker-machine] [user-name] [password]
 #
 # [docker-machine] : the name of the docker-machine to be created/used. (defaults to adop)
+# [user-name] : initial admin username for the tools (will be prompted for one if not provided)
+# [password] : password for the initial admin user (will be randomly generated and printed if not provided)
 #
 
 OVERRIDES=
@@ -14,11 +16,24 @@ export LOGGING_OVERRIDE=' -f etc/logging/syslog/default.yml'
 export CUSTOM_NETWORK_NAME=adopnetwork
 
 if [[ -z "$1" ]]; then
-  MACHINE_NAME=adop
+	MACHINE_NAME=adop
 else
-  MACHINE_NAME="$1"
+	MACHINE_NAME="$1"
 fi
 
+if [[ -z "$2" ]]; then
+	echo
+else
+	export ADMIN_USER="$2"
+fi
+
+if [[ -z "$3" ]]; then
+	echo
+else
+	export PASSWORD="$3"
+fi
+
+source credentials.config.sh
 source env.config.sh
 
 # Create Docker machine if one doesn't already exist with the same name
@@ -37,9 +52,9 @@ fi
 # Run the Docker compose commands
 export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
 export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
-docker-compose -f compose/elk.yml pull
+#docker-compose -f compose/elk.yml pull
 docker-compose -f docker-compose.yml -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE ${OVERRIDES} pull
-docker-compose -f compose/elk.yml up -d
+#docker-compose -f compose/elk.yml up -d
 docker-compose -f docker-compose.yml -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE ${OVERRIDES} up -d
 
 # Wait for Jenkins and Gerrit to come up before proceeding
@@ -47,7 +62,7 @@ until [[ $(docker exec jenkins curl -I -s jenkins:jenkins@localhost:8080/jenkins
 until [[ $(docker exec gerrit curl -I -s gerrit:gerrit@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo \"Gerrit unavailable, sleeping for 60s\"; sleep 60; done
 
 # Trigger Load_Platform in Jenkins
-docker exec jenkins curl -X POST jenkins:jenkins@localhost:8080/jenkins/job/Load_Platform/buildWithParameters \
+docker exec jenkins curl -X POST jenkins:$PASSWORD_JENKINS@localhost:8080/jenkins/job/Load_Platform/buildWithParameters \
 	--data token=gAsuE35s \
 
 # Generate and copy the certificates to jenkins slave
