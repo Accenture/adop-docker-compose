@@ -8,7 +8,7 @@ The DevOps Platform is a tools environment for continuously testing, releasing a
 
 Once you have a stack up and running, please log in with the username and password created upon startup.
 
-# Quickstart instructions
+# Quickstart Instructions
 
 These instructions will spin up an instance in a single server in AWS (for evaluation purposes).
 
@@ -99,7 +99,7 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 
 # Required environment variable on the host
 
-- MACHINE_NAME the name of your docker machine
+- MACHINE\_NAME the name of your docker machine
 - TARGET\_HOST the dns/ip of proxy
 - LOGSTASH\_HOST the dns/ip of logstash
 - CUSTOM\_NETWORK\_NAME: The name of the pre-created custom network to use
