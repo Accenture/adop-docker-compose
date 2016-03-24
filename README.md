@@ -91,7 +91,7 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 - Create a custom network: docker network create $CUSTOM\_NETWORK\_NAME
 - Run: docker-compose -f compose/elk.yml up -d
 - Run: export LOGSTASH\_HOST=\<IP\_OF\_LOGSTASH\_HOST\>
-- Run: source credentials.config.sh **\[Note: Only run this script once or else new credentials will be generated and you will not have access to the tools.\]**
+- Run: source credentials.generate.sh **\[Note: Only run this script once or else new credentials will be generated and you will not have access to the tools.\]**
 - Run: source env.config.sh
 - Choose a volume driver - either "local" or "nfs" are provided, and if the latter is chosen then an NFS server is expected along with the NFS\_HOST environment variable
 - Pull the images first (this is because we can't set dependencies in Compose yet so we want everything to start at the same time): docker-compose pull
