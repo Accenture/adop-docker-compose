@@ -124,23 +124,37 @@ These instructions will spin up an instance in a single server in AWS (for evalu
 
 The platform is designed to run on any container platform. 
 
-## To run in AWS (single instance) manually
+## Provision Docker Engine(s)
+
+### To run in AWS (single instance) manually
 
 - Create a VPC using the VPC wizard in the AWS console by selecting the first option with 1 public subnet
 
-- Create a Docker Engine in AWS: 
+- Create a Docker Engine in AWS (replace the placeholders and their <> markers): 
 ```sh
-docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KEY --amazonec2-secret-key YOUR\_SECRET\_KEY --amazonec2-vpc-id vpc-YOUR_ID --amazonec2-instance-type t2.large --amazonec2-region REGION IN THIS FORMAT: eu-west-1   YOUR\_MACHINE\_NAME
+docker-machine create --driver amazonec2 --amazonec2-access-key <YOUR_ACCESS_KEY> --amazonec2-secret-key <YOUR_SECRET_KEY> --amazonec2-vpc-id <YOUR_VPC_ID> --amazonec2-instance-type t2.large --amazonec2-region <YOUR_AWS_REGION, e.g. eu-west-1> <YOUR_MACHINE_NAME>
 ```
 
 - Update the docker-machine security group to permit inbound http traffic on port 80 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32
 
-- Set your local environment variables to point docker-machine to your new instance
+- Set your local environment variables to point docker-machine to your new instance:
+```sh
+eval $(docker-machine env <YOUR_MACHINE_NAME>)
+```
 
-## To run locally
-Create a docker machine and set up your local environment variables to point docker-machine to your new instance
+### To run locally
 
-## To run with Docker Swarm
+- Create a local Docker Engine (replace the placeholders and their <> markers):
+```sh
+docker-machine create --driver virtualbox --virtualbox-memory 2048 <YOUR_MACHINE_NAME>
+```
+
+- Set your local environment variables to point docker-machine to your new instance:
+```sh
+eval $(docker-machine env <YOUR_MACHINE_NAME>)
+```
+
+### To run with Docker Swarm
 
 Create a Docker Swarm that has a publicly accessible Engine with the label "tier=public" to bind Nginx and Logstash to that node
 
