@@ -119,8 +119,8 @@ docker-compose -f compose/elk.yml up -d
 docker-compose -f docker-compose.yml -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE ${OVERRIDES} up -d
 
 # Wait for Jenkins and Gerrit to come up before proceeding
-until [[ $(docker exec jenkins curl -I -s jenkins:jenkins@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo \"Jenkins unavailable, sleeping for 60s\"; sleep 60; done
-until [[ $(docker exec gerrit curl -I -s gerrit:gerrit@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo \"Gerrit unavailable, sleeping for 60s\"; sleep 60; done
+until [[ $(docker exec jenkins curl -I -s jenkins:$PASSWORD_JENKINS@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo \"Jenkins unavailable, sleeping for 60s\"; sleep 60; done
+until [[ $(docker exec gerrit curl -I -s gerrit:$PASSWORD_GERRIT@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo \"Gerrit unavailable, sleeping for 60s\"; sleep 60; done
 
 # Trigger Load_Platform in Jenkins
 docker exec jenkins curl -X POST jenkins:$PASSWORD_JENKINS@localhost:8080/jenkins/job/Load_Platform/buildWithParameters \
