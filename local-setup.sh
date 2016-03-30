@@ -33,6 +33,7 @@ else
 	export INITIAL_ADMIN_PASSWORD_PLAIN="$3"
 fi
 
+# Source environment variables and set up default admin credentials
 source credentials.generate.sh
 source env.config.sh
 
@@ -76,6 +77,7 @@ echo SUCCESS, your new ADOP instance is ready!
 echo
 echo Run these commands in your shell:
 echo '  eval \"$(docker-machine env $MACHINE_NAME)\"'
+echo '  source credentials.generate.sh'
 echo '  source env.config.sh'
 echo
 echo Navigate to http://$TARGET_HOST in your browser to use your new DevOps Platform!

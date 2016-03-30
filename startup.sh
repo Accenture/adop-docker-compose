@@ -14,7 +14,7 @@ echo '
 '
 
 usage(){
-  echo "Usage: ./startup.sh -m <MACHINE_NAME> -c <VPC_ID> -r <REGION>(optional) -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) -u <INITIAL_ADMIN_USER>(optional) -p <INITIAL_ADMIN_PASSWORD>(optional)..."
+  echo "Usage: ./startup.sh -m <MACHINE_NAME> -c <VPC_ID> -r <REGION>(optional) -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) -u <INITIAL_ADMIN_USER>(optional) -p <INITIAL_ADMIN_PASSWORD_PLAIN>(optional)..."
 }
 
 # Defaults
@@ -52,7 +52,7 @@ while getopts "m:n:a:s:c:r:f:v:l:u:p:" opt; do
     l)
       export LOGGING_OVERRIDE=" -f ${OPTARG}"
       ;;
-	u)
+	  u)
       export INITIAL_ADMIN_USER=${OPTARG}
       ;;
     p)
@@ -137,6 +137,7 @@ echo SUCCESS, your new ADOP instance is ready!
 echo
 echo Run these commands in your shell:
 echo '  eval \"$(docker-machine env $MACHINE_NAME)\"'
+echo '  source credentials.generate.sh'
 echo '  source env.config.sh'
 echo
 echo Navigate to http://$TARGET_HOST in your browser to use your new DevOps Platform!
