@@ -28,6 +28,9 @@ function checkPassword {
 	echo "Your provided password satisfies the strength criteria."
 
 }
+function createPassword {
+    date +%s | openssl sha256 | awk '{print $2}' | base64 | head -c 16; echo
+}
 
 ###############################
 if [ -z $ADMIN_USER ]; then
@@ -47,7 +50,7 @@ fi
 # Else continue checking the input password
 if [ -z $PASSWORD ]; then
  	echo "You have not provided a password. Generating random..."
- 	export PASSWORD=$(date +%s | sha256sum | base64 | head -c 16; echo)
+ 	export PASSWORD=$(createPassword)
  	echo "Your password is $PASSWORD"
 	echo "**Please make note of this as you will use this password to log into all the tools**"
 else
@@ -58,12 +61,12 @@ fi
 export ADMIN_PWD=$(echo -n $PASSWORD | base64)
 
 ###############################
-export PASSWORD_JENKINS=$(date +%s | md5sum | base64 | head -c 16; echo)
+export PASSWORD_JENKINS=$(createPassword)
 export JENKINS_PWD=$(echo -n $PASSWORD_JENKINS | base64)
 
 ###############################
-export PASSWORD_GERRIT=$(date +%s | sha1sum | base64 | head -c 16; echo)
+export PASSWORD_GERRIT=$(createPassword)
 export GERRIT_PWD=$(echo -n $PASSWORD_GERRIT | base64)
 
 ###############################
-export PASSWORD_SQL=$(date +%s | base64 | base64 | head -c 16; echo)
+export PASSWORD_SQL=$(createPassword)
