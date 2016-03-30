@@ -27,8 +27,8 @@ Usage: ./startup.sh -m <MACHINE_NAME>
                     -l LOGGING_DRIVER(optional) 
                     -f path/to/additional_override1.yml(optional) 
                     -f path/to/additional_override2.yml(optional) 
-                    -u <ADMIN_USER>
-                    -p <PASSWORD>(optional) ...
+                    -u <INITIAL_ADMIN_USER>
+                    -p <INITIAL_ADMIN_PASSWORD_PLAIN>(optional) ...
 ```
 * You will need to supply:
     - a machine name (anything you want)
@@ -36,11 +36,11 @@ Usage: ./startup.sh -m <MACHINE_NAME>
     - If you don't have your AWS credentials and default region [stored locally in ~/.aws](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) you will also need to supply:
         - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using aws configure 
         - the AWS region id in this format: eu-west-1
-    - a username and password to act as credentials for the initial admin user
+    - a username and password (optional) to act as credentials for the initial admin user (you will be prompted to re-enter your password if it is considered weak)
 
 For example (if you don't have ~/.aws set up)
 ```bash
-./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword
+./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u userName -p userPassword
 ```
 4. If all goes well you will see the following output and you can view the DevOps Platform in your browser
 ```bash
@@ -50,13 +50,14 @@ SUCCESS, your new ADOP instance is ready!
 
 Run these commands in your shell:
   eval \"$(docker-machine env $MACHINE_NAME)\"
+  source credentials.generate.sh
   source env.config.sh
 
 Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
 ```
 5. Log in using the username and password you created in the startup script:
 ```sh
-<ADMIN_USER>/ <PASSWORD>
+<INITIAL_ADMIN_USER>/ <INITIAL_ADMIN_PASSWORD_PLAIN>
 ```
 
 
@@ -91,8 +92,12 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 - Create a custom network: docker network create $CUSTOM\_NETWORK\_NAME
 - Run: docker-compose -f compose/elk.yml up -d
 - Run: export LOGSTASH\_HOST=\<IP\_OF\_LOGSTASH\_HOST\>
-- Run: source credentials.generate.sh **\[Note: Only run this script once or else new credentials will be generated and you will not have access to the tools.\]**
+- Run: source credentials.generate.sh \[This creates a file containing your generated passwords, platform.secrets.sh, which is sourced. If the file already exists, it will not be created.\]
+    - platform.secrets.sh should not be uploaded to a remote repository hence **do not remove this file from the .gitignore file**
 - Run: source env.config.sh
+    - **If you delete platform.secrets.sh or if you edit any of the variables manually, you will need to re-run credentials.generate.sh in order to recreate the file or re-source the variables.**
+    - **If you change the values in platform.secrets.sh, you will need to remove your existing docker containers and re-run docker-compose in order to re-create the containers with the new password values.**
+    - **When creating a new instance of ADOP, you must delete platform.secrets.sh and regenerate it using credentials.generate.sh, else your old environment variables will get sourced as opposed to the new ones.**
 - Choose a volume driver - either "local" or "nfs" are provided, and if the latter is chosen then an NFS server is expected along with the NFS\_HOST environment variable
 - Pull the images first (this is because we can't set dependencies in Compose yet so we want everything to start at the same time): docker-compose pull
 - Run (logging driver file optional): docker-compose -f docker-compose.yml -f etc/volumes/\<VOLUME_DRIVER\>/default.yml -f etc/logging/syslog/default.yml up -d
@@ -111,6 +116,7 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 
 Create ssl certificate for jenkins to allow connectivity with docker engine.
 
+* RUN : credentials.generate.sh
 * RUN : source env.config.sh
 * RUN : ./generate\_client\_certs.sh ${DOCKER\_CLIENT\_CERT\_PATH}
 
