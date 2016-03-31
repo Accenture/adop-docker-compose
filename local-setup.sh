@@ -24,16 +24,17 @@ fi
 if [[ -z "$2" ]]; then
 	echo
 else
-	export ADMIN_USER="$2"
+	export INITIAL_ADMIN_USER="$2"
 fi
 
 if [[ -z "$3" ]]; then
 	echo
 else
-	export PASSWORD="$3"
+	export INITIAL_ADMIN_PASSWORD_PLAIN="$3"
 fi
 
-source credentials.config.sh
+# Source environment variables and set up default admin credentials
+source credentials.generate.sh
 source env.config.sh
 
 # Create Docker machine if one doesn't already exist with the same name
@@ -76,7 +77,10 @@ echo SUCCESS, your new ADOP instance is ready!
 echo
 echo Run these commands in your shell:
 echo '  eval \"$(docker-machine env $MACHINE_NAME)\"'
+echo '  source credentials.generate.sh'
 echo '  source env.config.sh'
 echo
 echo Navigate to http://$TARGET_HOST in your browser to use your new DevOps Platform!
-
+echo Login using the following credentials:
+echo Username: $INITIAL_ADMIN_USER
+echo Password: $INITIAL_ADMIN_PASSWORD_PLAIN
