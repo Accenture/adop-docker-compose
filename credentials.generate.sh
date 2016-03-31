@@ -62,7 +62,7 @@ else
 	else
 		echo "Your user name is $INITIAL_ADMIN_USER"
 	fi
-	sed -i "s/###INITIAL_ADMIN_USER###/$INITIAL_ADMIN_USER/g" platform.secrets.sh
+	sed -i'' -e "s/###INITIAL_ADMIN_USER###/$INITIAL_ADMIN_USER/g" platform.secrets.sh
 
 	# Generate a random password if user leaves password flag blank 
     # Else continue checking the input password
@@ -74,18 +74,18 @@ else
 	else
 		checkPassword $INITIAL_ADMIN_PASSWORD_PLAIN
 	fi
-	sed -i "s/###INITIAL_ADMIN_PASSWORD_PLAIN###/$INITIAL_ADMIN_PASSWORD_PLAIN/g" platform.secrets.sh
+	sed -i'' -e "s/###INITIAL_ADMIN_PASSWORD_PLAIN###/$INITIAL_ADMIN_PASSWORD_PLAIN/g" platform.secrets.sh
 		
 	# Generate random passwords for Jenkins, Gerrit and SQL and place them in secrets file
 	echo "Generating random passwords for Jenkins, Gerrit and SQL..."
 	PASSWORD_JENKINS=$(createPassword)
-	sed -i "s/###PASSWORD_JENKINS_PLAIN###/$PASSWORD_JENKINS/g" platform.secrets.sh
+	sed -i'' -e "s/###PASSWORD_JENKINS_PLAIN###/$PASSWORD_JENKINS/g" platform.secrets.sh
 	
 	PASSWORD_GERRIT=$(createPassword)
-	sed -i "s/###PASSWORD_GERRIT_PLAIN###/$PASSWORD_GERRIT/g" platform.secrets.sh
+	sed -i'' -e "s/###PASSWORD_GERRIT_PLAIN###/$PASSWORD_GERRIT/g" platform.secrets.sh
 	
 	PASSWORD_SQL=$(createPassword)
-	sed -i "s/###PASSWORD_SQL_PLAIN###/$PASSWORD_SQL/g" platform.secrets.sh
+	sed -i'' -e "s/###PASSWORD_SQL_PLAIN###/$PASSWORD_SQL/g" platform.secrets.sh
 fi
 
 # Source all the variables that were written to the secrets file
