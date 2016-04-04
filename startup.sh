@@ -14,7 +14,24 @@ echo '
 '
 
 usage(){
-  echo "Usage: ./startup.sh -m <MACHINE_NAME> -c <VPC_ID> -r <REGION>(optional) -a <AWS_ACCESS_KEY>(optional) -s <AWS_SECRET_ACCESS_KEY>(optional) -v <VOLUME_DRIVER>(optional) -n <CUSTOM_NETWORK_NAME>(optional) -l LOGGING_DRIVER(optional) -f path/to/additional_override1.yml(optional) -f path/to/additional_override2.yml(optional) -u <INITIAL_ADMIN_USER>(optional) -p <INITIAL_ADMIN_PASSWORD_PLAIN>(optional)..."
+  cat <<END_USAGE
+
+Usage: ./startup.sh
+   -m <MACHINE_NAME>
+   -c <VPC_ID>
+   -z <VPC_AVAIL_ZONE>(optional)
+   -r <REGION>(optional)
+   -a <AWS_ACCESS_KEY>(optional)
+   -s <AWS_SECRET_ACCESS_KEY>(optional)
+   -v <VOLUME_DRIVER>(optional)
+   -n <CUSTOM_NETWORK_NAME>(optional)
+   -l LOGGING_DRIVER(optional)
+   -f path/to/additional_override1.yml(optional)
+   -f path/to/additional_override2.yml(optional)
+   -u <INITIAL_ADMIN_USER>(optional)
+   -p <INITIAL_ADMIN_PASSWORD>(optional)...
+
+END_USAGE
 }
 
 # Defaults
@@ -23,7 +40,7 @@ export LOGGING_OVERRIDE=' -f etc/logging/syslog/default.yml'
 export CUSTOM_NETWORK_NAME=adopnetwork
 
 
-while getopts "m:n:a:s:c:r:f:v:l:u:p:" opt; do
+while getopts "m:n:a:s:c:z:r:f:v:l:u:p:" opt; do
   case $opt in
     m)
       export MACHINE_NAME=${OPTARG}
@@ -39,6 +56,9 @@ while getopts "m:n:a:s:c:r:f:v:l:u:p:" opt; do
       ;;
     c)
       export VPC_ID=${OPTARG}
+      ;;
+    z)
+      export VPC_AVAIL_ZONE=${OPTARG}
       ;;
     r)
       export AWS_DEFAULT_REGION=${OPTARG}
@@ -73,6 +93,14 @@ if [ -z $MACHINE_NAME ] | \
   exit 1
 fi
 
+if [ -z $VPC_AVAIL_ZONE ]; then
+    echo "No availability zone specified - using default [a]."
+    export VPC_AVAIL_ZONE=a
+elif [[ ! $VPC_AVAIL_ZONE =~ ^[a-e]{1,1}$ ]]; then
+        echo "Availability zone can only be a single lower case char, 'a' to 'e'. Exiting..."
+        exit 1
+fi
+
 if [ -z $AWS_ACCESS_KEY_ID ] & \
     [ -f ~/.aws/credentials ];
 then
@@ -87,20 +115,18 @@ then
   eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s\?=\s\?/export AWS_DEFAULT_REGION=/')
 fi
 
-
 # Source environment variables and set up default admin credentials
 source credentials.generate.sh
 source env.config.sh
-
 
 # Create Docker machine if one doesn't already exist with the same name
 if $(docker-machine env $MACHINE_NAME > /dev/null 2>&1) ; then
 	echo "Docker machine '$MACHINE_NAME' already exists"
 else
   if [ -z $AWS_ACCESS_KEY_ID ]; then
-    docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large $MACHINE_NAME
+    docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-zone $VPC_AVAIL_ZONE --amazonec2-instance-type t2.large $MACHINE_NAME
   else
-    docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY_ID --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $AWS_DEFAULT_REGION $MACHINE_NAME
+    docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY_ID --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-zone $VPC_AVAIL_ZONE --amazonec2-instance-type t2.large --amazonec2-region $AWS_DEFAULT_REGION $MACHINE_NAME
   fi
 fi
 
