@@ -1,0 +1,277 @@
+#!/bin/bash -e
+
+SUB_CMD_NAME="compose"
+
+cmd_desc() {
+    echo "For running Docker Compose related commands"
+}
+
+cmd_usage() {
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} [<options>] <subcommand>"
+    echo "Options:"
+    printf "    %-12s   %s\n" "-m <name>" "The name of the Docker Machine to target"
+    printf "    %-12s   %s\n" "-f <path>" "Additional override file for Docker Compose, can be specified more than once"
+    printf "    %-12s   %s\n" "-F <path>" "File to use for Docker Compose (in place of default), can be specified more than once"
+    printf "    %-12s   %s\n" "-l <driver>" "The logging driver to use"
+    printf "    %-12s   %s\n" "-v <driver>" "The volume driver to use"
+    printf "    %-12s   %s\n" "-n <name>" "The custom network to create (if not present) and use"
+    printf "    %-12s   %s\n" "-i <ip>" "The public IP that the proxy will be accessed from (only required when not using Docker Machine)"
+}
+
+help() {
+    cmd_usage
+    echo
+    echo "Available subcommands are:"
+    printf "    %-16s   %s\n" "init" "Initialises ADOP"
+    printf "    %-16s   %s\n" "up" "docker-compose up for ADOP"
+    printf "    %-16s   %s\n" "gen-certs <path>" "Generate client certificates for TLS-enabled Machine and copy to <path> in Jenkins Slave"
+    printf "    %-16s   %s\n" "<command>" "Runs 'docker-compose <command>' for ADOP, where <command> is not listed above"
+    printf "    %-16s   %s\n" "help" "Prints this help information"
+    echo
+}
+
+prep_env() {
+    # If the proxy IP has not been set work out the TARGET_HOST
+    # Else just use it
+    if [ -z "${PROXY_IP}" ]; then
+        # If MACHINE_NAME is not the default or it is and it exists
+        # Else fall back to localhost
+        if [ "${MACHINE_NAME}" != "${DEFAULT_MACHINE_NAME}" ] || ([ "${MACHINE_NAME}" = "${DEFAULT_MACHINE_NAME}" ] && $(docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1) ); then
+            # Check the machine exists first
+            if ! $(docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1) ; then
+               echo "The specified Docker Machine does not exist: ${MACHINE_NAME}"
+               echo "HINT: Either specify one with 'adop compose -m <name>', or use 'eval \$(docker-machine env ${MACHINE_NAME})'"
+               exit 1
+            else
+                # Set the machine
+                eval $( docker-machine env $MACHINE_NAME )
+
+                export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
+                export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
+            fi
+        else
+            echo "Docker Machine is not available or the default machine does not exist, defaulting to localhost"
+            echo "HINT: Either specify one with 'adop compose -m <name>', or use 'eval \$(docker-machine env ${MACHINE_NAME})'"
+            export TARGET_HOST=localhost
+            export LOGSTASH_HOST=localhost
+        fi
+    else
+        export TARGET_HOST=${PROXY_IP}
+        export LOGSTASH_HOST=${PROXY_IP}
+    fi
+
+    source ${CONF_DIR}/credentials.generate.sh
+    source ${CONF_DIR}/env.config.sh
+}
+
+init() {
+    echo ' 
+          ###    ########   #######  ########  
+         ## ##   ##     ## ##     ## ##     ## 
+        ##   ##  ##     ## ##     ## ##     ## 
+       ##     ## ##     ## ##     ## ########  
+       ######### ##     ## ##     ## ##        
+       ##     ## ##     ## ##     ## ##        
+       ##     ## ########   #######  ##        
+    '
+
+    echo "* Initialising ADOP"
+
+    # Load variables
+    prep_env
+
+    # Create the network
+    echo "* Setting up Docker Network"
+    create_network
+
+    # Run the Docker compose commands
+    echo "* Pulling Docker Images"
+    run_compose pull
+    echo "* Bringing up ADOP..."
+    run_compose up -d
+
+    # Wait for Jenkins and Gerrit to come up before proceeding
+    echo "* Waiting for the Platform to become available - this can take a few minutes"
+    TOOL_SLEEP_TIME=60
+    until [[ $(docker exec jenkins curl -I -s jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Jenkins unavailable, sleeping for ${TOOL_SLEEP_TIME}s"; sleep ${TOOL_SLEEP_TIME}; done
+    until [[ $(docker exec gerrit curl -I -s gerrit:${PASSWORD_GERRIT}@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Gerrit unavailable, sleeping for ${TOOL_SLEEP_TIME}s"; sleep ${TOOL_SLEEP_TIME}; done
+    
+    # Trigger Load_Platform in Jenkins
+    echo "* Initialising the Platform"
+    docker exec jenkins curl -s -X POST jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/job/Load_Platform/buildWithParameters --data token=gAsuE35s
+
+    # Generate and copy the certificates to jenkins slave if TLS is enabled
+    if [ "${DOCKER_TLS_VERIFY}" = "1" ]; then
+        gen-certs "${DOCKER_CLIENT_CERT_PATH}"
+    else
+        echo "DOCKER_TLS_VERIFY not set to 1, skipping certificate generation"
+    fi
+    
+    # Tell the user something useful
+    echo
+    echo '##########################################################'
+    echo
+    echo "SUCCESS, your new ADOP instance is ready!"
+    echo
+    echo "Run this command in your shell:"
+    echo '  source env.config.sh'
+    echo '  source credentials.generate.sh'
+    echo
+    echo "You can check if any variables are missing with: ./adop compose config  | grep 'WARNING'"
+    echo
+    echo "Navigate to http://${TARGET_HOST} in your browser to use your new DevOps Platform!"
+    echo "Login using the following credentials:"
+    echo "  Username: ${INITIAL_ADMIN_USER}"
+    echo "  Password: ${INITIAL_ADMIN_PASSWORD_PLAIN}"
+}
+
+create_network() {
+    if ! docker network create ${CUSTOM_NETWORK_NAME} &> /dev/null; then
+        echo "Network already exists: ${CUSTOM_NETWORK_NAME}"
+    else
+        echo "Created Docker network: ${CUSTOM_NETWORK_NAME}"
+    fi
+}
+
+gen-certs() {
+    echo "Generating client certificates for TLS-enabled Engine"
+    CERT_PATH=$1
+    if [ -z ${CERT_PATH} ]; then
+        echo "
+          Usage : 
+            gen-certs <docker_client_certificate_path>
+          
+          <docker_client_certificate_path>: 
+            This is the path of the certificate on jenkins slave container
+            to be able to run docker commands against docker swarm.
+            Note - absolute path is required.
+              
+          Example: 
+            gen-certs /root/.docker
+        "
+        exit 1
+    fi
+
+    ####
+    # Windows Git bash terminal identifies 
+    # /CN=client as a path and appends the absolute path 
+    # of parent directory to it
+    ####
+    HOST_OS=$(uname)
+    CLIENT_SUBJ="/CN=client"
+    if echo "${HOST_OS}" | grep -E "MINGW*" >/dev/null
+    then
+        CLIENT_SUBJ="//CN=client"
+    fi
+
+    ####
+    # Fresh start
+    #### 
+    TEMP_CERT_PATH="${HOME}/docker_certs"
+    rm -rf ${TEMP_CERT_PATH}
+    mkdir -p ${TEMP_CERT_PATH}
+
+    ####
+    # * Generate the client private key
+    # * Generate signed certificate
+    # * Generate the client certificate
+    ####
+    openssl genrsa -out ${TEMP_CERT_PATH}/key.pem 4096 &> /dev/null
+    openssl req -subj "${CLIENT_SUBJ}" -new -key ${TEMP_CERT_PATH}/key.pem -out ${TEMP_CERT_PATH}/client.csr &> /dev/null
+    echo "extendedKeyUsage = clientAuth" >  ${TEMP_CERT_PATH}/extfile.cnf
+    openssl x509 -req -days 365 -sha256 -in ${TEMP_CERT_PATH}/client.csr -CA ${HOME}/.docker/machine/certs/ca.pem -CAkey ${HOME}/.docker/machine/certs/ca-key.pem -CAcreateserial -out ${TEMP_CERT_PATH}/cert.pem -extfile ${TEMP_CERT_PATH}/extfile.cnf &> /dev/null
+    cp ${HOME}/.docker/machine/certs/ca.pem ${TEMP_CERT_PATH}/ca.pem
+    docker --tlsverify --tlscacert=${HOME}/.docker/machine/certs/ca.pem --tlscert=${TEMP_CERT_PATH}/cert.pem --tlskey=${TEMP_CERT_PATH}/key.pem -H=${DOCKER_HOST} version &> /dev/null
+
+    ####
+    # * Remove unnecessary files
+    # * Copy the certificates to slave 
+    ####
+    echo "Uploading certificates to Jenkins Slave at: ${CERT_PATH}"
+    rm -f ${TEMP_CERT_PATH}/extfile.cnf ${TEMP_CERT_PATH}/client.csr
+    set +e
+    docker exec jenkins-slave rm -rf ${CERT_PATH}
+    docker cp ${TEMP_CERT_PATH} jenkins-slave:${CERT_PATH}
+    set -e
+}
+
+run_compose() {
+    # Load variables
+    prep_env
+
+    compose_cmd=$1
+    shift
+
+    # If total overrides have been provided then just use them
+    # Else use "our" file list
+    if [ ! -z "${TOTAL_OVERRIDES}"   ]; then
+        docker-compose ${TOTAL_OVERRIDES} ${compose_cmd} "$@"
+    else
+        docker-compose ${ELKFILEOPTS} ${compose_cmd} "$@"
+        echo
+        docker-compose ${ADOPFILEOPTS} ${OVERRIDES} ${compose_cmd} "$@"
+    fi
+}
+
+# Defaults
+DEFAULT_MACHINE_NAME="default"
+export MACHINE_NAME=${DOCKER_MACHINE_NAME:-${DEFAULT_MACHINE_NAME}}
+
+export VOLUME_DRIVER=local
+export LOGGING_DRIVER=syslog
+export CUSTOM_NETWORK_NAME=local_network
+export OVERRIDES=""
+export TOTAL_OVERRIDES=""
+
+# Parameters
+while getopts "m:f:F:v:l:n:i:" opt; do
+  case $opt in
+    m)
+      export MACHINE_NAME=${OPTARG}
+      ;;
+    f)
+      export OVERRIDES="${OVERRIDES} -f ${OPTARG}"
+      ;;
+    F)
+      export TOTAL_OVERRIDES="${TOTAL_OVERRIDES} -f ${OPTARG}"
+      ;;
+    l)
+      export LOGGING_DRIVER="${OPTARG}"
+      ;;
+    v)
+      export VOLUME_DRIVER="${OPTARG}"
+      ;;
+    n)
+      export CUSTOM_NETWORK_NAME="${OPTARG}"
+      ;;
+    i)
+      export PROXY_IP="${OPTARG}"
+      ;;
+    *)
+      echo "Invalid parameter(s) or option(s)."
+      cmd_usage
+      exit 1
+      ;;
+  esac
+done
+
+shift $(($OPTIND -1))
+SUBCOMMAND_OPT="${1:-help}"
+
+# Only shift if there are other parameters
+if [ $# -ge 1 ]; then
+    shift
+fi
+
+# Setting Compose File Lists
+ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
+ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
+
+case ${SUBCOMMAND_OPT} in
+    "cmd_desc"|"help"|"init"|"gen-certs")
+        ${SUBCOMMAND_OPT} "$@"
+        ;;
+    *)
+        run_compose ${SUBCOMMAND_OPT} "$@"
+        ;;
+esac
