@@ -12,13 +12,15 @@ Once you have a stack up and running, please log in with the username and passwo
 
 These instructions will spin up an instance in a single server in AWS (for evaluation purposes).
 
-1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet
-1. Note the VPC ID (e.g. vpc-1ed3sfgw)
+1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet.
+1. On the "Step 2: VPC with a Single Public Subnet" page give your VPC a meaningful name and specify the availability zone as 'a', e.g. select eu-west-1a from the pulldown.
+1. Once the VPC is created note the VPC ID (e.g. vpc-1ed3sfgw)
 1. Clone this repository and then in a terminal window (this has been tested in GitBash) run:
 ```bash
 $ ./startup.sh
 Usage: ./startup.sh -m <MACHINE_NAME>  
                     -c <VPC_ID> 
+                    -z <VPC_AVAIL_ZONE>(optional) 
                     -r <REGION>(optional) 
                     -a <AWS_ACCESS_KEY>(optional) 
                     -s <AWS_SECRET_ACCESS_EY>(optional) 
@@ -42,7 +44,11 @@ For example (if you don't have ~/.aws set up)
 ```bash
 ./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u userName -p userPassword
 ```
-4. If all goes well you will see the following output and you can view the DevOps Platform in your browser
+N.B. If you see an error saying that docker-machine cannot find an associated subnet in a zone, go back to the VPC Dashboard on AWS and check the availablity zone for the subnet you've created. Then rerun the startup script and use the -z option to specify the zone for your subnet, e.g. for a zone of eu-west-1c the above command becomes 
+```bash
+./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword -z c 
+```
+1. If all goes well you will see the following output and you can view the DevOps Platform in your browser
 ```bash
 ##########################################################
 
@@ -55,11 +61,10 @@ Run these commands in your shell:
 
 Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
 ```
-5. Log in using the username and password you created in the startup script:
+1. Log in using the username and password you created in the startup script:
 ```sh
 <INITIAL_ADMIN_USER>/ <INITIAL_ADMIN_PASSWORD_PLAIN>
 ```
-
 
 # General Getting Started Instructions
 
