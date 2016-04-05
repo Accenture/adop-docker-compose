@@ -38,3 +38,5 @@ export SONAR_DB_PASSWORD=${SONAR_MYSQL_PASSWORD}
 ####
 export DOCKER_CLIENT_CERT_PATH="//root/.docker/"
 
+# SSL Settings
+export PROTO="http"
