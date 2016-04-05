@@ -94,10 +94,10 @@ while getopts "t:m:a:s:c:z:r:u:p:" opt; do
       export AWS_DEFAULT_REGION=${OPTARG}
       ;;
     u)
-      export ADMIN_USER=${OPTARG}
+      export INITIAL_ADMIN_USER=${OPTARG}
       ;;
     p)
-      export PASSWORD=${OPTARG}
+      export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
       ;;
     *)
       echo "Invalid parameter(s) or option(s)."
