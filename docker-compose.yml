@@ -308,7 +308,7 @@ adop-ldap-ltb:
   image:  accenture/adop-ldap-ltb:0.1.0
   net: ${CUSTOM_NETWORK_NAME}
   expose:
-    - "80:8082"
+    - "80"
   environment:
     LDAP_LTB_URL: "ldap://ldap:389"
     LDAP_LTB_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
