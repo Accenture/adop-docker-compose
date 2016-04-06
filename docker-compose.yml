@@ -301,3 +301,16 @@ nexus:
     LDAP_USER_BASE_DN: "ou=people"
     LDAP_GROUP_BASE_DN: "ou=groups"
     LDAP_BIND_PASSWORD: ${LDAP_PWD}
+
+adop-ldap-ltb:
+  container_name: adop-ldap-ltb
+  restart: always
+  image:  accenture/adop-ldap-ltb:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
+  expose:
+    - "80:8082"
+  environment:
+    LDAP_LTB_URL: "ldap://ldap:389"
+    LDAP_LTB_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
+    LDAP_LTB_PWD: "${LDAP_PWD}"
+    LDAP_LTB_BS: "${LDAP_FULL_DOMAIN}"
