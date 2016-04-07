@@ -4,7 +4,7 @@
 proxy:
   container_name: proxy
   restart: always
-  image: accenture/adop-nginx:0.1.0
+  image: accenture/adop-nginx:0.1.1
   #build: ../images/docker-nginx/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -54,7 +54,7 @@ gerrit:
   container_name: gerrit
   restart: always
   #build: ../images/docker-gerrit/
-  image: accenture/adop-gerrit:0.1.1
+  image: accenture/adop-gerrit:0.1.2
   privileged: true
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -63,14 +63,14 @@ gerrit:
   environment:
     - "affinity:container==gerrit-mysql"
     - "REPO_PATH=/var/git/repos"
-    - "WEBURL=http://${TARGET_HOST}/gerrit"
+    - "WEBURL=${PROTO}://${TARGET_HOST}/gerrit/"
     - "DATABASE_TYPE=mysql"
     - "DB_HOSTNAME=gerrit-mysql"
     - "DB_PORT=3306"
     - "DB_NAME=${GERRIT_MYSQL_DATABASE}"
     - "DB_USER=${GERRIT_MYSQL_USER}"
     - "DB_PASSWORD=${GERRIT_MYSQL_PASSWORD}"
-    - "AUTH_LOGOUTURL=http://${TARGET_HOST}/gerrit"
+    - "AUTH_LOGOUTURL=${PROTO}://${TARGET_HOST}/gerrit/"
     - "AUTH_TYPE=LDAP"
     - "GERRIT_PASSWORD=${PASSWORD_GERRIT}"
     - "JENKINS_PASSWORD=${PASSWORD_JENKINS}"
@@ -86,7 +86,7 @@ gerrit:
     - "LDAP_GROUPBASE=ou=groups,${LDAP_FULL_DOMAIN}"
     - "LDAP_GROUPPATTERN=(cn=$${groupname})"
     - "LDAP_GROUPMEMBERPATTERN=(uniqueMember=$${dn})"
-    - "HTTPD_LISTENURL=proxy-http://0.0.0.0:8080/gerrit"
+    - "HTTPD_LISTENURL=proxy-${PROTO}://0.0.0.0:8080/gerrit"
     - "USER_NAME=${GERRIT_USER_NAME}"
     - "USER_EMAIL=${GERRIT_USER_EMAIL}"
     - "DOWNLOAD_SCHEME=http"
@@ -203,7 +203,7 @@ jenkins:
   privileged: true
   environment:
     JENKINS_OPTS: "--prefix=/jenkins"
-    ROOT_URL: "http://${TARGET_HOST}/jenkins/"
+    ROOT_URL: "${PROTO}://${TARGET_HOST}/jenkins/"
     LDAP_SERVER: "ldap:389"
     LDAP_ROOTDN: "${LDAP_FULL_DOMAIN}"
     LDAP_USER_SEARCH_BASE: "ou=people"
@@ -292,7 +292,7 @@ nexus:
   expose:
     - "8081"
   environment:
-    NEXUS_BASE_URL: "http://${TARGET_HOST}/nexus"
+    NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
     LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
     LDAP_ENABLED: "true"
     LDAP_URL: "ldap"
