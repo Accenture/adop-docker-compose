@@ -131,7 +131,7 @@ else
 fi
 
 # Create Docker network if one doesn't already exist with the same name
-eval "$(docker-machine env $MACHINE_NAME)"
+eval "$(docker-machine env $MACHINE_NAME --shell bash)"
 if ! docker network create $CUSTOM_NETWORK_NAME; then
 	echo "Docker network '$CUSTOM_NETWORK_NAME' already exists"
 fi
