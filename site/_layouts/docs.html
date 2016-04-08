@@ -1,0 +1,21 @@
+---
+layout: default
+---
+
+    <section class="docs">
+        <div class ="grid">
+            <div class="main-content unit four-fifths">
+                <article>
+                  <div class="improve right">
+                    <a href="{{ site.github.repository_url }}/edit/master/site/{{ page.relative_path }}">Improve this page</a>
+                  </div>
+                  <h1>{% if page.chapter %}{{ page.chapter }} - {% endif %}{{ page.title }}</h1>
+                  {{ content }}
+                </article>
+            </div>
+
+            {% include docs_contents.html %}
+
+            <div class="clear"></div>
+        </div>
+    </section>
