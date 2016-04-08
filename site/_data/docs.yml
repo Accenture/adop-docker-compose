@@ -1,0 +1,47 @@
+- title: Getting Started
+  docs:
+  - home
+  - prerequisites
+  - quickstart
+  - recommended-reading
+
+- title: Architecture
+  docs:
+  - architecture
+  - architecture/core
+  - architecture/project-namespacing
+  - architecture/cartridges
+  - architecture/platform-extensions
+  - architecture/cli
+
+- title: Provisioning [WIP]
+  docs:
+  - provisioning
+
+- title: Operating [WIP]
+  docs:
+  - operating
+  - operating/platform
+  - operating/platform-extensions
+  - operating/workspaces
+  - operating/projects
+  - operating/cartridges
+
+- title: Developing
+  docs:
+  - developing
+  - developing/cartridges
+  - developing/platform-extensions
+  - developing/core
+  - developing/cli
+
+- title: Contributing
+  docs:
+  - contributing
+  - contributing/reporting-bugs
+  - contributing/pull-requests
+  - contributing/suggesting-enhancements
+
+- title: Reference [WIP]
+  docs:
+  - reference/cli
