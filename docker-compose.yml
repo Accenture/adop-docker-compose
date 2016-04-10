@@ -292,7 +292,7 @@ nexus:
 docker-registry:
   container_name: registry
   restart: always
-  image:  gogodi91/adop-registry:0.0.1
+  image:  gogodi91/adop-registry:0.0.3
   net: ${CUSTOM_NETWORK_NAME}
   volumes:
     - /etc/docker:/certs
@@ -301,6 +301,10 @@ docker-registry:
   environment:
     REGISTRY_HTTP_TLS_CERTIFICATE: "/registry_certs/registry.crt"
     REGISTRY_HTTP_TLS_KEY: "/registry_certs/registry.key"
+    BASE_HOST_IP: "${HOST_IP}"
+    #REGISTRY_AUTH: htpasswd
+    #REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+    #REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
     #REGISTRY_IP: ${REGISTRY_HOST}
     #PASS_ROOT: ADOPROOT
     #PASS_INTERMEDIATE: ADOPINTER

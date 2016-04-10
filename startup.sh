@@ -90,7 +90,7 @@ else
   if [ -z $AWS_ACCESS_KEY_ID ]; then
     docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large $MACHINE_NAME
   else
-    docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY_ID --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-region $AWS_DEFAULT_REGION $MACHINE_NAME
+    docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY_ID --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-instance-type t2.large --amazonec2-root-size 50 --amazonec2-region $AWS_DEFAULT_REGION $MACHINE_NAME
   fi
 fi
 
@@ -103,6 +103,7 @@ fi
 # Run the Docker compose commands
 export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
 export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
+export HOST_IP=$(docker-machine ip $MACHINE_NAME)
 docker-compose -f compose/elk.yml pull
 docker-compose -f docker-compose.yml -f etc/volumes/${VOLUME_DRIVER}/default.yml $LOGGING_OVERRIDE ${OVERRIDES} pull
 docker-compose -f compose/elk.yml up -d
