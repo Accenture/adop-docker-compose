@@ -104,14 +104,12 @@ fi
 if [ -z $AWS_ACCESS_KEY_ID ] & \
     [ -f ~/.aws/credentials ];
 then
-  echo "Using default AWS credentials from ~/.aws/credentials"
   eval $(grep -v '^\[' ~/.aws/credentials | sed 's/^\(.*\)\s=\s/export \U\1=/')
 fi
 
 if [ -z $AWS_DEFAULT_REGION ] & \
     [ -f ~/.aws/config ];
 then
-  echo "Using default AWS region from ~/.aws/config"
   eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s\?=\s\?/export AWS_DEFAULT_REGION=/')
 fi
 
