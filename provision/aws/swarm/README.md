@@ -47,11 +47,12 @@ container).
 ## Using template
 
 - This cloud formation template uses SSL certificate for ELB. It expects the ARN of the certificate as one of the input parameter.
-	- The ssl certificate can be generated and/or uploaded to AWS. To generate and upload a new certificate follow the instructions from ([here](https://github.com/SachinKSingh28/adop-docker-compose/provision/aws/ssl))
+	- The ssl certificate can be generated and/or uploaded to AWS. To generate and upload a new certificate follow the instructions from ([here](https://github.com/Accenture/adop-docker-compose/tree/master/provision/aws/ssl))
 - Spin up a AWS cloudformation stack using the `CF-ADOP-Cluster.json` file in this directory. Once the stack is created move on to deploying the ADOP on the swarm cluster.
-- Run : ssh -i <Private Key> centos@`ELBPublicDNSName` 
+- Run : ssh -i \<KeyName\> centos@`ELBPublicDNSName` 
 	- You can get the `ELBPublicDNSName` from cloudformation outputs as mentioned in above section. Outer proxy server acts as a bastion host.
-- Clone ([this repository](https://github.com/SachinKSingh28/adop-docker-compose))
+	- KeyName is the private key selected from the drop down list while creating the stack.
+- Clone ([this repository](https://github.com/Accenture/adop-docker-compose))
 - Run: export DOCKER\_HOST=tcp://IP\_OF\_SWARM\_MASTER\_HOST:2375
 	- You can get the IP\_OF\_SWARM\_MASTER\_HOST by searching for the instance with tag `STACK_NAME`-Master
 - Run: export TARGET\_HOST=\<ELBPublicDNSName\>
@@ -75,9 +76,4 @@ container).
 ## Future work
 
 * Persistent storge - no, there isn't any currently!
- time): docker-compose pull
-- Run (logging driver file optional): docker-compose -f docker-compose.yml -f etc/volumes/\<VOLUME_DRIVER\>/default.yml -f etc/logging/syslog/default.yml up -d 
 
-## Future work
-
-* Persistent storge - no, there isn't any currently!
