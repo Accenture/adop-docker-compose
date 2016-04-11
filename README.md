@@ -32,6 +32,7 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
 $ ./startup.sh
 Usage: ./startup.sh -m <MACHINE_NAME>  
                     -c <VPC_ID> 
+                    -z <VPC_AVAIL_ZONE>(optional)
                     -r <REGION>(optional) 
                     -a <AWS_ACCESS_KEY>(optional) 
                     -s <AWS_SECRET_ACCESS_EY>(optional) 
@@ -55,7 +56,11 @@ For example (if you don't have ~/.aws set up)
 ```bash
 ./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u userName -p userPassword
 ```
-4. If all goes well you will see the following output and you can view the DevOps Platform in your browser
+N.B. If you see an error saying that docker-machine cannot find an associated subnet in a zone, go back to the VPC Dashboard on AWS and check the availablity zone for the subnet you've created. Then rerun the startup script and use the -z option to specify the zone for your subnet, e.g. for a zone of eu-west-1c the above command becomes 
+```bash
+./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword -z c 
+```
+1. If all goes well you will see the following output and you can view the DevOps Platform in your browser
 ```bash
 ##########################################################
 
@@ -68,7 +73,7 @@ Run these commands in your shell:
 
 Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
 ```
-5. Log in using the username and password you created in the startup script:
+1. Log in using the username and password you created in the startup script:
 ```sh
 <INITIAL_ADMIN_USER>/ <INITIAL_ADMIN_PASSWORD_PLAIN>
 ```
