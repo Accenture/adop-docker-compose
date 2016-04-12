@@ -2,15 +2,27 @@
 
 # The DevOps Platform: Overview
 
-The DevOps Platform is a tools environment for continuously testing, releasing and maintaining applications. Reference code, delivery pipelines, automated testing and environments can be loaded in via the concept of Cartridges.
+The DevOps Platform is a tools environment for continuously testing, releasing and maintaining applications. Reference code, delivery pipelines, automated testing and environments can be loaded in via the concept of [Cartridges](https://github.com/Accenture/adop-cartridge-skeleton).
+
+The platform runs on a [docker container cluster](https://docs.docker.com/swarm/) so it can be stood up for evaluation purposes on just one server using local storage, or stood up in a multi-data centre cluster with distributed network storage.  It will also run anywhere that [docker runs](https://docs.docker.com/engine/installation/binaries/).
+
+Here is the front page:
 
 ![HomePage](https://raw.githubusercontent.com/accenture/adop-docker-compose/master/img/home.png)
 
-Once you have a stack up and running, please log in with the username and password created upon startup.
+Once you have a stack up and running, you can log in with the username and password created upon start-up.
+
+If you provisioned your stack using the start-up CLI, an example workspace containing an example project and an example cartridge will all have been pre-loaded in Jenkins:
+
+![HomePage](https://raw.githubusercontent.com/kramos/adop-docker-compose/master/img/exampleproj.png)
+
+Once you have explored this the next step is to create your own Workspace and Project and then load another cartridge using a 'Load Cartridge' job in the 'Cartridge Management' folder (that automatically gets created in any Project).  The cartridge [development cartridge](https://github.com/accenture/adop-cartridge-cartridge-dev/) also helps create your own cartridges.
 
 # Quickstart Instructions
 
-These instructions will spin up an instance in a single server in AWS (for evaluation purposes).
+These instructions will spin up an instance in a single server in AWS (for evaluation purposes).  
+
+NB. the instructions will also work in anywhere supported by [Docker Machine](https://docs.docker.com/machine/), just follow the relevant Docker Machine instructions for your target platform and then start at step 3 below and (you can set the VPC_ID to NA).
 
 1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet.
 1. On the "Step 2: VPC with a Single Public Subnet" page give your VPC a meaningful name and specify the availability zone as 'a', e.g. select eu-west-1a from the pulldown.
@@ -20,7 +32,7 @@ These instructions will spin up an instance in a single server in AWS (for evalu
 $ ./startup.sh
 Usage: ./startup.sh -m <MACHINE_NAME>  
                     -c <VPC_ID> 
-                    -z <VPC_AVAIL_ZONE>(optional) 
+                    -z <VPC_AVAIL_ZONE>(optional)
                     -r <REGION>(optional) 
                     -a <AWS_ACCESS_KEY>(optional) 
                     -s <AWS_SECRET_ACCESS_EY>(optional) 
@@ -66,99 +78,30 @@ Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
 <INITIAL_ADMIN_USER>/ <INITIAL_ADMIN_PASSWORD_PLAIN>
 ```
 
-# Quickstart Instructions (Experimental)
-
-These instructions will spin up an instance in a single server in AWS (for evaluation purposes).
-
-1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet.
-1. On the "Step 2: VPC with a Single Public Subnet" page give your VPC a meaningful name and specify the availability zone as 'a', e.g. select eu-west-1a from the pulldown.
-1. Once the VPC is created note the VPC ID (e.g. vpc-1ed3sfgw)
-1. Clone this repository and then in a terminal window (this has been tested in GitBash):
-    - Run:
-
-        ```./quickstart.sh ```
-        ```bash
-        $ ./quickstart.sh
-        Usage: ./quickstart.sh -t aws
-                               -m <MACHINE_NAME>  
-                               -c <VPC_ID> 
-                               -r <REGION>(optional) 
-                               -z <VPC_AVAIL_ZONE>(optional)
-                               -a <AWS_ACCESS_KEY>(optional) 
-                               -s <AWS_SECRET_ACCESS_EY>(optional) 
-                               -u <ADMIN_USER>
-                               -p <PASSWORD>(optional) ...
-        ```
-        - You will need to supply:
-            - the type of machine to create (aws, in this example)
-            - a machine name (anything you want)
-            - the target VPC
-            - If you don't have your AWS credentials and default region [stored locally in ~/.aws](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) you will also need to supply:
-                - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using aws configure 
-                - the AWS region id in this format: eu-west-1
-            - a username and password to act as credentials for the initial admin user
-    - For example (if you don't have ~/.aws set up):
-
-        ```./quickstart.sh -t aws -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword```
-        - N.B. If you see an error saying that docker-machine cannot find an associated subnet in a zone, go back to the VPC Dashboard on AWS and check the availablity zone for the subnet you've created. Then rerun the startup script and use the -z option to specify the zone for your subnet, e.g. for a zone of eu-west-1c the above command becomes:
-
-            ```./quickstart.sh -t aws -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword -z c```
-1. If all goes well you will see the following output and you can view the DevOps Platform in your browser
-    ```
-    ##########################################################
-
-    SUCCESS, your new ADOP instance is ready!
-
-    Run this command in your shell:
-        source credentials.generate.sh
-        source env.config.sh
-
-    Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
-    ```
-1. Log in using the username and password you specified in the quickstart script:
-```
-<INITIAL_ADMIN_USER> / <INITIAL_ADMIN_PASSWORD>
-```
 
 # General Getting Started Instructions
 
 The platform is designed to run on any container platform. 
 
-## Provision Docker Engine(s)
-
-### To run in AWS (single instance) manually
+## To run in AWS (single instance) manually
 
 - Create a VPC using the VPC wizard in the AWS console by selecting the first option with 1 public subnet
 
-- Create a Docker Engine in AWS (replace the placeholders and their <> markers): 
+- Create a Docker Engine in AWS: 
 ```sh
-docker-machine create --driver amazonec2 --amazonec2-access-key <YOUR_ACCESS_KEY> --amazonec2-secret-key <YOUR_SECRET_KEY> --amazonec2-vpc-id <YOUR_VPC_ID> --amazonec2-instance-type t2.large --amazonec2-region <YOUR_AWS_REGION, e.g. eu-west-1> <YOUR_MACHINE_NAME>
+docker-machine create --driver amazonec2 --amazonec2-access-key YOUR\_ACCESS\_KEY --amazonec2-secret-key YOUR\_SECRET\_KEY --amazonec2-vpc-id vpc-YOUR_ID --amazonec2-instance-type t2.large --amazonec2-region REGION IN THIS FORMAT: eu-west-1   YOUR\_MACHINE\_NAME
 ```
 
 - Update the docker-machine security group to permit inbound http traffic on port 80 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32
 
-- Set your local environment variables to point docker-machine to your new instance:
-```sh
-eval $(docker-machine env <YOUR_MACHINE_NAME>)
-```
+- Set your local environment variables to point docker-machine to your new instance
 
-### To run locally
+## To run locally
+Create a docker machine and set up your local environment variables to point docker-machine to your new instance
 
-- Create a local Docker Engine (replace the placeholders and their <> markers):
-```sh
-docker-machine create --driver virtualbox --virtualbox-memory 2048 <YOUR_MACHINE_NAME>
-```
-
-- Set your local environment variables to point docker-machine to your new instance:
-```sh
-eval $(docker-machine env <YOUR_MACHINE_NAME>)
-```
-
-### To run with Docker Swarm
+## To run with Docker Swarm
 
 Create a Docker Swarm that has a publicly accessible Engine with the label "tier=public" to bind Nginx and Logstash to that node
-
-- Instruction to create a docker swarm cluster on AWS are [`here`](https://github.com/Accenture/adop-docker-compose/blob/master/provision/aws/swarm/README.md)
 
 ## Launching
 
@@ -237,5 +180,7 @@ If you have any problems with or questions about this image, please contact us t
 You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can.
 
 Before you start to code, we recommend discussing your plans through a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues), especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.
+
+
 
 
