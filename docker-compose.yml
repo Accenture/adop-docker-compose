@@ -163,7 +163,7 @@ sonar-mysql:
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "3306"
-  environment: 
+  environment:
     MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
     MYSQL_USER: ${SONAR_MYSQL_USER}
     MYSQL_PASSWORD: ${SONAR_MYSQL_PASSWORD}
@@ -172,7 +172,7 @@ sonar-mysql:
 sonar:
   container_name: sonar
   restart: always
-  image: accenture/adop-sonar:0.1.0
+  image: accenture/adop-sonar:0.1.1
   #build: ../images/docker-sonar/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
