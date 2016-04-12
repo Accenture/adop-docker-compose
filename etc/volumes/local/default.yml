@@ -48,6 +48,11 @@ sonar:
     - sonar_extensions:/opt/sonarqube/extensions 
     - sonar_logs:/opt/sonarqube/logs
 
+jenkins-slave:
+  volumes:
+    - jenkins_slave_home:/workspace
+    - /var/run/docker.sock:/var/run/docker.sock
+
 jenkins:
   user: root 
   volumes:

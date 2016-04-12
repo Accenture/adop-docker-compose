@@ -7,25 +7,12 @@ services:
 env:
   global:
     - DOCKER_COMPOSE_VERSION=1.6.0
-    - CUSTOM_NETWORK_NAME=local_network
-    - TARGET_HOST=localhost
-    - LOGSTASH_HOST=localhost
-  matrix:
-    - DOCKER_COMPOSE_TOOLS="-f docker-compose.yml" DOCKER_COMPOSE_VOLUMES="-f etc/volumes/local/default.yml" DOCKER_COMPOSE_LOGGING=""
-    - DOCKER_COMPOSE_TOOLS="-f docker-compose.yml" DOCKER_COMPOSE_VOLUMES="-f etc/volumes/local/default.yml" DOCKER_COMPOSE_LOGGING="-f etc/logging/syslog/default.yml"
+    - INITIAL_ADMIN_USER=admin.user
 
 before_install:
  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
  - chmod +x docker-compose
  - sudo mv docker-compose /usr/local/bin
- 
-before_script:
-  - docker network create ${CUSTOM_NETWORK_NAME}
-  - docker-compose -f compose/elk.yml up -d
-  - docker-compose pull
 
 script:
-  - source env.config.sh
-  - docker-compose ${DOCKER_COMPOSE_TOOLS} ${DOCKER_COMPOSE_VOLUMES} ${DOCKER_COMPOSE_LOGGING} up -d
-  - docker-compose ps
-  - docker ps
+ - ./adop compose init

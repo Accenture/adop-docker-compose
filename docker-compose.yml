@@ -4,7 +4,7 @@
 proxy:
   container_name: proxy
   restart: always
-  image: accenture/adop-nginx:0.1.0
+  image: accenture/adop-nginx:0.1.1
   #build: ../images/docker-nginx/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -24,11 +24,15 @@ ldap:
   container_name: ldap
   restart: always
   #build: ../images/docker-ldap/
-  image: accenture/adop-ldap:0.1.0
+  image: accenture/adop-ldap:0.1.1
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "389"
   environment:
+    INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
+    INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+    JENKINS_PASSWORD: ${JENKINS_PWD}
+    GERRIT_PASSWORD: ${GERRIT_PWD}
     SLAPD_PASSWORD: ${LDAP_PWD}
     SLAPD_DOMAIN: ${LDAP_DOMAIN}
     SLAPD_FULL_DOMAIN: ${LDAP_FULL_DOMAIN}
@@ -41,7 +45,7 @@ gerrit-mysql:
   expose:
     - "3306"
   environment:
-    MYSQL_ROOT_PASSWORD: "Password01"
+    MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
     MYSQL_USER: ${GERRIT_MYSQL_USER}
     MYSQL_PASSWORD: ${GERRIT_MYSQL_PASSWORD}
     MYSQL_DATABASE: ${GERRIT_MYSQL_DATABASE}
@@ -50,7 +54,7 @@ gerrit:
   container_name: gerrit
   restart: always
   #build: ../images/docker-gerrit/
-  image: accenture/adop-gerrit:0.1.0
+  image: accenture/adop-gerrit:0.1.2
   privileged: true
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -59,15 +63,19 @@ gerrit:
   environment:
     - "affinity:container==gerrit-mysql"
     - "REPO_PATH=/var/git/repos"
-    - "WEBURL=http://${TARGET_HOST}/gerrit"
+    - "WEBURL=${PROTO}://${TARGET_HOST}/gerrit/"
     - "DATABASE_TYPE=mysql"
     - "DB_HOSTNAME=gerrit-mysql"
     - "DB_PORT=3306"
     - "DB_NAME=${GERRIT_MYSQL_DATABASE}"
     - "DB_USER=${GERRIT_MYSQL_USER}"
     - "DB_PASSWORD=${GERRIT_MYSQL_PASSWORD}"
-    - "AUTH_LOGOUTURL=http://${TARGET_HOST}/gerrit"
+    - "AUTH_LOGOUTURL=${PROTO}://${TARGET_HOST}/gerrit/"
     - "AUTH_TYPE=LDAP"
+    - "GERRIT_PASSWORD=${PASSWORD_GERRIT}"
+    - "JENKINS_PASSWORD=${PASSWORD_JENKINS}"
+    - "INITIAL_ADMIN_USER=${INITIAL_ADMIN_USER}"
+    - "INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD_PLAIN}"
     - "LDAP_SERVER=ldap:389"
     - "LDAP_ACCOUNTBASE=${LDAP_FULL_DOMAIN}"
     - "LDAP_ACCOUNTPATTERN=(cn=$${username})"
@@ -78,7 +86,7 @@ gerrit:
     - "LDAP_GROUPBASE=ou=groups,${LDAP_FULL_DOMAIN}"
     - "LDAP_GROUPPATTERN=(cn=$${groupname})"
     - "LDAP_GROUPMEMBERPATTERN=(uniqueMember=$${dn})"
-    - "HTTPD_LISTENURL=proxy-http://0.0.0.0:8080/gerrit"
+    - "HTTPD_LISTENURL=proxy-${PROTO}://0.0.0.0:8080/gerrit"
     - "USER_NAME=${GERRIT_USER_NAME}"
     - "USER_EMAIL=${GERRIT_USER_EMAIL}"
     - "DOWNLOAD_SCHEME=http"
@@ -156,7 +164,7 @@ sonar-mysql:
   expose:
     - "3306"
   environment: 
-    MYSQL_ROOT_PASSWORD: "sonar"
+    MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
     MYSQL_USER: ${SONAR_MYSQL_USER}
     MYSQL_PASSWORD: ${SONAR_MYSQL_PASSWORD}
     MYSQL_DATABASE: ${SONAR_MYSQL_DATABASE}
@@ -186,7 +194,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.1.0
+  image: accenture/adop-jenkins:0.1.3
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -195,7 +203,7 @@ jenkins:
   privileged: true
   environment:
     JENKINS_OPTS: "--prefix=/jenkins"
-    ROOT_URL: "http://${TARGET_HOST}/jenkins/"
+    ROOT_URL: "${PROTO}://${TARGET_HOST}/jenkins/"
     LDAP_SERVER: "ldap:389"
     LDAP_ROOTDN: "${LDAP_FULL_DOMAIN}"
     LDAP_USER_SEARCH_BASE: "ou=people"
@@ -209,11 +217,15 @@ jenkins:
     LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"
     LDAP_DISPLAY_NAME_ATTRIBUTE_NAME: "displayName"
     LDAP_MAIL_ADDRESS_ATTRIBUTE_NAME: "mail"
+    INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
+    INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD_PLAIN}
     GERRIT_HOST_NAME: "gerrit"
     GERRIT_FRONT_END_URL: "http://gerrit:8080/gerrit"
+    GERRIT_JENKINS_USERNAME: "jenkins"
+    GERRIT_JENKINS_PASSWORD: ${PASSWORD_JENKINS}
     SONAR_SERVER_URL: "http://sonar:9000/sonar/"
     SONAR_ACCOUNT_LOGIN: ${SONAR_ACCOUNT_LOGIN}
-    SONAR_ACCOUNT_PASSWORD: ${SONAR_ACCOUNT_PASSWORD}
+    SONAR_ACCOUNT_PASSWORD: ${PASSWORD_JENKINS}
     SONAR_DB_URL: "jdbc:mysql://sonar-mysql:3306/sonar?useUnicode=true&amp;characterEncoding=utf8"
     SONAR_DB_LOGIN: ${SONAR_DB_LOGIN}
     SONAR_DB_PASSWORD: ${SONAR_DB_PASSWORD}
@@ -235,13 +247,14 @@ jenkins:
 jenkins-slave:
   container_name: jenkins-slave
   restart: always
-  image: accenture/adop-jenkins-slave:0.1.3
+  image: accenture/adop-jenkins-slave:0.1.4
   net: ${CUSTOM_NETWORK_NAME}
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
   privileged: true
   environment:
     SLAVE_LABELS: "aws ldap java8 docker"
+    SWARM_PASSWORD: ${PASSWORD_JENKINS}
+    INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
+    INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD_PLAIN}
 
 selenium-hub:
   container_name: selenium-hub
@@ -279,7 +292,7 @@ nexus:
   expose:
     - "8081"
   environment:
-    NEXUS_BASE_URL: "http://${TARGET_HOST}/nexus"
+    NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
     LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
     LDAP_ENABLED: "true"
     LDAP_URL: "ldap"
