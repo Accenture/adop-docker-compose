@@ -46,7 +46,7 @@ while getopts "m:n:a:s:c:z:r:f:v:l:u:p:" opt; do
       export MACHINE_NAME=${OPTARG}
       ;;
     n)
-      ${OPTARG}
+      export CUSTOM_NETWORK_NAME=${OPTARG}
       ;;
     a)
       export AWS_ACCESS_KEY_ID=${OPTARG}

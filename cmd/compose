@@ -44,7 +44,7 @@ prep_env() {
                exit 1
             else
                 # Set the machine
-                eval $( docker-machine env $MACHINE_NAME )
+                eval $( docker-machine env $MACHINE_NAME --shell bash )
 
                 export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
                 export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
