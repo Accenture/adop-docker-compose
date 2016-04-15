@@ -310,8 +310,8 @@ ldap-phpadmin:
   expose:
     - "80"
   environment:
-    LDAP_SERVER_NAME "LDAP"
-    LDAP_SERVER_HOST "ldap"
-    LDAP_SERVER_PORT "389"
-    LDAP_SERVER_BIND_ID "cn=admin,${LDAP_FULL_DOMAIN}"
-    LDAP_SERVER_BASE_DN "${LDAP_FULL_DOMAIN}"
+    LDAP_SERVER_NAME: "LDAP"
+    LDAP_SERVER_HOST: "ldap"
+    LDAP_SERVER_PORT: "389"
+    LDAP_SERVER_BIND_ID: "cn=admin,${LDAP_FULL_DOMAIN}"
+    LDAP_SERVER_BASE_DN: "${LDAP_FULL_DOMAIN}"
