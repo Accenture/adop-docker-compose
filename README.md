@@ -132,7 +132,7 @@ The platform is designed to run on any container platform.
 
 - Create a Docker Engine in AWS (replace the placeholders and their <> markers): 
 ```sh
-docker-machine create --driver amazonec2 --amazonec2-access-key <YOUR_ACCESS_KEY> --amazonec2-secret-key <YOUR_SECRET_KEY> --amazonec2-vpc-id <YOUR_VPC_ID> --amazonec2-instance-type t2.large --amazonec2-region <YOUR_AWS_REGION, e.g. eu-west-1> <YOUR_MACHINE_NAME>
+docker-machine create --driver amazonec2 --amazonec2-access-key <YOUR_ACCESS_KEY> --amazonec2-secret-key <YOUR_SECRET_KEY> --amazonec2-vpc-id <YOUR_VPC_ID> --amazonec2-instance-type m4.xlarge --amazonec2-region <YOUR_AWS_REGION, e.g. eu-west-1> <YOUR_MACHINE_NAME>
 ```
 
 - Update the docker-machine security group to permit inbound http traffic on port 80 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32
