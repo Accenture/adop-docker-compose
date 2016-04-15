@@ -63,9 +63,9 @@ provision_aws() {
         echo "Docker machine '$MACHINE_NAME' already exists"
     else
       if [ -z ${AWS_ACCESS_KEY_ID} ]; then
-        docker-machine create --driver amazonec2 --amazonec2-vpc-id ${VPC_ID} --amazonec2-zone ${VPC_AVAIL_ZONE} --amazonec2-instance-type t2.large ${MACHINE_NAME}
+        docker-machine create --driver amazonec2 --amazonec2-vpc-id ${VPC_ID} --amazonec2-zone ${VPC_AVAIL_ZONE} --amazonec2-instance-type m4.xlarge ${MACHINE_NAME}
       else
-        docker-machine create --driver amazonec2 --amazonec2-access-key ${AWS_ACCESS_KEY_ID} --amazonec2-secret-key ${AWS_SECRET_ACCESS_KEY} --amazonec2-vpc-id ${VPC_ID} --amazonec2-zone ${VPC_AVAIL_ZONE} --amazonec2-instance-type t2.large --amazonec2-region ${AWS_DEFAULT_REGION} ${MACHINE_NAME}
+        docker-machine create --driver amazonec2 --amazonec2-access-key ${AWS_ACCESS_KEY_ID} --amazonec2-secret-key ${AWS_SECRET_ACCESS_KEY} --amazonec2-vpc-id ${VPC_ID} --amazonec2-zone ${VPC_AVAIL_ZONE} --amazonec2-instance-type m4.xlarge --amazonec2-region ${AWS_DEFAULT_REGION} ${MACHINE_NAME}
       fi
     fi
 }
