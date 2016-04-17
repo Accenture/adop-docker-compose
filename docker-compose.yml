@@ -301,3 +301,17 @@ nexus:
     LDAP_USER_BASE_DN: "ou=people"
     LDAP_GROUP_BASE_DN: "ou=groups"
     LDAP_BIND_PASSWORD: ${LDAP_PWD}
+
+ldap-phpadmin:
+  container_name: ldap-phpadmin
+  restart: always
+  image:  accenture/ldap-phpadmin:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
+  expose:
+    - "80"
+  environment:
+    LDAP_SERVER_NAME: "LDAP"
+    LDAP_SERVER_HOST: "ldap"
+    LDAP_SERVER_PORT: "389"
+    LDAP_SERVER_BIND_ID: "cn=admin,${LDAP_FULL_DOMAIN}"
+    LDAP_SERVER_BASE_DN: "${LDAP_FULL_DOMAIN}"
