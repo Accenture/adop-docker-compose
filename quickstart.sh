@@ -103,10 +103,11 @@ provision_aws() {
 	    MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
 				    --amazonec2-access-key $AWS_ACCESS_KEY_ID \
 				    --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY \
-				    --amazonec2-region $AWS_DEFAULT_REGIONs"
+				    --amazonec2-region $AWS_DEFAULT_REGION"
 	fi
 
 	MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} ${MACHINE_NAME}"
+    ${MACHINE_CREATE_CMD}
 
     fi
 
