@@ -95,6 +95,9 @@ fi
 
 if [ -z $VPC_AVAIL_ZONE ]; then
     echo "No availability zone specified - using default [a]."
+    # Driver amazonec2 defaults to zone a but setting explicitly here to
+    # guard against side effects in command below if using parameter with no
+    # value.
     export VPC_AVAIL_ZONE=a
 elif [[ ! $VPC_AVAIL_ZONE =~ ^[a-e]{1,1}$ ]]; then
         echo "Availability zone can only be a single lower case char, 'a' to 'e'. Exiting..."
@@ -119,16 +122,36 @@ fi
 source credentials.generate.sh
 source env.config.sh
 
+# Allow script to continue if error returned by docker-machine command
+set +e
+
 # Create Docker machine if one doesn't already exist with the same name
-if $(docker-machine env $MACHINE_NAME > /dev/null 2>&1) ; then
-	echo "Docker machine '$MACHINE_NAME' already exists"
+docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "Docker machine '${MACHINE_NAME}' already exists."
 else
-  if [ -z $AWS_ACCESS_KEY_ID ]; then
-    docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-zone $VPC_AVAIL_ZONE --amazonec2-instance-type m4.xlarge $MACHINE_NAME
-  else
-    docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY_ID --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-zone $VPC_AVAIL_ZONE --amazonec2-instance-type m4.xlarge --amazonec2-region $AWS_DEFAULT_REGION $MACHINE_NAME
-  fi
+
+    MACHINE_CREATE_CMD="docker-machine create \
+                            --driver amazonec2 \
+                            --amazonec2-vpc-id ${VPC_ID} \
+			    --amazonec2-zone $VPC_AVAIL_ZONE \
+			    --amazonec2-instance-type m4.xlarge"
+
+    if [ -n "${AWS_ACCESS_KEY_ID}" ]; then
+        MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
+	                        --amazonec2-access-key $AWS_ACCESS_KEY_ID \
+				--amazonec2-secret-key $AWS_SECRET_ACCESS_KEY \
+				--amazonec2-region $AWS_DEFAULT_REGIONs"
+    fi
+
+    MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} ${MACHINE_NAME}"
+
+    ${MACHINE_CREATE_CMD}
+
 fi
+
+# Reenable errexit
+set -e
 
 # Create Docker network if one doesn't already exist with the same name
 eval "$(docker-machine env $MACHINE_NAME --shell bash)"
