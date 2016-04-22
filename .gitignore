@@ -8,3 +8,4 @@ volumes/jenkins-home-vol
 *.swp
 *.swo
 platform.secrets.sh
+conf/provider/env.provider.*.sh
