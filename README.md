@@ -2,15 +2,27 @@
 
 # The DevOps Platform: Overview
 
-The DevOps Platform is a tools environment for continuously testing, releasing and maintaining applications. Reference code, delivery pipelines, automated testing and environments can be loaded in via the concept of Cartridges.
+The DevOps Platform is a tools environment for continuously testing, releasing and maintaining applications. Reference code, delivery pipelines, automated testing and environments can be loaded in via the concept of [Cartridges](https://github.com/Accenture/adop-cartridge-skeleton).
+
+The platform runs on a [docker container cluster](https://docs.docker.com/swarm/) so it can be stood up for evaluation purposes on just one server using local storage, or stood up in a multi-data centre cluster with distributed network storage.  It will also run anywhere that [docker runs](https://docs.docker.com/engine/installation/binaries/).
+
+Here is the front page:
 
 ![HomePage](https://raw.githubusercontent.com/accenture/adop-docker-compose/master/img/home.png)
 
-Once you have a stack up and running, please log in with the username and password created upon startup.
+Once you have a stack up and running, you can log in with the username and password created upon start-up.
+
+If you provisioned your stack using the start-up CLI, an example workspace containing an example project and an example cartridge will all have been pre-loaded in Jenkins:
+
+![HomePage](https://raw.githubusercontent.com/Accenture/adop-docker-compose/master/img/exampleproj.png)
+
+Once you have explored this the next step is to create your own Workspace and Project and then load another cartridge using a 'Load Cartridge' job in the 'Cartridge Management' folder (that automatically gets created in any Project).  The cartridge [development cartridge](https://github.com/accenture/adop-cartridge-cartridge-dev/) also helps create your own cartridges.
 
 # Quickstart Instructions
 
-These instructions will spin up an instance in a single server in AWS (for evaluation purposes).
+These instructions will spin up an instance in a single server in AWS (for evaluation purposes).  
+
+NB. the instructions will also work in anywhere supported by [Docker Machine](https://docs.docker.com/machine/), just follow the relevant Docker Machine instructions for your target platform and then start at step 3 below and (you can set the VPC_ID to NA).
 
 1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet.
 1. On the "Step 2: VPC with a Single Public Subnet" page give your VPC a meaningful name and specify the availability zone as 'a', e.g. select eu-west-1a from the pulldown.
