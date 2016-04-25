@@ -20,67 +20,9 @@ Once you have explored this the next step is to create your own Workspace and Pr
 
 # Quickstart Instructions
 
-These instructions will spin up an instance in a single server in AWS (for evaluation purposes).  
+These instructions will spin up an instance in a single server in AWS (for evaluation purposes).
 
 NB. the instructions will also work in anywhere supported by [Docker Machine](https://docs.docker.com/machine/), just follow the relevant Docker Machine instructions for your target platform and then start at step 3 below and (you can set the VPC_ID to NA).
-
-1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet.
-1. On the "Step 2: VPC with a Single Public Subnet" page give your VPC a meaningful name and specify the availability zone as 'a', e.g. select eu-west-1a from the pulldown.
-1. Once the VPC is created note the VPC ID (e.g. vpc-1ed3sfgw)
-1. Clone this repository and then in a terminal window (this has been tested in GitBash) run:
-```bash
-$ ./startup.sh
-Usage: ./startup.sh -m <MACHINE_NAME>  
-                    -c <VPC_ID> 
-                    -z <VPC_AVAIL_ZONE>(optional) 
-                    -r <REGION>(optional) 
-                    -a <AWS_ACCESS_KEY>(optional) 
-                    -s <AWS_SECRET_ACCESS_EY>(optional) 
-                    -v <VOLUME_DRIVER>(optional) 
-                    -n <CUSTOM_NETWORK_NAME>(optional) 
-                    -l LOGGING_DRIVER(optional) 
-                    -f path/to/additional_override1.yml(optional) 
-                    -f path/to/additional_override2.yml(optional) 
-                    -u <INITIAL_ADMIN_USER>
-                    -p <INITIAL_ADMIN_PASSWORD_PLAIN>(optional) ...
-```
-* You will need to supply:
-    - a machine name (anything you want)
-    - the target VPC
-    - If you don't have your AWS credentials and default region [stored locally in ~/.aws](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) you will also need to supply:
-        - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using aws configure 
-        - the AWS region id in this format: eu-west-1
-    - a username and password (optional) to act as credentials for the initial admin user (you will be prompted to re-enter your password if it is considered weak)
-
-For example (if you don't have ~/.aws set up)
-```bash
-./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u userName -p userPassword
-```
-N.B. If you see an error saying that docker-machine cannot find an associated subnet in a zone, go back to the VPC Dashboard on AWS and check the availablity zone for the subnet you've created. Then rerun the startup script and use the -z option to specify the zone for your subnet, e.g. for a zone of eu-west-1c the above command becomes 
-```bash
-./startup.sh -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword -z c 
-```
-1. If all goes well you will see the following output and you can view the DevOps Platform in your browser
-```bash
-##########################################################
-
-SUCCESS, your new ADOP instance is ready!
-
-Run these commands in your shell:
-  eval \"$(docker-machine env $MACHINE_NAME)\"
-  source credentials.generate.sh
-  source env.config.sh
-
-Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
-```
-1. Log in using the username and password you created in the startup script:
-```sh
-<INITIAL_ADMIN_USER>/ <INITIAL_ADMIN_PASSWORD_PLAIN>
-```
-
-# Quickstart Instructions (Experimental)
-
-These instructions will spin up an instance in a single server in AWS (for evaluation purposes).
 
 1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet.
 1. On the "Step 2: VPC with a Single Public Subnet" page give your VPC a meaningful name and specify the availability zone as 'a', e.g. select eu-west-1a from the pulldown.
@@ -98,8 +40,8 @@ These instructions will spin up an instance in a single server in AWS (for evalu
                                -z <VPC_AVAIL_ZONE>(optional)
                                -a <AWS_ACCESS_KEY>(optional) 
                                -s <AWS_SECRET_ACCESS_EY>(optional) 
-                               -u <ADMIN_USER>
-                               -p <PASSWORD>(optional) ...
+                               -u <INITIAL_ADMIN_USER>
+                               -p <INITIAL_ADMIN_PASSWORD>(optional) ...
         ```
         - You will need to supply:
             - the type of machine to create (aws, in this example)
@@ -108,7 +50,7 @@ These instructions will spin up an instance in a single server in AWS (for evalu
             - If you don't have your AWS credentials and default region [stored locally in ~/.aws](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) you will also need to supply:
                 - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using aws configure 
                 - the AWS region id in this format: eu-west-1
-            - a username and password to act as credentials for the initial admin user
+            - a username and password (optional) to act as credentials for the initial admin user (you will be prompted to re-enter your password if it is considered weak)
     - For example (if you don't have ~/.aws set up):
 
         ```./quickstart.sh -t aws -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword```
@@ -122,10 +64,15 @@ These instructions will spin up an instance in a single server in AWS (for evalu
     SUCCESS, your new ADOP instance is ready!
 
     Run this command in your shell:
-        source credentials.generate.sh
-        source env.config.sh
+      source env.config.sh
+      source credentials.generate.sh
+
+    You can check if any variables are missing with: ./adop compose config  | grep 'WARNING'
 
     Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
+    Login using the following credentials:
+      Username: YOUR_USERNAME
+      Password: YOUR_PASSWORD
     ```
 1. Log in using the username and password you specified in the quickstart script:
 ```
