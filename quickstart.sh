@@ -11,27 +11,9 @@ echo '
 '
 
 usage(){
-   cat <<END_USAGE
-
-Usage:
-        ./quickstart.sh 
-	    -t local 
-	    [-m <MACHINE_NAME>] 
-	    [-u <INITIAL_ADMIN_USER>] 
-	    [-p <INITIAL_ADMIN_PASSWORD>]
-
-        ./quickstart.sh 
-	    -t aws 
-	    -m <MACHINE_NAME> 
-	    -c <VPC_ID> 
-	    [-r <REGION>] 
-	    [-z <AVAILABILITY_ZONE_LETTER>] 
-	    [-a <AWS_ACCESS_KEY>] 
-	    [-s <AWS_SECRET_ACCESS_KEY>] 
-	    [-u <INITIAL_ADMIN_USER>] 
-	    [-p <INITIAL_ADMIN_PASSWORD>]
-
-END_USAGE
+  echo "Usage:"
+  echo "        ./quickstart.sh -t local [-m <MACHINE_NAME>] [-u <INITIAL_ADMIN_USER>] [-p <INITIAL_ADMIN_PASSWORD>]"
+  echo "        ./quickstart.sh -t aws -m <MACHINE_NAME> -c <VPC_ID> [-r <REGION>] [-z <AVAILABILITY_ZONE_LETTER>] [-a <AWS_ACCESS_KEY>] [-s <AWS_SECRET_ACCESS_KEY>] [-u <INITIAL_ADMIN_USER>] [-p <INITIAL_ADMIN_PASSWORD>]"
 }
 
 provision_local() {
@@ -39,20 +21,12 @@ provision_local() {
         MACHINE_NAME=adop
     fi
 
-    # Allow script to continue if error returned by docker-machine command
-    set +e
-
     # Create Docker machine if one doesn't already exist with the same name
-    docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
+    if $(docker-machine env $MACHINE_NAME > /dev/null 2>&1) ; then
         echo "Docker machine '$MACHINE_NAME' already exists"
     else
         docker-machine create --driver virtualbox --virtualbox-memory 2048 ${MACHINE_NAME}
     fi
-
-    # Reenable errexit
-    set -e
-
 }
 
 provision_aws() {
@@ -84,36 +58,16 @@ provision_aws() {
       eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s\?=\s\?/export AWS_DEFAULT_REGION=/')
     fi
 
-    # Allow script to continue if error returned by docker-machine command
-    set +e
-
     # Create Docker machine if one doesn't already exist with the same name
-    docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
+    if $(docker-machine env $MACHINE_NAME > /dev/null 2>&1) ; then
         echo "Docker machine '$MACHINE_NAME' already exists"
     else
-
-	MACHINE_CREATE_CMD="docker-machine create \
-				--driver amazonec2 \
-				--amazonec2-vpc-id ${VPC_ID} \
-				--amazonec2-zone $VPC_AVAIL_ZONE \
-				--amazonec2-instance-type m4.xlarge"
-
-	if [ -n "${AWS_ACCESS_KEY_ID}" ]; then
-	    MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
-				    --amazonec2-access-key $AWS_ACCESS_KEY_ID \
-				    --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY \
-				    --amazonec2-region $AWS_DEFAULT_REGION"
-	fi
-
-	MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} ${MACHINE_NAME}"
-    ${MACHINE_CREATE_CMD}
-
+      if [ -z ${AWS_ACCESS_KEY_ID} ]; then
+        docker-machine create --driver amazonec2 --amazonec2-vpc-id ${VPC_ID} --amazonec2-zone ${VPC_AVAIL_ZONE} --amazonec2-instance-type m4.xlarge ${MACHINE_NAME}
+      else
+        docker-machine create --driver amazonec2 --amazonec2-access-key ${AWS_ACCESS_KEY_ID} --amazonec2-secret-key ${AWS_SECRET_ACCESS_KEY} --amazonec2-vpc-id ${VPC_ID} --amazonec2-zone ${VPC_AVAIL_ZONE} --amazonec2-instance-type m4.xlarge --amazonec2-region ${AWS_DEFAULT_REGION} ${MACHINE_NAME}
+      fi
     fi
-
-    # Reenable errexit
-    set -e
-
 }
 
 while getopts "t:m:a:s:c:z:r:u:p:" opt; do
