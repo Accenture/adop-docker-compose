@@ -65,14 +65,14 @@ prep_env() {
 }
 
 init() {
-    echo ' 
-          ###    ########   #######  ########  
-         ## ##   ##     ## ##     ## ##     ## 
-        ##   ##  ##     ## ##     ## ##     ## 
-       ##     ## ##     ## ##     ## ########  
-       ######### ##     ## ##     ## ##        
-       ##     ## ##     ## ##     ## ##        
-       ##     ## ########   #######  ##        
+    echo '
+          ###    ########   #######  ########
+         ## ##   ##     ## ##     ## ##     ##
+        ##   ##  ##     ## ##     ## ##     ##
+       ##     ## ##     ## ##     ## ########
+       ######### ##     ## ##     ## ##
+       ##     ## ##     ## ##     ## ##
+       ##     ## ########   #######  ##
     '
 
     echo "* Initialising ADOP"
@@ -95,7 +95,13 @@ init() {
     TOOL_SLEEP_TIME=60
     until [[ $(docker exec jenkins curl -I -s jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Jenkins unavailable, sleeping for ${TOOL_SLEEP_TIME}s"; sleep ${TOOL_SLEEP_TIME}; done
     until [[ $(docker exec gerrit curl -I -s gerrit:${PASSWORD_GERRIT}@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Gerrit unavailable, sleeping for ${TOOL_SLEEP_TIME}s"; sleep ${TOOL_SLEEP_TIME}; done
-    
+
+    echo "* Waiting for the public key to become available..."
+    PUBLIC_KEY_SLEEP_TIME=15
+    until [[ $(docker exec jenkins find /var/jenkins_home/.ssh -type f | wc -l) -ge 3 ]]; do echo "Public key not ready yet, sleeping for ${PUBLIC_KEY_SLEEP_TIME}s"; sleep ${PUBLIC_KEY_SLEEP_TIME}; done
+    sleep 10
+    until [[ $(docker exec gerrit curl -I -s gerrit:${PASSWORD_GERRIT}@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Gerrit unavailable, sleeping for ${PUBLIC_KEY_SLEEP_TIME}s"; sleep ${PUBLIC_KEY_SLEEP_TIME}; done
+
     # Trigger Load_Platform in Jenkins
     echo "* Initialising the Platform"
     docker exec jenkins curl -s -X POST jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/job/Load_Platform/buildWithParameters --data token=gAsuE35s
@@ -106,7 +112,7 @@ init() {
     else
         echo "DOCKER_TLS_VERIFY not set to 1, skipping certificate generation"
     fi
-    
+
     # Tell the user something useful
     echo
     echo '##########################################################'
@@ -138,23 +144,23 @@ gen-certs() {
     CERT_PATH=$1
     if [ -z ${CERT_PATH} ]; then
         echo "
-          Usage : 
+          Usage :
             gen-certs <docker_client_certificate_path>
-          
-          <docker_client_certificate_path>: 
+
+          <docker_client_certificate_path>:
             This is the path of the certificate on jenkins slave container
             to be able to run docker commands against docker swarm.
             Note - absolute path is required.
-              
-          Example: 
+
+          Example:
             gen-certs /root/.docker
         "
         exit 1
     fi
 
     ####
-    # Windows Git bash terminal identifies 
-    # /CN=client as a path and appends the absolute path 
+    # Windows Git bash terminal identifies
+    # /CN=client as a path and appends the absolute path
     # of parent directory to it
     ####
     HOST_OS=$(uname)
@@ -166,7 +172,7 @@ gen-certs() {
 
     ####
     # Fresh start
-    #### 
+    ####
     TEMP_CERT_PATH="${HOME}/docker_certs"
     rm -rf ${TEMP_CERT_PATH}
     mkdir -p ${TEMP_CERT_PATH}
@@ -185,7 +191,7 @@ gen-certs() {
 
     ####
     # * Remove unnecessary files
-    # * Copy the certificates to slave 
+    # * Copy the certificates to slave
     ####
     echo "Uploading certificates to Jenkins Slave at: ${CERT_PATH}"
     rm -f ${TEMP_CERT_PATH}/extfile.cnf ${TEMP_CERT_PATH}/client.csr
