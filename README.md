@@ -51,6 +51,7 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
                 - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using aws configure 
                 - the AWS region id in this format: eu-west-1
             - a username and password (optional) to act as credentials for the initial admin user (you will be prompted to re-enter your password if it is considered weak)
+                - Initial admin user can not be set to 'admin' to avoid duplicate entries in LDAP.
     - For example (if you don't have ~/.aws set up):
 
         ```./quickstart.sh -t aws -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword```
