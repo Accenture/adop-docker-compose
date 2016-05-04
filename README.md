@@ -160,9 +160,9 @@ Create ssl certificate for jenkins to allow connectivity with docker engine.
 * RUN : source ./conf/env.provider.sh
 * RUN : source credentials.generate.sh
 * RUN : source env.config.sh
-* RUN : ./generate\_client\_certs.sh ${DOCKER\_CLIENT\_CERT\_PATH}
+* RUN : ./adop compose gen-certs ${DOCKER\_CLIENT\_CERT\_PATH}
 
-Note : For windows run the generate\_client\_certs.sh script from a terminal (Git Bash) as administrator.
+Note : For Windows run this command from a terminal (Git Bash) as administrator.
 
 ###### Load Platform
 
