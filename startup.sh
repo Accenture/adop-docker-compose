@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-OVERRIDES=
+OVERRIDES="-f etc/aws/default.yml"
 
 
 echo ' 
@@ -29,7 +29,10 @@ Usage: ./startup.sh
    -f path/to/additional_override1.yml(optional)
    -f path/to/additional_override2.yml(optional)
    -u <INITIAL_ADMIN_USER>(optional)
-   -p <INITIAL_ADMIN_PASSWORD>(optional)...
+   -p <INITIAL_ADMIN_PASSWORD>(optional)
+   -b <SUBNET_ID>(optional)
+   -k <AWS_KEYPAIR>(optional)
+   -x <INSTANCE_TYPE>(optional)...
 
 END_USAGE
 }
@@ -40,7 +43,7 @@ export LOGGING_OVERRIDE=' -f etc/logging/syslog/default.yml'
 export CUSTOM_NETWORK_NAME=adopnetwork
 
 
-while getopts "m:n:a:s:c:z:r:f:v:l:u:p:" opt; do
+while getopts "m:n:a:s:c:z:r:f:v:l:u:p:b:k:x:" opt; do
   case $opt in
     m)
       export MACHINE_NAME=${OPTARG}
@@ -78,6 +81,15 @@ while getopts "m:n:a:s:c:z:r:f:v:l:u:p:" opt; do
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
       ;;
+    b)
+      export SUBNET_ID=${OPTARG}
+      ;;
+    k)
+      export AWS_KEYPAIR=${OPTARG}
+      ;;
+    x)
+      export INSTANCE_TYPE=${OPTARG}
+      ;;
     *)
       echo "Invalid parameter(s) or option(s)."
       usage
@@ -85,6 +97,47 @@ while getopts "m:n:a:s:c:z:r:f:v:l:u:p:" opt; do
       ;;
   esac
 done
+
+# Function to create AWS-specific environment variables file
+source_aws() {
+  if [ -f ./env.aws.sh ]; then
+  
+    echo "Your AWS parameters file already exists, re-sourcing parameters and moving on..."
+    echo "If you would like to use new AWS parameters, please delete env.aws.sh and re-run this script."
+  
+  else
+   
+    echo "Creating a new AWS variables file..."
+    > env.aws.sh
+    
+    echo "# Shell script to store AWS-specific environment variables" >> env.aws.sh
+    echo "# Can be sourced and re-sourced to keep variables in shell instance" >> env.aws.sh
+
+    echo "" >> env.aws.sh
+
+    echo "export VPC_ID='${VPC_ID}'" >> env.aws.sh
+
+    # AWS-specific environment variables
+    if [ -z ${AWS_KEYPAIR} ]; then
+      echo "export AWS_KEYPAIR='${MACHINE_NAME}'" >> env.aws.sh
+    else
+      echo "export AWS_KEYPAIR='${AWS_KEYPAIR}'" >> env.aws.sh
+    fi
+
+    if [ -z ${INSTANCE_TYPE} ]; then
+      echo "export INSTANCE_TYPE='t2.large'" >> env.aws.sh
+    else
+      echo "export INSTANCE_TYPE='${INSTANCE_TYPE}'" >> env.aws.sh
+    fi
+
+    if [ -z ${SUBNET_ID} ]; then
+      echo "export SUBNET_ID='default'" >> env.aws.sh
+    else
+      echo "export SUBNET_ID='${SUBNET_ID}'" >> env.aws.sh
+    fi
+  
+  fi
+}
 
 if [ -z $MACHINE_NAME ] | \
 	[ -z $CUSTOM_NETWORK_NAME ] | \
@@ -118,7 +171,10 @@ then
   eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s\?=\s\?/export AWS_DEFAULT_REGION=/')
 fi
 
+source_aws
+
 # Source environment variables and set up default admin credentials
+source env.aws.sh
 source credentials.generate.sh
 source env.config.sh
 
@@ -186,6 +242,7 @@ echo SUCCESS, your new ADOP instance is ready!
 echo
 echo Run these commands in your shell:
 echo '  eval \"$(docker-machine env $MACHINE_NAME)\"'
+echo '  source env.aws.sh'
 echo '  source credentials.generate.sh'
 echo '  source env.config.sh'
 echo

@@ -23,8 +23,8 @@ Usage:
         ./quickstart.sh 
 	    -t aws 
 	    -m <MACHINE_NAME> 
-	    -c <VPC_ID> 
-	    [-r <REGION>] 
+	    -c <AWS_VPC_ID> 
+	    [-r <AWS_DEFAULT_REGION>] 
 	    [-z <AVAILABILITY_ZONE_LETTER>] 
 	    [-a <AWS_ACCESS_KEY>] 
 	    [-s <AWS_SECRET_ACCESS_KEY>] 
@@ -54,10 +54,52 @@ provision_local() {
     set -e
 
 }
+    
+# Function to create AWS-specific environment variables file
+source_aws() {  
+  AWS_FILE='./conf/provider/env.provider.aws.sh'
+
+  if [ -f ${AWS_FILE} ]; then  
+    echo "Your AWS parameters file already exists, deleting it..."
+    rm -f ${AWS_FILE}
+  fi
+    
+  echo "Creating a new AWS variables file..."
+  cp ./conf/provider/examples/env.provider.aws.sh.example ${AWS_FILE}
+
+  # AWS-specific environment variables
+  if [ -z ${AWS_VPC_ID} ]; then
+    usage
+    exit 1
+  else    
+    sed -i'' -e "s/###AWS_VPC_ID###/$AWS_VPC_ID/g" ${AWS_FILE}
+  fi
+
+  if [ -z ${AWS_KEYPAIR} ]; then
+    sed -i'' -e "s/###AWS_KEYPAIR###/$MACHINE_NAME/g" ${AWS_FILE}
+  else
+    sed -i'' -e "s/###AWS_KEYPAIR###/$AWS_KEYPAIR/g" ${AWS_FILE}
+  fi
+
+  if [ -z ${AWS_INSTANCE_TYPE} ]; then
+    sed -i'' -e "s/###AWS_INSTANCE_TYPE###/t2.large/g" ${AWS_FILE}
+  else
+    sed -i'' -e "s/###AWS_INSTANCE_TYPE###/$AWS_INSTANCE_TYPE/g" ${AWS_FILE}
+  fi
+
+  if [ -z ${AWS_SUBNET_ID} ]; then
+    sed -i'' -e "s/###AWS_SUBNET_ID###/default/g" ${AWS_FILE}
+  else
+    sed -i'' -e "s/###AWS_SUBNET_ID###/$AWS_SUBNET_ID/g" ${AWS_FILE}
+  fi
+  
+  sed -i'' -e "s/###AWS_DEFAULT_REGION###/$AWS_DEFAULT_REGION/g" ${AWS_FILE}
+
+}
 
 provision_aws() {
     if [ -z ${MACHINE_NAME} ] | \
-       [ -z ${VPC_ID} ]; then
+       [ -z ${AWS_VPC_ID} ]; then
         usage
         exit 1
     fi
@@ -84,6 +126,9 @@ provision_aws() {
       eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s\?=\s\?/export AWS_DEFAULT_REGION=/')
     fi
 
+    # Create a file with AWS parameters
+    source_aws
+
     # Allow script to continue if error returned by docker-machine command
     set +e
 
@@ -95,7 +140,7 @@ provision_aws() {
 
 	MACHINE_CREATE_CMD="docker-machine create \
 				--driver amazonec2 \
-				--amazonec2-vpc-id ${VPC_ID} \
+				--amazonec2-vpc-id ${AWS_VPC_ID} \
 				--amazonec2-zone $VPC_AVAIL_ZONE \
 				--amazonec2-instance-type m4.xlarge"
 
@@ -119,7 +164,7 @@ provision_aws() {
 while getopts "t:m:a:s:c:z:r:u:p:" opt; do
   case ${opt} in
     t)
-      MACHINE_TYPE=${OPTARG}
+      export MACHINE_TYPE=${OPTARG}
       ;;
     m)
       export MACHINE_NAME=${OPTARG}
@@ -131,7 +176,7 @@ while getopts "t:m:a:s:c:z:r:u:p:" opt; do
       export AWS_SECRET_ACCESS_KEY=${OPTARG}
       ;;
     c)
-      export VPC_ID=${OPTARG}
+      export AWS_VPC_ID=${OPTARG}
       ;;
     z)
       export VPC_AVAIL_ZONE=${OPTARG}
@@ -144,7 +189,7 @@ while getopts "t:m:a:s:c:z:r:u:p:" opt; do
       ;;
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
-      ;;
+      ;;      
     *)
       echo "Invalid parameter(s) or option(s)."
       usage
@@ -159,6 +204,8 @@ if [ -z ${MACHINE_TYPE} ]; then
     exit 1
 fi
 
+CLI_COMPOSE_OPTS=""
+
 # Switch based on the machine type
 case ${MACHINE_TYPE} in
     "local")
@@ -166,6 +213,7 @@ case ${MACHINE_TYPE} in
         ;;
     "aws")
         provision_aws
+        CLI_COMPOSE_OPTS="-f etc/aws/default.yml"
         ;;
     *)
         echo "Invalid parameter(s) or option(s)."
@@ -175,5 +223,4 @@ case ${MACHINE_TYPE} in
 esac
 
 # Use the ADOP CLI
-./adop compose -m "${MACHINE_NAME}" init
-
+./adop compose -m "${MACHINE_NAME}" "${CLI_COMPOSE_OPTS}" init
