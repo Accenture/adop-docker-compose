@@ -51,11 +51,11 @@ else
 	cp ./platform.secrets.sh.example ./platform.secrets.sh
 	
 	# Check for username, prompt one if not entered and write it to secrets file
-	if [ -z $INITIAL_ADMIN_USER ]; then
-		echo "You have not provided a user name. Please enter a username: "
+	if [ -z $INITIAL_ADMIN_USER -o "$INITIAL_ADMIN_USER" == "admin" ]; then
+		echo "You have entered invalid username. Username can not be blank or 'admin'. Please enter a valid username: "
 		read INITIAL_ADMIN_USER
-		while [ "$INITIAL_ADMIN_USER" == "" ]; do
-			echo "You have not entered a username. Try again..."
+		while [ "$INITIAL_ADMIN_USER" == "" -o "$INITIAL_ADMIN_USER" == "admin" ]; do
+			echo "You have entered invalid username. Username can not be blank or 'admin'. Try again..."
 			read INITIAL_ADMIN_USER
 		done
 		export INITIAL_ADMIN_USER
