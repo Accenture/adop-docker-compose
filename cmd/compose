@@ -61,6 +61,7 @@ prep_env() {
         export LOGSTASH_HOST=${PROXY_IP}
     fi
 
+    source ${CONF_DIR}/conf/env.provider.sh
     source ${CONF_DIR}/credentials.generate.sh
     source ${CONF_DIR}/env.config.sh
 }
@@ -128,9 +129,10 @@ esac
     echo
     echo "SUCCESS, your new ADOP instance is ready!"
     echo
-    echo "Run this command in your shell:"
-    echo '  source env.config.sh'
+    echo "Run these commands in your shell:"
+    echo '  source ./conf/env.provider.sh'
     echo '  source credentials.generate.sh'
+    echo '  source env.config.sh'
     echo
     echo "You can check if any variables are missing with: ./adop compose config  | grep 'WARNING'"
     echo
