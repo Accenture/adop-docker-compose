@@ -22,11 +22,12 @@ help() {
     cmd_usage
     echo
     echo "Available subcommands are:"
-    printf "    %-16s   %s\n" "init" "Initialises ADOP"
-    printf "    %-16s   %s\n" "up" "docker-compose up for ADOP"
-    printf "    %-16s   %s\n" "gen-certs <path>" "Generate client certificates for TLS-enabled Machine and copy to <path> in Jenkins Slave"
-    printf "    %-16s   %s\n" "<command>" "Runs 'docker-compose <command>' for ADOP, where <command> is not listed above"
-    printf "    %-16s   %s\n" "help" "Prints this help information"
+    printf "    %-22s   %s\n" "init" "Initialises ADOP"
+    printf "    %-22s   %s\n" "init" <--without-pull> "Initialises ADOP without pulling images"
+    printf "    %-22s   %s\n" "up" "docker-compose up for ADOP"
+    printf "    %-22s   %s\n" "gen-certs <path>" "Generate client certificates for TLS-enabled Machine and copy to <path> in Jenkins Slave"
+    printf "    %-22s   %s\n" "<command>" "Runs 'docker-compose <command>' for ADOP, where <command> is not listed above"
+    printf "    %-22s   %s\n" "help" "Prints this help information"
     echo
 }
 
@@ -65,6 +66,14 @@ prep_env() {
 }
 
 init() {
+
+case "$1" in
+    --without-pull)
+        export PULL="NO"
+        ;;
+        *)
+esac
+
     echo ' 
           ###    ########   #######  ########  
          ## ##   ##     ## ##     ## ##     ## 
@@ -85,8 +94,14 @@ init() {
     create_network
 
     # Run the Docker compose commands
-    echo "* Pulling Docker Images"
-    run_compose pull
+
+    if [ "${PULL}" = "NO" ]; then
+        echo "* Skipping Pulling Docker Images"
+    else
+        echo "* Pulling Docker Images"
+        run_compose pull
+    fi
+
     echo "* Bringing up ADOP..."
     run_compose up -d
 
@@ -222,6 +237,7 @@ export LOGGING_DRIVER=syslog
 export CUSTOM_NETWORK_NAME=local_network
 export OVERRIDES=""
 export TOTAL_OVERRIDES=""
+export PULL="YES"
 
 # Parameters
 while getopts "m:f:F:v:l:n:i:" opt; do
