@@ -223,4 +223,4 @@ case ${MACHINE_TYPE} in
 esac
 
 # Use the ADOP CLI
-./adop compose -m "${MACHINE_NAME}" "${CLI_COMPOSE_OPTS}" init
+./adop compose -m "${MACHINE_NAME}" ${CLI_COMPOSE_OPTS} init
