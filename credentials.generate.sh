@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Recursive function to check strength of user password
 function checkPassword {
 
@@ -7,7 +8,7 @@ function checkPassword {
 		read -s INITIAL_ADMIN_PASSWORD_PLAIN
 		checkPassword $INITIAL_ADMIN_PASSWORD_PLAIN
 	fi
-	
+
 	# Check to ensure username is not part of password
 	if [[ "$1" = *$INITIAL_ADMIN_USER* ]]; then
 		echo "You are not allowed to include your username in your password! Please enter another password: "
@@ -30,8 +31,38 @@ function checkPassword {
         echo "Your password must contain a number. Try again: "
         read -s INITIAL_ADMIN_PASSWORD_PLAIN
 		checkPassword $INITIAL_ADMIN_PASSWORD_PLAIN
-    fi 
-	
+    fi
+
+	echo "Your provided password satisfies the strength criteria."
+
+}
+
+function checkLDAPPassword {
+
+	# Check to disallow usage of the word password
+	if [[ "$1" = *"Password"* ]] || [[ "$1" = *"password"* ]]; then
+		echo "You are not allowed to use a password containing the word password! Please enter another password: "
+		read -s LDAP_PWD
+		checkLDAPPassword $LDAP_PWD
+	fi
+
+	# Check to ensure password is a minimum of 8 characters
+	LEN=${#1}
+	if [ $LEN -lt 8 ]; then
+		echo "Your password length is $LEN. It must be at least 8. Try again: "
+		read -s LDAP_PWD
+		checkLDAPPassword $LDAP_PWD
+	fi
+
+	# Check to ensure password contains numerical characters
+    if [[ $1 =~ [0-9] ]]; then
+        echo
+    else
+        echo "Your password must contain a number. Try again: "
+        read -s LDAP_PWD
+		checkLDAPPassword $LDAP_PWD
+    fi
+
 	echo "Your provided password satisfies the strength criteria."
 
 }
@@ -49,7 +80,7 @@ if [ -f ./platform.secrets.sh ]; then
 else
 	echo "Creating a new secrets file..."
 	cp ./platform.secrets.sh.example ./platform.secrets.sh
-	
+
 	# Check for username, prompt one if not entered and write it to secrets file
 	if [ -z $INITIAL_ADMIN_USER -o "$INITIAL_ADMIN_USER" == "admin" ]; then
 		echo "You have entered invalid username. Username can not be blank or 'admin'. Please enter a valid username: "
@@ -64,7 +95,7 @@ else
 	fi
 	sed -i'' -e "s/###INITIAL_ADMIN_USER###/$INITIAL_ADMIN_USER/g" platform.secrets.sh
 
-	# Generate a random password if user leaves password flag blank 
+	# Generate a random password if user leaves password flag blank
     # Else continue checking the input password
 	if [ -z $INITIAL_ADMIN_PASSWORD_PLAIN ]; then
 		echo "You have not provided a password. Generating random..."
@@ -75,15 +106,27 @@ else
 		checkPassword $INITIAL_ADMIN_PASSWORD_PLAIN
 	fi
 	sed -i'' -e "s/###INITIAL_ADMIN_PASSWORD_PLAIN###/$INITIAL_ADMIN_PASSWORD_PLAIN/g" platform.secrets.sh
-		
+
+	# Generate a random password if user leaves password flag blank
+    # Else continue checking the input password
+	if [ -z $LDAP_PWD ]; then
+		echo "You have not provided LDAP password. Generating random..."
+		export LDAP_PWD=$(echo -n $(createPassword) | base64)
+		echo "Your password is $LDAP_PWD"
+		echo "**Please make note of this as you will use this password for LDAP connection**"
+	else
+		checkLDAPPassword $LDAP_PWD
+	fi
+	sed -i'' -e "s/###LDAP_PWD_PLAIN###/$LDAP_PWD/g" platform.secrets.sh
+
 	# Generate random passwords for Jenkins, Gerrit and SQL and place them in secrets file
 	echo "Generating random passwords for Jenkins, Gerrit and SQL..."
 	PASSWORD_JENKINS=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_JENKINS_PLAIN###/$PASSWORD_JENKINS/g" platform.secrets.sh
-	
+
 	PASSWORD_GERRIT=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_GERRIT_PLAIN###/$PASSWORD_GERRIT/g" platform.secrets.sh
-	
+
 	PASSWORD_SQL=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_SQL_PLAIN###/$PASSWORD_SQL/g" platform.secrets.sh
 fi
@@ -96,6 +139,7 @@ source platform.secrets.sh
 if  [ $INITIAL_ADMIN_PASSWORD_PLAIN == "###INITIAL_ADMIN_PASSWORD_PLAIN###" ] || \
 	[ $PASSWORD_JENKINS == "###PASSWORD_JENKINS_PLAIN###" ] || \
 	[ $PASSWORD_GERRIT == "###PASSWORD_GERRIT_PLAIN###" ] || \
+	[ $LDAP_PWD == "###LDAP_PWD_PLAIN###" ] || \
 	[ $PASSWORD_SQL == "###PASSWORD_SQL_PLAIN###" ]; then
 	echo "Your passwords are set to the default tokens provided in the example secrets file, this is not allowed."
 	echo "Delete the platform.secrets.sh file and re-run the credentials.generate.sh script"

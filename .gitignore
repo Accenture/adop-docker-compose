@@ -9,3 +9,4 @@ volumes/jenkins-home-vol
 *.swo
 platform.secrets.sh
 conf/provider/env.provider.*.sh
+.idea
