@@ -118,7 +118,7 @@ esac
 
     # Generate and copy the certificates to jenkins slave if TLS is enabled
     if [ "${DOCKER_TLS_VERIFY}" = "1" ]; then
-        gen-certs "${DOCKER_CLIENT_CERT_PATH}"
+        gen_certs "${DOCKER_CLIENT_CERT_PATH}"
     else
         echo "DOCKER_TLS_VERIFY not set to 1, skipping certificate generation"
     fi
@@ -150,7 +150,7 @@ create_network() {
     fi
 }
 
-gen-certs() {
+gen_certs() {
     echo "Generating client certificates for TLS-enabled Engine"
     CERT_PATH=$1
     if [ -z ${CERT_PATH} ]; then
@@ -312,7 +312,7 @@ ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUM
 ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
 
 case ${SUBCOMMAND_OPT} in
-    "cmd_desc"|"help"|"init"|"gen-certs")
+    "cmd_desc"|"help"|"init"|"gen_certs")
         ${SUBCOMMAND_OPT} "$@"
         ;;
     *)
