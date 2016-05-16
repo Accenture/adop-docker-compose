@@ -312,8 +312,11 @@ ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUM
 ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
 
 case ${SUBCOMMAND_OPT} in
-    "cmd_desc"|"help"|"init"|"gen_certs")
+    "cmd_desc"|"help"|"init")
         ${SUBCOMMAND_OPT} "$@"
+        ;;
+    "gen-certs")
+        gen_certs "$@"
         ;;
     *)
         run_compose ${SUBCOMMAND_OPT} "$@"
