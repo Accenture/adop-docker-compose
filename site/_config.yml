@@ -1,8 +1,10 @@
 markdown: kramdown
 
+repository: https://github.com/Accenture/adop-docker-compose
+
 collections:
   docs:
       output: true
 
-exclude: [ README.md ]
+exclude: [ vendor README.md Gemfile Gemfile.lock Dockerfile docker-compose.yml ]
 
