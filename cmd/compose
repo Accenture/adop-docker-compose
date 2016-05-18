@@ -197,31 +197,25 @@ gen-certs() {
     openssl genrsa -out ${TEMP_CERT_PATH}/key.pem 4096 &> /dev/null
     openssl req -subj "${CLIENT_SUBJ}" -new -key ${TEMP_CERT_PATH}/key.pem -out ${TEMP_CERT_PATH}/client.csr &> /dev/null
     echo "extendedKeyUsage = clientAuth" >  ${TEMP_CERT_PATH}/extfile.cnf
-    openssl x509 -req -days 365 -sha256 -in ${TEMP_CERT_PATH}/client.csr -CA ${HOME}/.docker/machine/certs/ca.pem -CAkey ${HOME}/.docker/machine/certs/ca-key.pem -CAcreateserial -out ${TEMP_CERT_PATH}/cert.pem -extfile ${TEMP_CERT_PATH}/extfile.cnf &> /dev/null
+    openssl x509 -req -days 365 -sha256 -in ${TEMP_CERT_PATH}/client.csr -CA ${HOME}/.docker/machine/certs/ca.pem -CAkey ${HOME}/.docker/machine/certs/ca-key.pem -CAcreateserial -CAserial temp.seq -out ${TEMP_CERT_PATH}/cert.pem -extfile ${TEMP_CERT_PATH}/extfile.cnf &> /dev/null
     set -e
-    CERT_FILE="${TEMP_CERT_PATH}/cert.pem"
-    if [[ -s $CERT_FILE ]]; then
-        echo "$CERT_FILE was generated successfully."
-    else
-        echo "$CERT_FILE was not created successfully and is empty."
-        echo "This is because you have not run your shell window in Administrator mode or with root access."
-        echo "Please run your shell window in Administrator mode or with root access and re-run the quickstart script with the same flags provided in this run."
-        exit 1
-    fi
     cp ${HOME}/.docker/machine/certs/ca.pem ${TEMP_CERT_PATH}/ca.pem
     docker --tlsverify --tlscacert=${HOME}/.docker/machine/certs/ca.pem --tlscert=${TEMP_CERT_PATH}/cert.pem --tlskey=${TEMP_CERT_PATH}/key.pem -H=${DOCKER_HOST} version &> /dev/null
 
     ####
     # * Check if certificates were generated successfully
     ####
+    CERT_FILE="${TEMP_CERT_PATH}/cert.pem"
     CA_FILE="${TEMP_CERT_PATH}/ca.pem"
     KEY_FILE="${TEMP_CERT_PATH}/key.pem"
-    for file in $CA_FILE $KEY_FILE
+    for file in $CERT_FILE $CA_FILE $KEY_FILE
     do
         if [[ -s $file ]]; then
             echo "${file} was generated successfully..."
         else
             echo "${file} was not generated successfully..."
+            echo "This may be due to OpenSSL failing to generate cert.pem."
+            echo "Please run your shell window in Administrator mode or with root access and re-run the quickstart script with the same flags provided in this run."
             exit 1
         fi
     done
