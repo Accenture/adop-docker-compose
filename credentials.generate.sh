@@ -77,7 +77,9 @@ else
 	sed -i'' -e "s/###INITIAL_ADMIN_PASSWORD_PLAIN###/$INITIAL_ADMIN_PASSWORD_PLAIN/g" platform.secrets.sh
 		
 	# Generate random passwords for Jenkins, Gerrit and SQL and place them in secrets file
-	echo "Generating random passwords for Jenkins, Gerrit and SQL..."
+	echo "Generating random passwords for LDAP, Jenkins, Gerrit and SQL..."
+	LDAP_PWD=$(createPassword)
+	sed -i'' -e "s/###LDAP_PWD_PLAIN###/$LDAP_PWD/g" platform.secrets.sh
 	PASSWORD_JENKINS=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_JENKINS_PLAIN###/$PASSWORD_JENKINS/g" platform.secrets.sh
 	
@@ -94,6 +96,7 @@ source platform.secrets.sh
 
 # Check to make sure the default tokens are not being used
 if  [ $INITIAL_ADMIN_PASSWORD_PLAIN == "###INITIAL_ADMIN_PASSWORD_PLAIN###" ] || \
+	[ $LDAP_PWD == "###LDAP_PWD_PLAIN###" ] || \
 	[ $PASSWORD_JENKINS == "###PASSWORD_JENKINS_PLAIN###" ] || \
 	[ $PASSWORD_GERRIT == "###PASSWORD_GERRIT_PLAIN###" ] || \
 	[ $PASSWORD_SQL == "###PASSWORD_SQL_PLAIN###" ]; then

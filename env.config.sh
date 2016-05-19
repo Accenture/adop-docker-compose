@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Globals
-
-export LDAP_PWD="Jpk66g63ZifGYIcShSGM"
-
 # LDAP
 
 export LDAP_DOMAIN="ldap.example.com"
