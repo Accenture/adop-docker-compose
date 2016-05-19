@@ -1,0 +1,8 @@
+site:
+  build: .
+  ports:
+   - "80:4000"
+  environment:
+   - "JEKYLL_SOURCE=${JEKYLL_SOURCE}"
+  volumes:
+   - .:/site
