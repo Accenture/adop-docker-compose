@@ -4,12 +4,14 @@ sudo: required
 services:
   - docker
 
+# branch whitelist, only for GitHub Pages
+branches:
+  only:
+  - gh-pages 
+
 env:
   global:
-    - DOCKER_COMPOSE_VERSION=1.6.0
-    - INITIAL_ADMIN_USER=admin.user
-    - COMPOSE_FILES="-f site/docker-compose.yml"
-    - JEKYLL_SOURCE="/site"
+    - DOCKER_COMPOSE_VERSION=1.6.2
 
 before_install:
  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -17,11 +19,9 @@ before_install:
  - sudo mv docker-compose /usr/local/bin
 
 script:
- - ./adop compose init
- - ./adop compose down
- - docker-compose ${COMPOSE_FILES} build
- - docker-compose ${COMPOSE_FILES} -p adopdockercompose up -d
+ - docker-compose build
+ - docker-compose up -d
  - count=0; until docker logs adopdockercompose_site_1 | grep "Server running..." &> /dev/null || (( count++ > 12 )); do echo "Waiting $count"; sleep 5; done
- - docker logs adopdockercompose_site_1 
+ - docker logs adopdockercompose_site_1
  - docker logs adopdockercompose_site_1 | grep "Server running..." &> /dev/null
  - curl -sL -w "%{http_code}\\n" "http://localhost/adop-docker-compose/" -o /dev/null | grep "200" &> /dev/null

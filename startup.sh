@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-OVERRIDES=
+OVERRIDES="-f etc/aws/default.yml"
 
 
 echo ' 
@@ -29,7 +29,10 @@ Usage: ./startup.sh
    -f path/to/additional_override1.yml(optional)
    -f path/to/additional_override2.yml(optional)
    -u <INITIAL_ADMIN_USER>(optional)
-   -p <INITIAL_ADMIN_PASSWORD>(optional)...
+   -p <INITIAL_ADMIN_PASSWORD>(optional)
+   -b <SUBNET_ID>(optional)
+   -k <AWS_KEYPAIR>(optional)
+   -x <INSTANCE_TYPE>(optional)...
 
 END_USAGE
 }
@@ -40,7 +43,7 @@ export LOGGING_OVERRIDE=' -f etc/logging/syslog/default.yml'
 export CUSTOM_NETWORK_NAME=adopnetwork
 
 
-while getopts "m:n:a:s:c:z:r:f:v:l:u:p:" opt; do
+while getopts "m:n:a:s:c:z:r:f:v:l:u:p:b:k:x:" opt; do
   case $opt in
     m)
       export MACHINE_NAME=${OPTARG}
@@ -78,6 +81,15 @@ while getopts "m:n:a:s:c:z:r:f:v:l:u:p:" opt; do
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
       ;;
+    b)
+      export SUBNET_ID=${OPTARG}
+      ;;
+    k)
+      export AWS_KEYPAIR=${OPTARG}
+      ;;
+    x)
+      export INSTANCE_TYPE=${OPTARG}
+      ;;
     *)
       echo "Invalid parameter(s) or option(s)."
       usage
@@ -85,6 +97,47 @@ while getopts "m:n:a:s:c:z:r:f:v:l:u:p:" opt; do
       ;;
   esac
 done
+
+# Function to create AWS-specific environment variables file
+source_aws() {
+  if [ -f ./env.aws.sh ]; then
+  
+    echo "Your AWS parameters file already exists, re-sourcing parameters and moving on..."
+    echo "If you would like to use new AWS parameters, please delete env.aws.sh and re-run this script."
+  
+  else
+   
+    echo "Creating a new AWS variables file..."
+    > env.aws.sh
+    
+    echo "# Shell script to store AWS-specific environment variables" >> env.aws.sh
+    echo "# Can be sourced and re-sourced to keep variables in shell instance" >> env.aws.sh
+
+    echo "" >> env.aws.sh
+
+    echo "export VPC_ID='${VPC_ID}'" >> env.aws.sh
+
+    # AWS-specific environment variables
+    if [ -z ${AWS_KEYPAIR} ]; then
+      echo "export AWS_KEYPAIR='${MACHINE_NAME}'" >> env.aws.sh
+    else
+      echo "export AWS_KEYPAIR='${AWS_KEYPAIR}'" >> env.aws.sh
+    fi
+
+    if [ -z ${INSTANCE_TYPE} ]; then
+      echo "export INSTANCE_TYPE='t2.large'" >> env.aws.sh
+    else
+      echo "export INSTANCE_TYPE='${INSTANCE_TYPE}'" >> env.aws.sh
+    fi
+
+    if [ -z ${SUBNET_ID} ]; then
+      echo "export SUBNET_ID='default'" >> env.aws.sh
+    else
+      echo "export SUBNET_ID='${SUBNET_ID}'" >> env.aws.sh
+    fi
+  
+  fi
+}
 
 if [ -z $MACHINE_NAME ] | \
 	[ -z $CUSTOM_NETWORK_NAME ] | \
@@ -95,6 +148,9 @@ fi
 
 if [ -z $VPC_AVAIL_ZONE ]; then
     echo "No availability zone specified - using default [a]."
+    # Driver amazonec2 defaults to zone a but setting explicitly here to
+    # guard against side effects in command below if using parameter with no
+    # value.
     export VPC_AVAIL_ZONE=a
 elif [[ ! $VPC_AVAIL_ZONE =~ ^[a-e]{1,1}$ ]]; then
         echo "Availability zone can only be a single lower case char, 'a' to 'e'. Exiting..."
@@ -115,20 +171,43 @@ then
   eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s\?=\s\?/export AWS_DEFAULT_REGION=/')
 fi
 
+source_aws
+
 # Source environment variables and set up default admin credentials
+source env.aws.sh
 source credentials.generate.sh
 source env.config.sh
 
+# Allow script to continue if error returned by docker-machine command
+set +e
+
 # Create Docker machine if one doesn't already exist with the same name
-if $(docker-machine env $MACHINE_NAME > /dev/null 2>&1) ; then
-	echo "Docker machine '$MACHINE_NAME' already exists"
+docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "Docker machine '${MACHINE_NAME}' already exists."
 else
-  if [ -z $AWS_ACCESS_KEY_ID ]; then
-    docker-machine create --driver amazonec2 --amazonec2-vpc-id $VPC_ID --amazonec2-zone $VPC_AVAIL_ZONE --amazonec2-instance-type t2.large $MACHINE_NAME
-  else
-    docker-machine create --driver amazonec2 --amazonec2-access-key $AWS_ACCESS_KEY_ID --amazonec2-secret-key $AWS_SECRET_ACCESS_KEY --amazonec2-vpc-id $VPC_ID --amazonec2-zone $VPC_AVAIL_ZONE --amazonec2-instance-type t2.large --amazonec2-root-size 50 --amazonec2-region $AWS_DEFAULT_REGION $MACHINE_NAME
-  fi
+
+    MACHINE_CREATE_CMD="docker-machine create \
+                            --driver amazonec2 \
+                            --amazonec2-vpc-id ${VPC_ID} \
+			    --amazonec2-zone $VPC_AVAIL_ZONE \
+			    --amazonec2-instance-type m4.xlarge"
+
+    if [ -n "${AWS_ACCESS_KEY_ID}" ]; then
+        MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
+	                        --amazonec2-access-key $AWS_ACCESS_KEY_ID \
+				--amazonec2-secret-key $AWS_SECRET_ACCESS_KEY \
+				--amazonec2-region $AWS_DEFAULT_REGION"
+    fi
+
+    MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} ${MACHINE_NAME}"
+
+    ${MACHINE_CREATE_CMD}
+
 fi
+
+# Reenable errexit
+set -e
 
 # Create Docker network if one doesn't already exist with the same name
 eval "$(docker-machine env $MACHINE_NAME --shell bash)"
@@ -164,6 +243,7 @@ echo SUCCESS, your new ADOP instance is ready!
 echo
 echo Run these commands in your shell:
 echo '  eval \"$(docker-machine env $MACHINE_NAME)\"'
+echo '  source env.aws.sh'
 echo '  source credentials.generate.sh'
 echo '  source env.config.sh'
 echo
