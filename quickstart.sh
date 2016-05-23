@@ -142,7 +142,8 @@ provision_aws() {
 				--driver amazonec2 \
 				--amazonec2-vpc-id ${AWS_VPC_ID} \
 				--amazonec2-zone $VPC_AVAIL_ZONE \
-				--amazonec2-instance-type m4.xlarge"
+				--amazonec2-instance-type m4.xlarge \
+        --amazonec2-root-size 32"
 
 	if [ -n "${AWS_ACCESS_KEY_ID}" ]; then
 	    MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
