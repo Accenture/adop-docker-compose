@@ -64,6 +64,10 @@ prep_env() {
     source ${CONF_DIR}/conf/env.provider.sh
     source ${CONF_DIR}/credentials.generate.sh
     source ${CONF_DIR}/env.config.sh
+    if [ -f "${CONF_DIR}/env.override.sh" ]; then
+	echo "Using ${CONF_DIR}/env.override.sh to override default values for environment variable."
+	source ${CONF_DIR}/env.override.sh
+    fi
 }
 
 init() {
