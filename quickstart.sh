@@ -125,6 +125,10 @@ provision_aws() {
       echo "Using default AWS region from ~/.aws/config"
       eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s\?=\s\?/export AWS_DEFAULT_REGION=/')
     fi
+    
+    if [ -z ${AWS_DOCKER_MACHINE_SIZE} ]; then
+    	export AWS_DOCKER_MACHINE_SIZE="m4.xlarge"
+    fi
 
     # Create a file with AWS parameters
     source_aws
@@ -142,7 +146,7 @@ provision_aws() {
 				--driver amazonec2 \
 				--amazonec2-vpc-id ${AWS_VPC_ID} \
 				--amazonec2-zone $VPC_AVAIL_ZONE \
-				--amazonec2-instance-type m4.xlarge"
+				--amazonec2-instance-type ${AWS_DOCKER_MACHINE_SIZE}"
 
 	if [ -n "${AWS_ACCESS_KEY_ID}" ]; then
 	    MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
