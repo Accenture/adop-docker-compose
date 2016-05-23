@@ -11,3 +11,4 @@ platform.secrets.sh
 env.override.sh
 conf/provider/env.provider.*.sh
 *.seq
+.adop*
