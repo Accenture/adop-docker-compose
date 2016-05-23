@@ -22,11 +22,12 @@ help() {
     cmd_usage
     echo
     echo "Available subcommands are:"
-    printf "    %-16s   %s\n" "init" "Initialises ADOP"
-    printf "    %-16s   %s\n" "up" "docker-compose up for ADOP"
-    printf "    %-16s   %s\n" "gen-certs <path>" "Generate client certificates for TLS-enabled Machine and copy to <path> in Jenkins Slave"
-    printf "    %-16s   %s\n" "<command>" "Runs 'docker-compose <command>' for ADOP, where <command> is not listed above"
-    printf "    %-16s   %s\n" "help" "Prints this help information"
+    printf "    %-22s   %s\n" "init" "Initialises ADOP"
+    printf "    %-22s   %s\n" "init" "<--without-pull>" "Initialises ADOP without pulling images"
+    printf "    %-22s   %s\n" "up" "docker-compose up for ADOP"
+    printf "    %-22s   %s\n" "gen-certs <path>" "Generate client certificates for TLS-enabled Machine and copy to <path> in Jenkins Slave"
+    printf "    %-22s   %s\n" "<command>" "Runs 'docker-compose <command>' for ADOP, where <command> is not listed above"
+    printf "    %-22s   %s\n" "help" "Prints this help information"
     echo
 }
 
@@ -44,7 +45,7 @@ prep_env() {
                exit 1
             else
                 # Set the machine
-                eval $( docker-machine env $MACHINE_NAME )
+                eval $(docker-machine env $MACHINE_NAME --shell bash)
 
                 export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
                 export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
@@ -60,11 +61,20 @@ prep_env() {
         export LOGSTASH_HOST=${PROXY_IP}
     fi
 
+    source ${CONF_DIR}/conf/env.provider.sh
     source ${CONF_DIR}/credentials.generate.sh
     source ${CONF_DIR}/env.config.sh
 }
 
 init() {
+
+case "$1" in
+    --without-pull)
+        export PULL="NO"
+        ;;
+        *)
+esac
+
     echo ' 
           ###    ########   #######  ########  
          ## ##   ##     ## ##     ## ##     ## 
@@ -85,8 +95,14 @@ init() {
     create_network
 
     # Run the Docker compose commands
-    echo "* Pulling Docker Images"
-    run_compose pull
+
+    if [ "${PULL}" = "NO" ]; then
+        echo "* Skipping Pulling Docker Images"
+    else
+        echo "* Pulling Docker Images"
+        run_compose pull
+    fi
+
     echo "* Bringing up ADOP..."
     run_compose up -d
 
@@ -102,7 +118,7 @@ init() {
 
     # Generate and copy the certificates to jenkins slave if TLS is enabled
     if [ "${DOCKER_TLS_VERIFY}" = "1" ]; then
-        gen-certs "${DOCKER_CLIENT_CERT_PATH}"
+        gen_certs "${DOCKER_CLIENT_CERT_PATH}"
     else
         echo "DOCKER_TLS_VERIFY not set to 1, skipping certificate generation"
     fi
@@ -113,9 +129,10 @@ init() {
     echo
     echo "SUCCESS, your new ADOP instance is ready!"
     echo
-    echo "Run this command in your shell:"
-    echo '  source env.config.sh'
+    echo "Run these commands in your shell:"
+    echo '  source ./conf/env.provider.sh'
     echo '  source credentials.generate.sh'
+    echo '  source env.config.sh'
     echo
     echo "You can check if any variables are missing with: ./adop compose config  | grep 'WARNING'"
     echo
@@ -133,7 +150,7 @@ create_network() {
     fi
 }
 
-gen-certs() {
+gen_certs() {
     echo "Generating client certificates for TLS-enabled Engine"
     CERT_PATH=$1
     if [ -z ${CERT_PATH} ]; then
@@ -176,12 +193,32 @@ gen-certs() {
     # * Generate signed certificate
     # * Generate the client certificate
     ####
+    set +e
     openssl genrsa -out ${TEMP_CERT_PATH}/key.pem 4096 &> /dev/null
     openssl req -subj "${CLIENT_SUBJ}" -new -key ${TEMP_CERT_PATH}/key.pem -out ${TEMP_CERT_PATH}/client.csr &> /dev/null
     echo "extendedKeyUsage = clientAuth" >  ${TEMP_CERT_PATH}/extfile.cnf
-    openssl x509 -req -days 365 -sha256 -in ${TEMP_CERT_PATH}/client.csr -CA ${HOME}/.docker/machine/certs/ca.pem -CAkey ${HOME}/.docker/machine/certs/ca-key.pem -CAcreateserial -out ${TEMP_CERT_PATH}/cert.pem -extfile ${TEMP_CERT_PATH}/extfile.cnf &> /dev/null
+    openssl x509 -req -days 365 -sha256 -in ${TEMP_CERT_PATH}/client.csr -CA ${HOME}/.docker/machine/certs/ca.pem -CAkey ${HOME}/.docker/machine/certs/ca-key.pem -CAcreateserial -CAserial temp.seq -out ${TEMP_CERT_PATH}/cert.pem -extfile ${TEMP_CERT_PATH}/extfile.cnf &> /dev/null
+    set -e
     cp ${HOME}/.docker/machine/certs/ca.pem ${TEMP_CERT_PATH}/ca.pem
     docker --tlsverify --tlscacert=${HOME}/.docker/machine/certs/ca.pem --tlscert=${TEMP_CERT_PATH}/cert.pem --tlskey=${TEMP_CERT_PATH}/key.pem -H=${DOCKER_HOST} version &> /dev/null
+
+    ####
+    # * Check if certificates were generated successfully
+    ####
+    CERT_FILE="${TEMP_CERT_PATH}/cert.pem"
+    CA_FILE="${TEMP_CERT_PATH}/ca.pem"
+    KEY_FILE="${TEMP_CERT_PATH}/key.pem"
+    for file in $CERT_FILE $CA_FILE $KEY_FILE
+    do
+        if [[ -s $file ]]; then
+            echo "${file} was generated successfully..."
+        else
+            echo "${file} was not generated successfully..."
+            echo "This may be due to OpenSSL failing to generate cert.pem."
+            echo "Please run your shell window in Administrator mode or with root access and re-run the quickstart script with the same flags provided in this run."
+            exit 1
+        fi
+    done
 
     ####
     # * Remove unnecessary files
@@ -222,6 +259,7 @@ export LOGGING_DRIVER=syslog
 export CUSTOM_NETWORK_NAME=local_network
 export OVERRIDES=""
 export TOTAL_OVERRIDES=""
+export PULL="YES"
 
 # Parameters
 while getopts "m:f:F:v:l:n:i:" opt; do
@@ -268,8 +306,11 @@ ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUM
 ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
 
 case ${SUBCOMMAND_OPT} in
-    "cmd_desc"|"help"|"init"|"gen-certs")
+    "cmd_desc"|"help"|"init")
         ${SUBCOMMAND_OPT} "$@"
+        ;;
+    "gen-certs")
+        gen_certs "$@"
         ;;
     *)
         run_compose ${SUBCOMMAND_OPT} "$@"

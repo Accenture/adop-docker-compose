@@ -4,7 +4,7 @@
 proxy:
   container_name: proxy
   restart: always
-  image: accenture/adop-nginx:0.1.1
+  image: accenture/adop-nginx:0.2.0
   #build: ../images/docker-nginx/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -24,7 +24,7 @@ ldap:
   container_name: ldap
   restart: always
   #build: ../images/docker-ldap/
-  image: accenture/adop-ldap:0.1.1
+  image: accenture/adop-ldap:0.1.2
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "389"
@@ -163,7 +163,7 @@ sonar-mysql:
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "3306"
-  environment: 
+  environment:
     MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
     MYSQL_USER: ${SONAR_MYSQL_USER}
     MYSQL_PASSWORD: ${SONAR_MYSQL_PASSWORD}
@@ -172,7 +172,7 @@ sonar-mysql:
 sonar:
   container_name: sonar
   restart: always
-  image: accenture/adop-sonar:0.1.0
+  image: accenture/adop-sonar:0.1.1
   #build: ../images/docker-sonar/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -194,7 +194,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.1.3
+  image: accenture/adop-jenkins:0.1.5
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -202,6 +202,7 @@ jenkins:
     - "50000"
   privileged: true
   environment:
+    ADOP_PLATFORM_MANAGEMENT_VERSION: "0.1.1"
     JENKINS_OPTS: "--prefix=/jenkins"
     ROOT_URL: "${PROTO}://${TARGET_HOST}/jenkins/"
     LDAP_SERVER: "ldap:389"
@@ -332,3 +333,31 @@ docker-registry:
     #EMAIL: dcsc@accenture.com
   entrypoint: /bin/bash
   command: /bin/startup.sh
+
+ldap-ltb:
+  container_name: ldap-ltb
+  restart: always
+  image: accenture/adop-ldap-ltb:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
+  expose:
+    - "80"
+  environment:
+    LDAP_LTB_URL: "ldap://ldap:389"
+    LDAP_LTB_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
+    LDAP_LTB_PWD: "${LDAP_PWD}"
+    LDAP_LTB_BS: "${LDAP_FULL_DOMAIN}"
+
+ldap-phpadmin:
+  container_name: ldap-phpadmin
+  restart: always
+  image: accenture/adop-ldap-phpadmin:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
+  expose:
+    - "80"
+  environment:
+    LDAP_SERVER_NAME: "LDAP"
+    LDAP_SERVER_HOST: "ldap"
+    LDAP_SERVER_PORT: "389"
+    LDAP_SERVER_BIND_ID: "cn=admin,${LDAP_FULL_DOMAIN}"
+    LDAP_SERVER_BASE_DN: "${LDAP_FULL_DOMAIN}"
+

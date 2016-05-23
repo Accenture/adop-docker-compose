@@ -1,0 +1,6 @@
+{
+  "name": "ADOP",
+  "tagline": "",
+  "body": "# The DevOps Platform: Overview\r\n\r\nThe DevOps Platform is a tools environment for continuously testing, releasing and maintaining applications. Reference code, delivery pipelines, automated testing and environments can be loaded in via the concept of Cartridges.\r\n\r\n![HomePage](https://raw.githubusercontent.com/accenture/adop-docker-compose/master/img/home.png)",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}

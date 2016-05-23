@@ -1,0 +1,9 @@
+# Override file to pass in AWS specific env variables to jenkins
+
+jenkins:
+  environment:
+    AWS_KEYPAIR: "${AWS_KEYPAIR}"
+    AWS_VPC_ID: "${AWS_VPC_ID}"
+    AWS_SUBNET_ID: "${AWS_SUBNET_ID}"
+    AWS_INSTANCE_TYPE: "${AWS_INSTANCE_TYPE}"
+    AWS_DEFAULT_REGION: "${AWS_DEFAULT_REGION}"
