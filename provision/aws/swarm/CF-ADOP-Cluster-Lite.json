@@ -1,0 +1,1817 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Adop Core Generation 5 CloudFormation Swarm Stack - Lite",
+  "Mappings": {
+    "RegionMap": {
+      "eu-central-1": {
+        "CENTOSAMI": "ami-9bf712f4",
+        "NATAMI": "ami-ae380eb3",
+        "RHELAMI": "ami-875042eb"
+      },
+      "eu-west-1": {
+        "CENTOSAMI": "ami-7abd0209",
+        "NATAMI": "ami-14913f63",
+        "RHELAMI": "ami-8b8c57f8"
+      },
+      "us-east-1": {
+        "CENTOSAMI": "ami-6d1c2007",
+        "NATAMI": "ami-184dc970",
+        "RHELAMI": "ami-2051294a"
+      },
+      "us-west-2": {
+        "CENTOSAMI": "ami-d2c924b2",
+        "NATAMI": "ami-290f4119",
+        "RHELAMI": "ami-775e4f16"
+      },
+      "us-west-1": {
+        "CENTOSAMI": "ami-af4333cf",
+        "NATAMI": "ami-a98396ec",
+        "RHELAMI": "ami-d1315fb1"
+      },
+      "ap-southeast-1": {
+        "CENTOSAMI": "ami-f068a193",
+        "NATAMI": "ami-6aa38238",
+        "RHELAMI": "ami-e0c19f83"
+      },
+      "ap-southeast-2": {
+        "CENTOSAMI": "ami-fedafc9d",
+        "NATAMI": "ami-893f53b3",
+        "RHELAMI": "ami-e0c19f83"
+      },
+      "ap-northeast-1": {
+        "CENTOSAMI": "ami-eec1c380",
+        "NATAMI": "ami-27d6e626",
+        "RHELAMI": "ami-e0c19f83"
+      },
+      "ap-northeast-2": {
+        "CENTOSAMI": "ami-c74789a9",
+        "NATAMI": "ami-68a46f06",
+        "RHELAMI": "ami-e0c19f83"
+      },
+      "sa-east-1": {
+        "CENTOSAMI": "ami-26b93b4a",
+        "NATAMI": "ami-8122969c",
+        "RHELAMI": "ami-e0c19f83"
+      }
+    }
+  },
+  "Outputs": {
+    "ReleaseNote": {
+      "Description": "This is your starting point, please copy this URL into your web browser.",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": [
+                "AdopSwarmProxy",
+                "PublicIp"
+              ]
+            },
+            "/"
+          ]
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "AdopLandingPage": {
+      "Type": "String",
+      "Description": "Adop Extensions. Customise your ADOP Landing page.",
+      "AllowedValues": [
+        "GitlabExtension",
+        "Default"
+      ],
+      "ConstraintDescription": "Must be a valid entry.",
+      "Default": "GitlabExtension"
+    },
+    "AdopWorkspace": {
+      "Default": "",
+      "Description": "Initialise a Jenkins workspace folder.",
+      "Type": "String",
+      "Default": "None"
+    },
+    "AdopUsername": {
+      "Default": "",
+      "Description": "ADOP admin account username.",
+      "Type": "String"
+    },
+    "AdopUserPassword": {
+      "NoEcho": "true",
+      "Description": "ADOP admin account password. Example allowed password: n0tyourusername123",
+      "Type": "String",
+      "MinLength": "8",
+      "MaxLength": "15",
+      "AllowedPattern": "[a-zA-Z0-9]*",
+      "ConstraintDescription":"You are not allowed to include your 'username' or 'password' in your password! Minimum Length of 8 characters and must contain a number."
+    },
+    "KeyName": {
+      "Default": "academy_key",
+      "Description": "Key-pair name to use.",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+    "NatInstanceType": {
+      "Type": "String",
+      "Description": "Nat instance EC2 HVM instance type. Note that this can be adjusted after the stack has been completed.",
+      "AllowedValues": [
+        "t2.small",
+        "t2.medium",
+        "t2.large",
+        "m4.large",
+        "m4.xlarge",
+        "m4.2xlarge",
+        "m4.4xlarge",
+        "m4.10xlarge",
+        "m3.medium",
+        "m3.xlarge",
+        "m3.xlarge",
+        "m3.2xlarge"
+      ],
+      "ConstraintDescription": "Must be a valid EC2 HVM instance type.",
+      "Default": "t2.medium"
+    },
+    "SwarmNodeInstanceType": {
+      "Type": "String",
+      "Description": "ADOP Core EC2 HVM instance type. Note that this can be adjusted after the stack has been completed.",
+      "AllowedValues": [
+        "t2.small",
+        "t2.medium",
+        "t2.large",
+        "m4.large",
+        "m4.xlarge",
+        "m4.2xlarge",
+        "m4.4xlarge",
+        "m4.10xlarge",
+        "m3.medium",
+        "m3.xlarge",
+        "m3.xlarge",
+        "m3.2xlarge"
+      ],
+      "ConstraintDescription": "Must be a valid EC2 HVM instance type.",
+      "Default": "t2.large"
+    }
+  },
+  "Resources": {
+    "ElasticIP": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "InstanceId": {
+          "Ref": "AdopSwarmProxy"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "77d8a590-a4b7-4657-ae49-2bace7b74166"
+        }
+      }
+    },
+    "AdopNatConsulInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "SourceDestCheck": "false",
+        "InstanceType": {
+          "Ref": "NatInstanceType"
+        },
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "NATAMI"
+          ]
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "NetworkInterfaces": [
+          {
+            "AssociatePublicIpAddress": "true",
+            "DeleteOnTermination": "true",
+            "DeviceIndex": "0",
+            "GroupSet": [
+              {
+                "Ref": "NATConsulSecurityGroup"
+              }
+            ],
+            "PrivateIpAddress": "10.10.1.100",
+            "SubnetId": {
+              "Ref": "PublicSubnet"
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "AdopNatConsulInstance"
+                ]
+              ]
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "sleep 5\n",
+                "IP=$(hostname -i)\n",
+                "yum -y install docker\n",
+                "curl -L https://github.com/docker/compose/releases/download/1.6.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose\n",
+                "chmod +x /usr/local/bin/docker-compose && ln -sv /usr/local/bin/docker-compose /usr/bin/docker-compose\n",
+                "service docker start\n",
+                "chkconfig docker on\n",
+                "docker run -d --restart=always -p 8500:8500 --name=consul progrium/consul -server -bootstrap -advertise=${IP} -client=0.0.0.0\n",
+                "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\",",
+                "\"Reason\" : \"NAT Instance with Consul Backend is ready\",",
+                "\"UniqueId\" : \"IDNAT\",",
+                "\"Data\" : \"Done\"}' ",
+                "\"",
+                {
+                  "Ref": "NATWaitConditionHandle"
+                },
+                "\"\n"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "97c64025-438f-4af4-afd1-18baa33f0dbc"
+        }
+      }
+    },
+    "AdopSwarmProxy": {
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": "true",
+              "VolumeSize": 50,
+              "VolumeType": "gp2"
+            }
+          }
+        ],
+        "NetworkInterfaces": [
+          {
+            "AssociatePublicIpAddress": "false",
+            "DeleteOnTermination": "true",
+            "DeviceIndex": "0",
+            "GroupSet": [
+              {
+                "Ref": "SwarmProxySecurityGroup"
+              }
+            ],
+            "PrivateIpAddress": "10.10.1.101",
+            "SubnetId": {
+              "Ref": "PublicSubnet"
+            }
+          }
+        ],
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "CENTOSAMI"
+          ]
+        },
+        "InstanceType": "t2.small",
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "SwarmProxy"
+                ]
+              ]
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -e\n",
+                "export IP=$(hostname --ip-address)\n",
+                "sleep 10\n",
+                "yum -y install git\n",
+                "mkdir -p /data && chmod 775 /data\n",
+                "cd /data && git clone https://github.com/bzon/adop-docker-compose.git\n",
+                "cd /data/adop-docker-compose\n",
+                "install/centos/install_docker.sh\n",
+                "cat > /etc/sysconfig/docker <<- 'EOF'\n",
+                "DOCKER_OPTS=\"-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://10.10.1.100:8500/network --cluster-advertise=eth0:2375\"\n",
+                "EOF\n",
+                "systemctl daemon-reload\n",
+                "systemctl start docker\n",
+                "chkconfig docker on\n",
+                "docker run --restart=always --name swarm-leader -d -p 4000:4000 --restart=always swarm manage -H :4000 --replication --advertise $(hostname -i):4000 consul://10.10.1.100:8500\n",
+                
+                "sleep 5\n",
+                "echo \"ADOP extensions start here...\"\n",
+                "export PUBLIC_IP=$(curl http://instance-data/latest/meta-data/public-ipv4)\n",
+                "echo \"\n",
+                "export PUBLIC_IP=$PUBLIC_IP\n",
+                "export TARGET_HOST=$PUBLIC_IP\n",
+                "export LOGSTASH_HOST=$PUBLIC_IP\n",
+                "export VOLUME_DRIVER=local\n",
+                "export CUSTOM_NETWORK_NAME=adop-network-overlay\n",
+                "export AWS_REGION=",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n",
+                "export VPC_ID=",
+                {
+                  "Ref": "Vpc"
+                },
+                "\n",
+                "export DEFAULT_PUBLIC_SUBNET_ID=",
+                {
+                  "Ref": "PublicSubnet"
+                },
+                "\n",
+                "export DEFAULT_PRIVATE_SUBNET_ID=",
+                {
+                  "Ref": "PrivateSubnet"
+                },
+                "\n",
+                "export DEFAULT_RHEL_AMI=",
+                {
+                  "Fn::FindInMap": [
+                    "RegionMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "RHELAMI"
+                  ]
+                },
+                "\n",
+                "export DEFAULT_SECURITY_GROUP_ID=",
+                {
+                  "Fn::GetAtt": [
+                    "SwarmNodeSecurityGroup",
+                    "GroupId"
+                  ]
+                },
+                "\n",
+                "export DEFAULT_KEY_PAIR=",
+                {
+                  "Ref": "KeyName"
+                },
+                "\n",
+                "export INITIAL_ADMIN_USER=",
+                {
+                  "Ref": "AdopUsername"
+                },
+                "\n",
+                "export INITIAL_ADMIN_PASSWORD_PLAIN=",
+                {
+                  "Ref": "AdopUserPassword"
+                },
+                "\n",
+                "\"> compose.env.sh\n",
+                "echo \". /data/adop-docker-compose/compose.env.sh\" >> ~/.bashrc\n",
+                "source /data/adop-docker-compose/compose.env.sh\n",
+                "docker network create --driver overlay --subnet=192.168.0.0/24 adop-network-overlay\n",
+                "source credentials.generate.sh\n",
+                "source env.config.sh\n",
+                "export COMPOSE_OVERRIDE=\"-f etc/logging/syslog/default.yml -f etc/volumes/local/default.yml -f adop-overrides.yml\"\n",
+                "export DOCKER_HOST=tcp://10.10.2.101:2375\n",
+                "docker-compose -f compose/elk.yml up -d\n",
+                "docker-compose -f docker-compose.yml $COMPOSE_OVERRIDE up -d sensu-uchiwa sensu-api sensu-server sensu-client sensu-rabbitmq sensu-redis  ldap-ltb ldap-phpadmin\n",
+                "export DOCKER_HOST=tcp://10.10.2.102:2375\n",
+                "docker-compose -f docker-compose.yml $COMPOSE_OVERRIDE up -d jenkins-slave ldap selenium-hub selenium-node-chrome selenium-node-firefox sonar sonar-mysql\n",
+                "export DOCKER_HOST=tcp://10.10.2.100:2375\n",
+                "docker-compose -f docker-compose.yml $COMPOSE_OVERRIDE up -d jenkins gitlab gerrit gerrit-mysql nexus\n",
+                "export DOCKER_HOST=\n",
+                "docker-compose -f docker-compose.yml $COMPOSE_OVERRIDE up -d proxy\n",
+                "sleep 5\n",
+                "hack/customise_landing_page.sh ",{ "Ref": "AdopLandingPage" },"\n",
+                "hack/gitlab-load-platform.sh ",{ "Ref": "AdopWorkspace" },"\n",
+                
+                "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\",",
+                "\"Reason\" : \"ADOP is ready\",",
+                "\"UniqueId\" : \"IDSwarmProxyID\",",
+                "\"Data\" : \"Done\"}' ",
+                "\"",
+                {
+                  "Ref": "SwarmProxyWaitConditionHandle"
+                },
+                "\"\n",
+                "\n"
+              ]
+            ]
+          }
+        }
+      },
+      "Type": "AWS::EC2::Instance",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "50a0d189-8c47-44b2-8eff-17759eb9c659"
+        }
+      },
+      "DependsOn": [
+        "AdopNatConsulInstance",
+        "SwarmNodeWaitCondition",
+        "SwarmNodeWaitCondition2",
+        "SwarmNodeWaitCondition3"
+      ]
+    },
+    "AdopSwarmNode1": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": "true",
+              "VolumeSize": 50,
+              "VolumeType": "gp2"
+            }
+          }
+        ],
+        "NetworkInterfaces": [
+          {
+            "AssociatePublicIpAddress": "false",
+            "DeleteOnTermination": "true",
+            "DeviceIndex": "0",
+            "GroupSet": [
+              {
+                "Ref": "SwarmNodeSecurityGroup"
+              }
+            ],
+            "PrivateIpAddress": "10.10.2.100",
+            "SubnetId": {
+              "Ref": "PrivateSubnet"
+            }
+          }
+        ],
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "CENTOSAMI"
+          ]
+        },
+        "InstanceType": {
+          "Ref": "SwarmNodeInstanceType"
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "SwarmNodeTools1"
+                ]
+              ]
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "sleep 5\n",
+                "export IP=$(hostname --ip-address)\n",
+                "yum -y install git\n",
+                "mkdir -p /data && chmod 775 /data\n",
+                "cd /data && git clone https://github.com/bzon/adop-docker-compose.git\n",
+                "cd /data/adop-docker-compose\n",
+                "install/centos/install_docker.sh\n",
+                "cat > /etc/sysconfig/docker <<- 'EOF'\n",
+                "DOCKER_OPTS=\"-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://10.10.1.100:8500/network --cluster-advertise=eth0:2375\"\n",
+                "EOF\n",
+                "systemctl daemon-reload\n",
+                "systemctl start docker\n",
+                "chkconfig docker on\n",
+                "docker run -d --restart=always --name swarm-node swarm join --advertise=$(hostname -i):2375 consul://10.10.1.100:8500\n",
+                "docker-compose -f docker-compose.yml -f adop-overrides.yml pull jenkins gitlab gerrit gerrit-mysql nexus\n",
+                "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\",",
+                "\"Reason\" : \"Swarm Node is ready\",",
+                "\"UniqueId\" : \"IDSwarmNode1ID\",",
+                "\"Data\" : \"Done\"}' ",
+                "\"",
+                {
+                  "Ref": "SwarmNodeWaitConditionHandle"
+                },
+                "\"\n",
+                "\n"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "cd66cd71-b482-4f28-92a6-11dc601a5597"
+        }
+      },
+      "DependsOn": [
+        "NATWaitCondition"
+      ]
+    },
+    "NATConsulSecurityGroup": {
+      "Properties": {
+        "GroupDescription": "NAT Consul Security Group",
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "22",
+            "IpProtocol": "tcp",
+            "ToPort": "22"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "3389",
+            "IpProtocol": "tcp",
+            "ToPort": "3389"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "80",
+            "IpProtocol": "tcp",
+            "ToPort": "80"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "443",
+            "IpProtocol": "tcp",
+            "ToPort": "443"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "8500",
+            "IpProtocol": "tcp",
+            "ToPort": "8500"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "8500",
+            "IpProtocol": "udp",
+            "ToPort": "8500"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "7946",
+            "IpProtocol": "tcp",
+            "ToPort": "7946"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "7946",
+            "IpProtocol": "udp",
+            "ToPort": "7946"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "4789",
+            "IpProtocol": "udp",
+            "ToPort": "4789"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "25826",
+            "IpProtocol": "udp",
+            "ToPort": "25826"
+          },
+          {
+            "IpProtocol": "icmp",
+            "FromPort": "-1",
+            "ToPort": "-1",
+            "CidrIp": "10.10.0.0/16"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "9476a6df-d58e-42b8-93db-8d04e5f5b7f4"
+        }
+      }
+    },
+    "PublicRouteDefault": {
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "VpcInternetGateway"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        }
+      },
+      "Type": "AWS::EC2::Route",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "cc4ce313-df1f-42d2-bab5-12efccd9dfd9"
+        }
+      }
+    },
+    "PublicRouteTable": {
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::RouteTable",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "4ddb3c75-e8a0-4b89-9744-115cc2a9d1ee"
+        }
+      }
+    },
+    "PublicSubnet": {
+      "Properties": {
+        "CidrBlock": "10.10.1.0/24",
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::Subnet",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "869aca7e-e10e-4b3f-9bfd-86e5ff3a00e3"
+        }
+      }
+    },
+    "PublicSubnetPublicRouteTableAssoc": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        },
+        "SubnetId": {
+          "Ref": "PublicSubnet"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "49ba56df-a6f9-4eef-a621-d01f453e23d9"
+        }
+      }
+    },
+    "Vpc": {
+      "Properties": {
+        "CidrBlock": "10.10.0.0/16",
+        "EnableDnsHostnames": "true",
+        "EnableDnsSupport": "true"
+      },
+      "Type": "AWS::EC2::VPC",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "a44e677b-c679-482b-929c-f1a7aa112926"
+        }
+      }
+    },
+    "VpcGatewayAttachment": {
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "VpcInternetGateway"
+        },
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "82dcb3af-1538-44be-b9ad-cda2335288f1"
+        }
+      }
+    },
+    "VpcInternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "a25e58c0-2ee7-41d4-ab1f-42f4d636c535"
+        }
+      }
+    },
+    "PrivateRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "5d410393-db64-4d4b-836d-a23ab8561339"
+        }
+      }
+    },
+    "PrivateRouteDefault": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTable"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "InstanceId": {
+          "Ref": "AdopNatConsulInstance"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "655d7159-0e6b-41f6-b58d-d795e5b20e7a"
+        }
+      }
+    },
+    "PrivateSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.10.2.0/24",
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "35cfa4d8-7b76-4317-a01a-96dbf919bd0d"
+        }
+      }
+    },
+    "PrivateSubnetPrivateRouteAssoc": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRouteTable"
+        },
+        "SubnetId": {
+          "Ref": "PrivateSubnet"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "b35c0812-8292-43d4-aaf9-ec5587d06c6e"
+        }
+      }
+    },
+    "SwarmProxySecurityGroup": {
+      "Properties": {
+        "GroupDescription": "Swarm Proxy Security Group",
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "2375",
+            "IpProtocol": "tcp",
+            "ToPort": "2375"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "4000",
+            "IpProtocol": "tcp",
+            "ToPort": "4000"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "3375",
+            "IpProtocol": "tcp",
+            "ToPort": "3375"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "8500",
+            "IpProtocol": "udp",
+            "ToPort": "8500"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "8500",
+            "IpProtocol": "tcp",
+            "ToPort": "8500"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "7946",
+            "IpProtocol": "tcp",
+            "ToPort": "7946"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "7946",
+            "IpProtocol": "udp",
+            "ToPort": "7946"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "4789",
+            "IpProtocol": "udp",
+            "ToPort": "4789"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "25826",
+            "IpProtocol": "tcp",
+            "ToPort": "25826"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "22",
+            "IpProtocol": "tcp",
+            "ToPort": "22"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "80",
+            "IpProtocol": "tcp",
+            "ToPort": "80"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "443",
+            "IpProtocol": "tcp",
+            "ToPort": "443"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "5f8a92e2-f223-4168-893e-02e01796aa86"
+        }
+      }
+    },
+    "SwarmNodeSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Swarm Node Security Group",
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "0",
+            "IpProtocol": "tcp",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "10.10.0.0/16",
+            "FromPort": "0",
+            "IpProtocol": "udp",
+            "ToPort": "65535"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "6378e06e-56df-465c-baa5-1984f0c2ff48"
+        }
+      }
+    },
+    "SwarmNodeWaitConditionHandle": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle",
+      "Properties": {},
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "2081c4d8-19c1-42cd-ac1b-f37218066a19"
+        }
+      }
+    },
+    "SwarmNodeWaitCondition": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Properties": {
+        "Handle": {
+          "Ref": "SwarmNodeWaitConditionHandle"
+        },
+        "Timeout": "1500"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "a7beba5f-00e5-4d95-b03f-be9fc6d2aab5"
+        }
+      },
+      "DependsOn": [
+        "AdopSwarmNode1"
+      ]
+    },
+    "AdopSwarmNode2": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": "true",
+              "VolumeSize": 50,
+              "VolumeType": "gp2"
+            }
+          }
+        ],
+        "NetworkInterfaces": [
+          {
+            "AssociatePublicIpAddress": "false",
+            "DeleteOnTermination": "true",
+            "DeviceIndex": "0",
+            "GroupSet": [
+              {
+                "Ref": "SwarmNodeSecurityGroup"
+              }
+            ],
+            "PrivateIpAddress": "10.10.2.101",
+            "SubnetId": {
+              "Ref": "PrivateSubnet"
+            }
+          }
+        ],
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "CENTOSAMI"
+          ]
+        },
+        "InstanceType": {
+          "Ref": "SwarmNodeInstanceType"
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "SwarmNodeTools2"
+                ]
+              ]
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "sleep 5\n",
+                "export IP=$(hostname --ip-address)\n",
+                "yum -y install git\n",
+                "mkdir -p /data && chmod 775 /data\n",
+                "cd /data && git clone https://github.com/bzon/adop-docker-compose.git\n",
+                "cd /data/adop-docker-compose\n",
+                "install/centos/install_docker.sh\n",
+                "cat > /etc/sysconfig/docker <<- 'EOF'\n",
+                "DOCKER_OPTS=\"-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://10.10.1.100:8500/network --cluster-advertise=eth0:2375\"\n",
+                "EOF\n",
+                "systemctl daemon-reload\n",
+                "systemctl start docker\n",
+                "chkconfig docker on\n",
+                "docker run -d --restart=always --name swarm-node swarm join --advertise=$(hostname -i):2375 consul://10.10.1.100:8500\n",
+                "docker-compose -f compose/elk.yml -f docker-compose.yml -f adop-overrides.yml pull kibana logstash elasticsearch sensu-uchiwa sensu-api sensu-server sensu-client sensu-rabbitmq sensu-redis ldap-ltb ldap-phpadmin\n",
+                "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\",",
+                "\"Reason\" : \"Swarm Node is ready\",",
+                "\"UniqueId\" : \"IDSwarmNode2ID\",",
+                "\"Data\" : \"Done\"}' ",
+                "\"",
+                {
+                  "Ref": "SwarmNodeWaitConditionHandle2"
+                },
+                "\"\n",
+                "\n"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "cba4c0fc-c175-4f41-88be-bdcd9a25a862"
+        }
+      },
+      "DependsOn": [
+        "NATWaitCondition"
+      ]
+    },
+    "SwarmNodeWaitCondition2": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Properties": {
+        "Handle": {
+          "Ref": "SwarmNodeWaitConditionHandle2"
+        },
+        "Timeout": "1500"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "007d682c-145c-42ac-a10f-dbb3c791ca22"
+        }
+      },
+      "DependsOn": [
+        "AdopSwarmNode2"
+      ]
+    },
+    "SwarmNodeWaitConditionHandle2": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle",
+      "Properties": {},
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "4639eafb-f924-47cc-9b96-2e3d5c363e1d"
+        }
+      }
+    },
+    "NATWaitCondition": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Properties": {
+        "Handle": {
+          "Ref": "NATWaitConditionHandle"
+        },
+        "Timeout": "1000"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "a0c96e64-00eb-47a4-8b7c-70035ccc71e9"
+        }
+      },
+      "DependsOn": [
+        "AdopNatConsulInstance"
+      ]
+    },
+    "NATWaitConditionHandle": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle",
+      "Properties": {},
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "0ed6b090-237d-4f57-ad37-f77099070540"
+        }
+      }
+    },
+    "AdopSwarmNode3": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": "true",
+              "VolumeSize": 50,
+              "VolumeType": "gp2"
+            }
+          }
+        ],
+        "NetworkInterfaces": [
+          {
+            "AssociatePublicIpAddress": "false",
+            "DeleteOnTermination": "true",
+            "DeviceIndex": "0",
+            "GroupSet": [
+              {
+                "Ref": "SwarmNodeSecurityGroup"
+              }
+            ],
+            "PrivateIpAddress": "10.10.2.102",
+            "SubnetId": {
+              "Ref": "PrivateSubnet"
+            }
+          }
+        ],
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "CENTOSAMI"
+          ]
+        },
+        "InstanceType": "t2.medium",
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "SwarmNodeTools3"
+                ]
+              ]
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "sleep 5\n",
+                "export IP=$(hostname --ip-address)\n",
+                "yum -y install git\n",
+                "mkdir -p /data && chmod 775 /data\n",
+                "cd /data && git clone https://github.com/bzon/adop-docker-compose.git\n",
+                "cd /data/adop-docker-compose\n",
+                "install/centos/install_docker.sh\n",
+                "cat > /etc/sysconfig/docker <<- 'EOF'\n",
+                "DOCKER_OPTS=\"-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://10.10.1.100:8500/network --cluster-advertise=eth0:2375\"\n",
+                "EOF\n",
+                "systemctl daemon-reload\n",
+                "systemctl start docker\n",
+                "chkconfig docker on\n",
+                "docker run -d --restart=always --name swarm-node swarm join --advertise=$(hostname -i):2375 consul://10.10.1.100:8500\n",
+                "docker-compose -f docker-compose.yml -f adop-overrides.yml pull ldap jenkins-slave selenium-node-firefox selenium-hub selenium-node-chrome sonar sonar-mysql\n",
+                "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\",",
+                "\"Reason\" : \"Swarm Node is ready\",",
+                "\"UniqueId\" : \"IDSwarmNode3ID\",",
+                "\"Data\" : \"Done\"}' ",
+                "\"",
+                {
+                  "Ref": "SwarmNodeWaitConditionHandle3"
+                },
+                "\"\n",
+                "\n"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "eeee439c-93d4-4d5d-904e-8de917cf1f40"
+        }
+      },
+      "DependsOn": [
+        "NATWaitCondition"
+      ]
+    },
+    "SwarmNodeWaitCondition3": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Properties": {
+        "Handle": {
+          "Ref": "SwarmNodeWaitConditionHandle3"
+        },
+        "Timeout": "1500"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "68a71f69-06b6-44b1-a4e7-97ca8995297f"
+        }
+      },
+      "DependsOn": [
+        "AdopSwarmNode3"
+      ]
+    },
+    "SwarmNodeWaitConditionHandle3": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle",
+      "Properties": {},
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "7d14e476-f68d-4015-9068-5b65c9d34560"
+        }
+      },
+      "DependsOn": []
+    },
+    "SwarmProxyWaitCondition": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Properties": {
+        "Handle": {
+          "Ref": "SwarmProxyWaitConditionHandle"
+        },
+        "Timeout": "3500"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "0eef5043-0727-47d5-8591-648eaf4ca05a"
+        }
+      },
+      "DependsOn": [
+        "AdopSwarmProxy"
+      ]
+    },
+    "SwarmProxyWaitConditionHandle": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle",
+      "Properties": {},
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "7934e36f-378a-4447-aa93-674ae8a35be6"
+        }
+      }
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "a25e58c0-2ee7-41d4-ab1f-42f4d636c535": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 120,
+          "y": 200
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "a44e677b-c679-482b-929c-f1a7aa112926": {
+        "size": {
+          "width": 720,
+          "height": 560
+        },
+        "position": {
+          "x": 250,
+          "y": 80
+        },
+        "z": 1,
+        "embeds": [
+          "6378e06e-56df-465c-baa5-1984f0c2ff48",
+          "5f8a92e2-f223-4168-893e-02e01796aa86",
+          "35cfa4d8-7b76-4317-a01a-96dbf919bd0d",
+          "5d410393-db64-4d4b-836d-a23ab8561339",
+          "869aca7e-e10e-4b3f-9bfd-86e5ff3a00e3",
+          "4ddb3c75-e8a0-4b89-9744-115cc2a9d1ee",
+          "9476a6df-d58e-42b8-93db-8d04e5f5b7f4"
+        ]
+      },
+      "35cfa4d8-7b76-4317-a01a-96dbf919bd0d": {
+        "size": {
+          "width": 240,
+          "height": 240
+        },
+        "position": {
+          "x": 590,
+          "y": 390
+        },
+        "z": 2,
+        "parent": "a44e677b-c679-482b-929c-f1a7aa112926",
+        "embeds": [
+          "eeee439c-93d4-4d5d-904e-8de917cf1f40",
+          "cba4c0fc-c175-4f41-88be-bdcd9a25a862",
+          "cd66cd71-b482-4f28-92a6-11dc601a5597"
+        ]
+      },
+      "5d410393-db64-4d4b-836d-a23ab8561339": {
+        "size": {
+          "width": 170,
+          "height": 160
+        },
+        "position": {
+          "x": 340,
+          "y": 430
+        },
+        "z": 2,
+        "parent": "a44e677b-c679-482b-929c-f1a7aa112926",
+        "embeds": [
+          "655d7159-0e6b-41f6-b58d-d795e5b20e7a"
+        ]
+      },
+      "b35c0812-8292-43d4-aaf9-ec5587d06c6e": {
+        "source": {
+          "id": "5d410393-db64-4d4b-836d-a23ab8561339"
+        },
+        "target": {
+          "id": "35cfa4d8-7b76-4317-a01a-96dbf919bd0d"
+        },
+        "z": 2
+      },
+      "82dcb3af-1538-44be-b9ad-cda2335288f1": {
+        "source": {
+          "id": "a25e58c0-2ee7-41d4-ab1f-42f4d636c535"
+        },
+        "target": {
+          "id": "a44e677b-c679-482b-929c-f1a7aa112926"
+        },
+        "z": 1
+      },
+      "869aca7e-e10e-4b3f-9bfd-86e5ff3a00e3": {
+        "size": {
+          "width": 240,
+          "height": 240
+        },
+        "position": {
+          "x": 590,
+          "y": 100
+        },
+        "z": 2,
+        "parent": "a44e677b-c679-482b-929c-f1a7aa112926",
+        "embeds": [
+          "97c64025-438f-4af4-afd1-18baa33f0dbc",
+          "50a0d189-8c47-44b2-8eff-17759eb9c659"
+        ]
+      },
+      "4ddb3c75-e8a0-4b89-9744-115cc2a9d1ee": {
+        "size": {
+          "width": 190,
+          "height": 150
+        },
+        "position": {
+          "x": 330,
+          "y": 140
+        },
+        "z": 2,
+        "parent": "a44e677b-c679-482b-929c-f1a7aa112926",
+        "embeds": [
+          "cc4ce313-df1f-42d2-bab5-12efccd9dfd9"
+        ]
+      },
+      "49ba56df-a6f9-4eef-a621-d01f453e23d9": {
+        "source": {
+          "id": "4ddb3c75-e8a0-4b89-9744-115cc2a9d1ee"
+        },
+        "target": {
+          "id": "869aca7e-e10e-4b3f-9bfd-86e5ff3a00e3"
+        },
+        "z": 2
+      },
+      "cc4ce313-df1f-42d2-bab5-12efccd9dfd9": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 390,
+          "y": 170
+        },
+        "z": 3,
+        "parent": "4ddb3c75-e8a0-4b89-9744-115cc2a9d1ee",
+        "embeds": [],
+        "references": [
+          "a25e58c0-2ee7-41d4-ab1f-42f4d636c535"
+        ]
+      },
+      "9476a6df-d58e-42b8-93db-8d04e5f5b7f4": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 880,
+          "y": 230
+        },
+        "z": 2,
+        "parent": "a44e677b-c679-482b-929c-f1a7aa112926",
+        "embeds": []
+      },
+      "97c64025-438f-4af4-afd1-18baa33f0dbc": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 680,
+          "y": 230
+        },
+        "z": 3,
+        "parent": "869aca7e-e10e-4b3f-9bfd-86e5ff3a00e3",
+        "embeds": [],
+        "isrelatedto": [
+          "9476a6df-d58e-42b8-93db-8d04e5f5b7f4",
+          "0ed6b090-237d-4f57-ad37-f77099070540"
+        ]
+      },
+      "655d7159-0e6b-41f6-b58d-d795e5b20e7a": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 390,
+          "y": 480
+        },
+        "z": 3,
+        "parent": "5d410393-db64-4d4b-836d-a23ab8561339",
+        "embeds": [],
+        "references": [
+          "97c64025-438f-4af4-afd1-18baa33f0dbc"
+        ]
+      },
+      "5f8a92e2-f223-4168-893e-02e01796aa86": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 880,
+          "y": 130
+        },
+        "z": 2,
+        "parent": "a44e677b-c679-482b-929c-f1a7aa112926",
+        "embeds": []
+      },
+      "50a0d189-8c47-44b2-8eff-17759eb9c659": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 680,
+          "y": 130
+        },
+        "z": 3,
+        "parent": "869aca7e-e10e-4b3f-9bfd-86e5ff3a00e3",
+        "embeds": [],
+        "dependson": [
+          "97c64025-438f-4af4-afd1-18baa33f0dbc",
+          "a7beba5f-00e5-4d95-b03f-be9fc6d2aab5",
+          "007d682c-145c-42ac-a10f-dbb3c791ca22"
+        ],
+        "isrelatedto": [
+          "9476a6df-d58e-42b8-93db-8d04e5f5b7f4",
+          "a44e677b-c679-482b-929c-f1a7aa112926",
+          "5f8a92e2-f223-4168-893e-02e01796aa86",
+          "89b96fce-9d10-40a4-9707-28adc03432e7",
+          "6378e06e-56df-465c-baa5-1984f0c2ff48",
+          "dfa972dc-2815-4964-a003-dad8912feaef",
+          "23df0d39-96c2-4932-b761-6311656005ec",
+          "7934e36f-378a-4447-aa93-674ae8a35be6"
+        ]
+      },
+      "cd66cd71-b482-4f28-92a6-11dc601a5597": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 620,
+          "y": 450
+        },
+        "z": 3,
+        "parent": "35cfa4d8-7b76-4317-a01a-96dbf919bd0d",
+        "embeds": [],
+        "dependson": [
+          "50a0d189-8c47-44b2-8eff-17759eb9c659",
+          "97c64025-438f-4af4-afd1-18baa33f0dbc",
+          "a0c96e64-00eb-47a4-8b7c-70035ccc71e9"
+        ],
+        "isrelatedto": [
+          "9476a6df-d58e-42b8-93db-8d04e5f5b7f4",
+          "a44e677b-c679-482b-929c-f1a7aa112926",
+          "5f8a92e2-f223-4168-893e-02e01796aa86",
+          "89b96fce-9d10-40a4-9707-28adc03432e7",
+          "6378e06e-56df-465c-baa5-1984f0c2ff48",
+          "2081c4d8-19c1-42cd-ac1b-f37218066a19"
+        ]
+      },
+      "6378e06e-56df-465c-baa5-1984f0c2ff48": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 880,
+          "y": 390
+        },
+        "z": 2,
+        "parent": "a44e677b-c679-482b-929c-f1a7aa112926",
+        "embeds": []
+      },
+      "e7511ce7-d6ad-4efa-9a80-071b8b532447": {
+        "source": {
+          "id": "cd66cd71-b482-4f28-92a6-11dc601a5597"
+        },
+        "target": {
+          "id": "50a0d189-8c47-44b2-8eff-17759eb9c659"
+        },
+        "z": 4
+      },
+      "77d8a590-a4b7-4657-ae49-2bace7b74166": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 120,
+          "y": 80
+        },
+        "z": 1,
+        "embeds": [],
+        "isconnectedto": [
+          "50a0d189-8c47-44b2-8eff-17759eb9c659"
+        ]
+      },
+      "820de39c-9417-4a1d-ad9d-98e027eb1a3f": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 600,
+          "y": 590
+        },
+        "z": 3,
+        "parent": "35cfa4d8-7b76-4317-a01a-96dbf919bd0d",
+        "embeds": [],
+        "dependson": [
+          "50a0d189-8c47-44b2-8eff-17759eb9c659",
+          "97c64025-438f-4af4-afd1-18baa33f0dbc"
+        ],
+        "isrelatedto": [
+          "9476a6df-d58e-42b8-93db-8d04e5f5b7f4",
+          "a44e677b-c679-482b-929c-f1a7aa112926",
+          "5f8a92e2-f223-4168-893e-02e01796aa86",
+          "89b96fce-9d10-40a4-9707-28adc03432e7",
+          "6378e06e-56df-465c-baa5-1984f0c2ff48"
+        ]
+      },
+      "a7beba5f-00e5-4d95-b03f-be9fc6d2aab5": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 520,
+          "y": 700
+        },
+        "z": 1,
+        "embeds": [],
+        "references": [
+          "2081c4d8-19c1-42cd-ac1b-f37218066a19"
+        ],
+        "dependson": [
+          "cd66cd71-b482-4f28-92a6-11dc601a5597"
+        ]
+      },
+      "2081c4d8-19c1-42cd-ac1b-f37218066a19": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 610,
+          "y": 700
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "3d85fceb-fe8b-4481-b64f-d6d957976075": {
+        "source": {
+          "id": "a7beba5f-00e5-4d95-b03f-be9fc6d2aab5"
+        },
+        "target": {
+          "id": "cd66cd71-b482-4f28-92a6-11dc601a5597"
+        },
+        "z": 11
+      },
+      "b99d6ff0-701c-486c-b251-dd9f37c3bf91": {
+        "source": {
+          "id": "50a0d189-8c47-44b2-8eff-17759eb9c659"
+        },
+        "target": {
+          "id": "a7beba5f-00e5-4d95-b03f-be9fc6d2aab5"
+        },
+        "z": 4
+      },
+      "cba4c0fc-c175-4f41-88be-bdcd9a25a862": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 730,
+          "y": 450
+        },
+        "z": 3,
+        "parent": "35cfa4d8-7b76-4317-a01a-96dbf919bd0d",
+        "embeds": [],
+        "dependson": [
+          "50a0d189-8c47-44b2-8eff-17759eb9c659",
+          "97c64025-438f-4af4-afd1-18baa33f0dbc",
+          "a0c96e64-00eb-47a4-8b7c-70035ccc71e9"
+        ],
+        "isrelatedto": [
+          "9476a6df-d58e-42b8-93db-8d04e5f5b7f4",
+          "a44e677b-c679-482b-929c-f1a7aa112926",
+          "5f8a92e2-f223-4168-893e-02e01796aa86",
+          "89b96fce-9d10-40a4-9707-28adc03432e7",
+          "6378e06e-56df-465c-baa5-1984f0c2ff48",
+          "2081c4d8-19c1-42cd-ac1b-f37218066a19",
+          "4639eafb-f924-47cc-9b96-2e3d5c363e1d"
+        ]
+      },
+      "007d682c-145c-42ac-a10f-dbb3c791ca22": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 990,
+          "y": 540
+        },
+        "z": 1,
+        "embeds": [],
+        "references": [
+          "4639eafb-f924-47cc-9b96-2e3d5c363e1d"
+        ],
+        "dependson": [
+          "cba4c0fc-c175-4f41-88be-bdcd9a25a862"
+        ]
+      },
+      "4639eafb-f924-47cc-9b96-2e3d5c363e1d": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 990,
+          "y": 450
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "4f373403-1ec4-4a33-9390-f1e9c3e48b03": {
+        "source": {
+          "id": "007d682c-145c-42ac-a10f-dbb3c791ca22"
+        },
+        "target": {
+          "id": "cba4c0fc-c175-4f41-88be-bdcd9a25a862"
+        },
+        "z": 11
+      },
+      "ae7640e6-2e2a-4304-b19a-3c52707580c9": {
+        "source": {
+          "id": "50a0d189-8c47-44b2-8eff-17759eb9c659"
+        },
+        "target": {
+          "id": "007d682c-145c-42ac-a10f-dbb3c791ca22"
+        },
+        "z": 11
+      },
+      "a0c96e64-00eb-47a4-8b7c-70035ccc71e9": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 1010,
+          "y": 210
+        },
+        "z": 1,
+        "embeds": [],
+        "references": [
+          "0ed6b090-237d-4f57-ad37-f77099070540"
+        ],
+        "dependson": [
+          "97c64025-438f-4af4-afd1-18baa33f0dbc"
+        ]
+      },
+      "0ed6b090-237d-4f57-ad37-f77099070540": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 1010,
+          "y": 290
+        },
+        "z": 0,
+        "embeds": []
+      },
+      "47b1dfa3-3434-4265-96f4-25a6ef11964d": {
+        "source": {
+          "id": "a0c96e64-00eb-47a4-8b7c-70035ccc71e9"
+        },
+        "target": {
+          "id": "97c64025-438f-4af4-afd1-18baa33f0dbc"
+        },
+        "z": 11
+      },
+      "80eb011b-5d3f-4e10-9728-392827cc4a80": {
+        "source": {
+          "id": "cba4c0fc-c175-4f41-88be-bdcd9a25a862"
+        },
+        "target": {
+          "id": "a0c96e64-00eb-47a4-8b7c-70035ccc71e9"
+        },
+        "z": 4
+      },
+      "f55b605c-abf9-4903-8caf-d9b638f1e919": {
+        "source": {
+          "id": "cd66cd71-b482-4f28-92a6-11dc601a5597"
+        },
+        "target": {
+          "id": "a0c96e64-00eb-47a4-8b7c-70035ccc71e9"
+        },
+        "z": 4
+      },
+      "eeee439c-93d4-4d5d-904e-8de917cf1f40": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 730,
+          "y": 540
+        },
+        "z": 3,
+        "parent": "35cfa4d8-7b76-4317-a01a-96dbf919bd0d",
+        "embeds": [],
+        "dependson": [
+          "a0c96e64-00eb-47a4-8b7c-70035ccc71e9"
+        ],
+        "isrelatedto": [
+          "6378e06e-56df-465c-baa5-1984f0c2ff48",
+          "7d14e476-f68d-4015-9068-5b65c9d34560"
+        ]
+      },
+      "68a71f69-06b6-44b1-a4e7-97ca8995297f": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 720,
+          "y": 700
+        },
+        "z": 0,
+        "embeds": [],
+        "references": [
+          "7d14e476-f68d-4015-9068-5b65c9d34560"
+        ],
+        "dependson": [
+          "a0c96e64-00eb-47a4-8b7c-70035ccc71e9",
+          "eeee439c-93d4-4d5d-904e-8de917cf1f40"
+        ]
+      },
+      "7d14e476-f68d-4015-9068-5b65c9d34560": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 810,
+          "y": 700
+        },
+        "z": 0,
+        "embeds": []
+      },
+      "0eef5043-0727-47d5-8591-648eaf4ca05a": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 730,
+          "y": -20
+        },
+        "z": 0,
+        "embeds": [],
+        "references": [
+          "7934e36f-378a-4447-aa93-674ae8a35be6"
+        ]
+      },
+      "7934e36f-378a-4447-aa93-674ae8a35be6": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 830,
+          "y": -20
+        },
+        "z": 0,
+        "embeds": []
+      }
+    }
+  }
+}
