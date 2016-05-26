@@ -27,7 +27,7 @@ usage() {
 main() {
     if [ $# -lt 1 ]; then
         usage
-        exit 1
+        exit 0
     fi
 
     SUBCOMMAND="$1"; shift
