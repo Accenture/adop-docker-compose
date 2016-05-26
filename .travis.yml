@@ -8,6 +8,7 @@ env:
   global:
     - DOCKER_COMPOSE_VERSION=1.6.0
     - INITIAL_ADMIN_USER=admin.user
+    - INITIAL_ADMIN_PASSWORD_PLAIN=admin123
     - COMPOSE_FILES="-f site/docker-compose.yml"
     - JEKYLL_SOURCE="/site"
 
@@ -17,7 +18,9 @@ before_install:
  - sudo mv docker-compose /usr/local/bin
 
 script:
+ - ./adop
  - ./adop compose init
+ - ./adop target set -t http://127.0.0.1 -u ${INITIAL_ADMIN_USER} -p ${INITIAL_ADMIN_PASSWORD_PLAIN}
  - ./adop compose down
  - docker-compose ${COMPOSE_FILES} build
  - docker-compose ${COMPOSE_FILES} -p adopdockercompose up -d
