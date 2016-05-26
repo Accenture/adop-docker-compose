@@ -94,7 +94,6 @@ source_aws() {
   fi
   
   sed -i'' -e "s/###AWS_DEFAULT_REGION###/$AWS_DEFAULT_REGION/g" ${AWS_FILE}
-
 }
 
 provision_aws() {
