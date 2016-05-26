@@ -23,7 +23,7 @@ help() {
     echo
     echo "Available subcommands are:"
     printf "    %-22s   %s\n" "init" "Initialises ADOP"
-    printf "    %-22s   %s\n" "init" "<--without-pull>" "Initialises ADOP without pulling images"
+    printf "    %-22s   %s\n" "init <--without-pull>" "Initialises ADOP without pulling images"
     printf "    %-22s   %s\n" "up" "docker-compose up for ADOP"
     printf "    %-22s   %s\n" "gen-certs <path>" "Generate client certificates for TLS-enabled Machine and copy to <path> in Jenkins Slave"
     printf "    %-22s   %s\n" "<command>" "Runs 'docker-compose <command>' for ADOP, where <command> is not listed above"
