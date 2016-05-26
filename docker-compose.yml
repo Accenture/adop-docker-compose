@@ -61,7 +61,7 @@ gerrit:
     - "8080"
     - "29418"
   environment:
-    - "affinity:container==gerrit-mysql"
+    - "dependency:container==gerrit-mysql"
     - "REPO_PATH=/var/git/repos"
     - "WEBURL=${PROTO}://${TARGET_HOST}/gerrit/"
     - "DATABASE_TYPE=mysql"
@@ -178,7 +178,7 @@ sonar:
   expose:
     - "9000"
   environment:
-    - "affinity:container==sonar-mysql"
+    - "dependency:container==sonar-mysql"
     - "LDAP_URL=ldap://ldap:389"
     - "LDAP_BIND_DN=cn=admin,${LDAP_FULL_DOMAIN}"
     - "LDAP_BIND_PASSWORD=${LDAP_PWD}"
