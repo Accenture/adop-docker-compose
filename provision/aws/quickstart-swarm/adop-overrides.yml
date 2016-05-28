@@ -1,0 +1,55 @@
+jenkins:
+  image: bzon/centos-adop-jenkins:0.3.0
+  environment:
+    AWS_REGION: "${AWS_REGION}"
+    VPC_ID: "${VPC_ID}"
+    KEY_PAIR: "${DEFAULT_KEY_PAIR}"
+    DEFAULT_PUBLIC_SUBNET_ID: "${DEFAULT_PUBLIC_SUBNET_ID}"
+    DEFAULT_PRIVATE_SUBNET_ID: "${DEFAULT_PRIVATE_SUBNET_ID}"
+    DEFAULT_SECURITY_GROUP_ID: "${DEFAULT_SECURITY_GROUP_ID}"
+    DEFAULT_RHEL_AMI: "${DEFAULT_RHEL_AMI}"
+    PASSWORD_GITLAB: "${PASSWORD_GITLAB}"
+    PUBLIC_IP: "${PUBLIC_IP}"
+    LDAP_DOMAIN: "${LDAP_DOMAIN}"
+ 
+jenkins-slave:
+  image: bzon/adop-ansible-jenkins
+  environment:
+    SLAVE_EXECUTORS: "10"
+    LDAP_DOMAIN: "${LDAP_DOMAIN}"
+    SWARM_PASSWORD: "${PASSWORD_JENKINS}"
+    PASSWORD_GITLAB: "${PASSWORD_GITLAB}"
+    PUBLIC_IP: "${PUBLIC_IP}"
+ 
+gitlab:
+  container_name: gitlab
+  restart: always
+  image: gitlab/gitlab-ce:8.7.6-ce.0
+  net: ${CUSTOM_NETWORK_NAME}
+  ports:
+    - "9080:80"
+    - "9443:443"
+    - "9022:22"
+  volumes:
+    - gitlab_etc:/etc/gitlab
+    - gitlab_opt:/var/opt/gitlab
+    - gitlab_log:/var/log/gitlab
+  environment:
+    GITLAB_ROOT_PASSWORD: ${PASSWORD_GITLAB}
+    GITLAB_OMNIBUS_CONFIG: |
+     external_url 'http://${TARGET_HOST}/gitlab'
+     gitlab_rails['ldap_enabled'] = true
+     gitlab_rails['ldap_servers'] = YAML.load <<-'EOS'
+       main:
+         label: 'LDAP'
+         host: ldap
+         port: 389
+         uid: 'uid'
+         method: 'plain'
+         bind_dn: 'cn=admin,${LDAP_FULL_DOMAIN}'
+         password: '${LDAP_PWD}'
+         active_directory: false
+         allow_username_or_email_login: false
+         block_auto_created_users: false
+         base: '${LDAP_FULL_DOMAIN}'
+     EOS
