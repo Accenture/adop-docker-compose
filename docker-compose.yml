@@ -330,3 +330,16 @@ ldap-phpadmin:
     LDAP_SERVER_PORT: "389"
     LDAP_SERVER_BIND_ID: "cn=admin,${LDAP_FULL_DOMAIN}"
     LDAP_SERVER_BASE_DN: "${LDAP_FULL_DOMAIN}"
+
+registry:
+  container_name: registry
+  image: registry:2
+  net: ${CUSTOM_NETWORK_NAME}
+  expose:
+    - "5000"
+  environment:
+    REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
+    REGISTRY_HTTP_TLS_CERTIFICATE: /certs/live/${REGISTRY_DOMAIN_NAME}/fullchain.pem
+    REGISTRY_HTTP_TLS_KEY : /certs/live/${REGISTRY_DOMAIN_NAME}/privkey.pem
+  volumes:
+    - ${LE_CERT_PATH}:/certs

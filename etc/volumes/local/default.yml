@@ -70,3 +70,8 @@ selenium-node-firefox:
 nexus:
   volumes:
     - nexus_sonatype_work:/sonatype-work
+
+registry:
+  volumes:
+    - /etc/ssl:/certs
+    - registry_data:/data
