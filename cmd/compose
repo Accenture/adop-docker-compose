@@ -188,23 +188,25 @@ gen_certs() {
     ####
     # Fresh start
     #### 
-    TEMP_CERT_PATH="${HOME}/docker_certs"
-    rm -rf ${TEMP_CERT_PATH}
-    mkdir -p ${TEMP_CERT_PATH}
+    TEMP_CERT_PATH=$(mktemp -d tmp.XXXXXXXXXX) || { echo "Failed to create temp file"; exit 1; }
+    TEMP_DOCKER_MACHINE_CERTS=$(mktemp -d) || { echo "Failed to create temp file"; exit 1; }
+    DOCKER_MACHINE_CERTS=${HOME}/.docker/machine/certs
+    GEN_CERTS_LOG="GEN_CERTS_`date '+%y%m%d-%H%M%S'`.log"
+
+    #Copying the docker machine certificates to temporary folder
+    cp ${DOCKER_MACHINE_CERTS}/* ${TEMP_DOCKER_MACHINE_CERTS}
 
     ####
     # * Generate the client private key
     # * Generate signed certificate
     # * Generate the client certificate
     ####
-    set +e
-    openssl genrsa -out ${TEMP_CERT_PATH}/key.pem 4096 &> /dev/null
-    openssl req -subj "${CLIENT_SUBJ}" -new -key ${TEMP_CERT_PATH}/key.pem -out ${TEMP_CERT_PATH}/client.csr &> /dev/null
-    echo "extendedKeyUsage = clientAuth" >  ${TEMP_CERT_PATH}/extfile.cnf
-    openssl x509 -req -days 365 -sha256 -in ${TEMP_CERT_PATH}/client.csr -CA ${HOME}/.docker/machine/certs/ca.pem -CAkey ${HOME}/.docker/machine/certs/ca-key.pem -CAcreateserial -CAserial temp.seq -out ${TEMP_CERT_PATH}/cert.pem -extfile ${TEMP_CERT_PATH}/extfile.cnf &> /dev/null
-    set -e
-    cp ${HOME}/.docker/machine/certs/ca.pem ${TEMP_CERT_PATH}/ca.pem
-    docker --tlsverify --tlscacert=${HOME}/.docker/machine/certs/ca.pem --tlscert=${TEMP_CERT_PATH}/cert.pem --tlskey=${TEMP_CERT_PATH}/key.pem -H=${DOCKER_HOST} version &> /dev/null
+    openssl genrsa -out ${TEMP_CERT_PATH}/key.pem 4096 > ${GEN_CERTS_LOG} 2>&1 || { echo "Error generating certificates. Please see " ${GEN_CERTS_LOG} " for more info"; exit 1; }
+    openssl req -subj "${CLIENT_SUBJ}" -new -key ${TEMP_CERT_PATH}/key.pem -out ${TEMP_CERT_PATH}/client.csr >> ${GEN_CERTS_LOG} 2>&1 || { echo "Error generating certificates. Please see " ${GEN_CERTS_LOG} " for more info"; exit 1; }
+    echo "extendedKeyUsage =  clientAuth" >  ${TEMP_CERT_PATH}/extfile.cnf
+    openssl x509 -req -days 365 -sha256 -in ${TEMP_CERT_PATH}/client.csr -CA ${TEMP_DOCKER_MACHINE_CERTS}/ca.pem -CAkey ${TEMP_DOCKER_MACHINE_CERTS}/ca-key.pem -CAcreateserial -CAserial temp.seq -out ${TEMP_CERT_PATH}/cert.pem -extfile ${TEMP_CERT_PATH}/extfile.cnf >> ${GEN_CERTS_LOG} 2>&1 || { echo "Error generating certificates. Please see " ${GEN_CERTS_LOG} " for more info"; exit 1; }
+    cp ${TEMP_DOCKER_MACHINE_CERTS}/ca.pem ${TEMP_CERT_PATH}/ca.pem
+    docker --tlsverify --tlscacert ${TEMP_CERT_PATH}/ca.pem --tlscert ${TEMP_CERT_PATH}/cert.pem --tlskey ${TEMP_CERT_PATH}/key.pem -H=${DOCKER_HOST} version >> ${GEN_CERTS_LOG} 2>&1 || { echo "Error generating certificates. Please see " ${GEN_CERTS_LOG} " for more info"; exit 1; }
 
     ####
     # * Check if certificates were generated successfully
@@ -230,10 +232,14 @@ gen_certs() {
     ####
     echo "Uploading certificates to Jenkins Slave at: ${CERT_PATH}"
     rm -f ${TEMP_CERT_PATH}/extfile.cnf ${TEMP_CERT_PATH}/client.csr
-    set +e
     docker exec jenkins-slave rm -rf ${CERT_PATH}
     docker cp ${TEMP_CERT_PATH} jenkins-slave:${CERT_PATH}
-    set -e
+    
+    #Cleaning up all temporary folders and files
+    rm -rf ${TEMP_CERT_PATH}
+    rm -rf ${TEMP_DOCKER_MACHINE_CERTS}
+    rm -f temp.seq
+    rm -f ${GEN_CERTS_LOG}
 }
 
 run_compose() {
