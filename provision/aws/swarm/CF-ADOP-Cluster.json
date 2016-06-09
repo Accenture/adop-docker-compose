@@ -1905,7 +1905,7 @@
               { "Fn::GetAtt": [ "ProxyPrivateElasticLoadBalancer", "DNSName" ] },
               " -e SWARM_MASTER_HOST=",
               { "Fn::GetAtt": [ "MasterSwarmInstance", "PrivateIp" ] },
-              " -e SWARM_MASTER_PORT=2375 --name=outer-proxy-nginx -d accenture/adop-outer-proxy:0.1.0 \n"
+              " -e SWARM_MASTER_PORT=2375 --name=outer-proxy-nginx -d accenture/adop-outer-proxy:0.2.0 \n"
               ]
             ]
           }
