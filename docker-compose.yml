@@ -94,7 +94,7 @@ gerrit:
 sensu-uchiwa:
   container_name: sensu-uchiwa
   restart: always
-  image: sstarcher/uchiwa
+  image: sstarcher/uchiwa:0.15.0
   net: ${CUSTOM_NETWORK_NAME}
   environment:
     SENSU_HOSTNAME: sensu-api
