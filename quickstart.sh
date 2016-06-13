@@ -30,6 +30,7 @@ Usage:
 	    [-s <AWS_SECRET_ACCESS_KEY>] 
 	    [-u <INITIAL_ADMIN_USER>] 
 	    [-p <INITIAL_ADMIN_PASSWORD>]
+	    [-i AWS_SUBNET_ID]
 
 END_USAGE
 }
@@ -145,6 +146,7 @@ provision_aws() {
 	MACHINE_CREATE_CMD="docker-machine create \
 				--driver amazonec2 \
 				--amazonec2-vpc-id ${AWS_VPC_ID} \
+				--amazonec2-subnet-id ${AWS_SUBNET_ID} \
 				--amazonec2-zone $VPC_AVAIL_ZONE \
 				--amazonec2-instance-type ${AWS_DOCKER_MACHINE_SIZE} \
         --amazonec2-root-size 50"
@@ -166,7 +168,7 @@ provision_aws() {
 
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:" opt; do
+while getopts "t:m:a:s:c:z:r:u:p:i:" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -194,7 +196,10 @@ while getopts "t:m:a:s:c:z:r:u:p:" opt; do
       ;;
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
-      ;;      
+      ;;
+    i)
+      export AWS_SUBNET_ID=${OPTARG}
+      ;;
     *)
       echo "Invalid parameter(s) or option(s)."
       usage
