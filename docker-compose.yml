@@ -98,6 +98,7 @@ sensu-uchiwa:
   net: ${CUSTOM_NETWORK_NAME}
   environment:
     SENSU_HOSTNAME: sensu-api
+    SENSU_DC_NAME: Sensu
   expose:
     - "3000"
 
