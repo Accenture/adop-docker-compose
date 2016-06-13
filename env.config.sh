@@ -32,6 +32,9 @@ export SONAR_ACCOUNT_LOGIN="jenkins"
 export SONAR_DB_LOGIN=${SONAR_MYSQL_USER}
 export SONAR_DB_PASSWORD=${SONAR_MYSQL_PASSWORD}
 
+# Jenkins Slave
+export SLAVE_EXECUTORS=1
+
 # Jenkins Certificate Path
 ####
 # "//" to cater for both Windows and Unix path

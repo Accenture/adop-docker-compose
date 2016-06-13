@@ -1,0 +1,118 @@
+#!/bin/bash -e
+
+SUB_CMD_NAME="target"
+
+cmd_desc() {
+    echo "For setting up environment variables to connect with adop stack."
+}
+
+cmd_usage() {
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} <subcommand>"
+}
+
+help() {
+    cmd_usage
+    echo
+    echo "Available subcommands are:"
+    printf "    %-20s   %s\n" "set [<options>]" "Sets the environment variables to point to adop stack."
+    printf "    %-20s   %s\n" "unset" "Unsets the environment variables pointing to adop stack."
+    printf "    %-20s   %s\n" "help" "Prints this help information"
+    echo
+    echo "Try '${CMD_NAME} ${SUB_CMD_NAME} <subcommand> help' for details."
+    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} set' to set the target adop instance."
+    echo
+}
+
+set_help() {
+    echo
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} set [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "-t <endpoint> : The endpoint url to connect to adop stack. (Required) (HINT : http://54.77.198.55)"
+    printf "    %-3s   %s\n" "" "-u <username> : The username required for authentication with adop stack. (Required)"
+    printf "    %-3s   %s\n" "" "-p <password> : The password required for authentication with adop stack. (Required)"
+    echo
+}
+
+unset_target() {
+  rm -f ${CLI_DIR}/.adop/target
+}
+
+set_target() {
+  # Parameters
+  while getopts "t:u:p:" opt; do
+    case $opt in
+      t)
+        export ADOP_CLI_ENDPOINT=${OPTARG}
+        ;;
+      u)
+        export ADOP_CLI_USER=${OPTARG}
+        ;;
+      p)
+        export ADOP_CLI_PASSWORD=${OPTARG}
+        ;;
+      *)
+        echo "Invalid parameter(s) or option(s)."
+        set_help
+        exit 1
+        ;;
+    esac
+  done
+
+  if [ -z ${ADOP_CLI_ENDPOINT} ] | \
+         [ -z ${ADOP_CLI_USER} ] | \
+          [ -z ${ADOP_CLI_PASSWORD} ] ; then
+      echo "ERROR : Required parameters are missing."
+      set_help
+      exit 1
+  else
+      echo "INFO : Validating the endpoints..."
+      set +e
+      URL_RC=$(curl --max-time 60 -I -s -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${ADOP_CLI_ENDPOINT})
+      CMD_RC=$?
+      CMD=$(echo ${ADOP_CLI_ENDPOINT} | egrep 'http://[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/?$')
+      CMD_RC=$(($CMD_RC + $?))
+      set -e
+
+      if [ ${CMD_RC} != 0 ] ; then
+          echo "ERROR: ENDPOINT ${ADOP_CLI_ENDPOINT} is invalid. Check the endpoint url."
+          exit 2
+      elif [ $(echo ${URL_RC} |head -n 1|cut -d$' ' -f2) != 200 ]; then
+          echo "ERROR: ENDPOINT ${ADOP_CLI_ENDPOINT} is inaccessible using CLI credentials ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD}. Check the endpoint and credentials"
+          exit 3
+      else
+          mkdir -p ${CLI_DIR}/.adop
+          echo "export ADOP_CLI_ENDPOINT=${ADOP_CLI_ENDPOINT}" > ${CLI_DIR}/.adop/target
+          echo "export ADOP_CLI_USER=${ADOP_CLI_USER}" >> ${CLI_DIR}/.adop/target
+          echo "export ADOP_CLI_PASSWORD=${ADOP_CLI_PASSWORD}" >> ${CLI_DIR}/.adop/target
+          echo -e "SUCCESS : To set the target for ADOP instance source following file -\n\t${CLI_DIR}/.adop/target"
+      fi
+  fi
+}
+
+shift $(($OPTIND -1))
+SUBCOMMAND_OPT="${1:-help}"
+
+# Only shift if there are other parameters
+if [ $# -ge 1 ]; then
+    shift
+fi
+
+if [ ! -z ${SUBCOMMAND_OPT} ]; then
+  case ${SUBCOMMAND_OPT} in
+    "cmd_desc"|"help")
+        ${SUBCOMMAND_OPT} "$@"
+        ;;
+    "set")
+        set_target "$@"
+        ;;
+    "unset")
+        unset_target "$@"
+        ;;
+    *)
+        echo "Invalid subcommand."
+        help
+        exit 1
+        ;;
+  esac
+fi
+

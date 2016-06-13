@@ -1377,12 +1377,12 @@
       "Properties" : {
         "Subnets": [ { "Ref": "ProxyELBSubnetAz1" }, { "Ref": "ProxyELBSubnetAz2" }, { "Ref": "ProxyELBSubnetAz3" }  ],
         "CrossZone" : "true",
-        "Listeners" : [ 
+        "Listeners" : [
             {
               "LoadBalancerPort" : "443",
               "InstancePort" : "80",
               "Protocol" : "HTTPS",
-              "SSLCertificateId": { "Ref": "SSLCertificateARN" }      
+              "SSLCertificateId": { "Ref": "SSLCertificateARN" }
             },
             {
               "LoadBalancerPort" : "22",
@@ -1400,7 +1400,7 @@
 	      "ConnectionSettings" : {
 	        "IdleTimeout" : 600
 	      },
-        "SecurityGroups" : [{ 
+        "SecurityGroups" : [{
            "Fn::GetAtt": [
               "PublicELBSG",
               "GroupId"
@@ -1426,7 +1426,7 @@
           "Interval" : "30",
           "Timeout" : "5"
         },
-        "SecurityGroups" : [{ 
+        "SecurityGroups" : [{
            "Fn::GetAtt": [
               "PrivateELBSG",
               "GroupId"
@@ -1448,15 +1448,23 @@
           ]
         },
         "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/sda1",
-                        "Ebs": {
-                            "DeleteOnTermination": "true",
-                            "VolumeSize": 50,
-                            "VolumeType": "gp2"
-                        }
-                    }
-                ],
+            {
+                "DeviceName": "/dev/sda1",
+                "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "VolumeSize": 8,
+                    "VolumeType": "gp2"
+                }
+            },
+            {
+                "DeviceName": "/dev/sda2",
+                "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "VolumeSize": 50,
+                    "VolumeType": "gp2"
+                }
+            }
+        ],
         "ImageId": {
           "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "CENTOSAMI" ]
         },
@@ -1487,10 +1495,13 @@
               "gpgcheck=1\n",
               "gpgkey=https://yum.dockerproject.org/gpg\n",
               "EOF\n",
-              "yum -y install docker-engine-1.10.3-1.el7.centos.x86_64\n",
-              "sed -i 's/ExecStart\\(.*\\)$/ExecStart\\1 -H tcp:\\\/\\\/0.0.0.0:4243/g' /usr/lib/systemd/system/docker.service\n",
+              "yum -y install etcd-2.2.2-5.el7.x86_64 lvm2 docker-engine-1.10.3-1.el7.centos.x86_64\n",
+              "pvcreate /dev/xvdb\n",
+              "vgcreate vg-docker /dev/xvdb\n",
+              "lvcreate -l 95%VG -n data vg-docker\n",
+              "lvcreate -l 5%VG -n metadata vg-docker\n",
+              "sed -i 's/ExecStart\\(.*\\)$/ExecStart\\1 -H tcp:\\\/\\\/0.0.0.0:4243 --storage-driver=devicemapper --storage-opt dm.datadev=\\/dev\\/vg-docker\\/data --storage-opt dm.metadatadev=\\/dev\\/vg-docker\\/metadata/g' /usr/lib/systemd/system/docker.service\n",
               "systemctl daemon-reload && systemctl restart docker\n",
-              "yum -y install etcd-2.2.2-5.el7.x86_64\n",
               "service etcd start\n",
               "echo \"\n",
               "ETCD_NAME=default\n",
@@ -1590,15 +1601,23 @@
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
         "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/sda1",
-                        "Ebs": {
-                            "DeleteOnTermination": "true",
-                            "VolumeSize": 50,
-                            "VolumeType": "gp2"
-                        }
-                    }
-                ],
+            {
+                "DeviceName": "/dev/sda1",
+                "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "VolumeSize": 8,
+                    "VolumeType": "gp2"
+                }
+            },
+            {
+                "DeviceName": "/dev/sda2",
+                "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "VolumeSize": 50,
+                    "VolumeType": "gp2"
+                }
+            }
+        ],
         "ImageId": {
           "Fn::FindInMap": [
             "RegionMap",
@@ -1634,7 +1653,7 @@
               "gpgcheck=1\n",
               "gpgkey=https://yum.dockerproject.org/gpg\n",
               "EOF\n",
-              "yum -y install etcd-2.2.2-5.el7.x86_64\n",
+              "yum -y install etcd-2.2.2-5.el7.x86_64 lvm2 docker-engine-1.10.3-1.el7.centos.x86_64\n",
               "service etcd start\n",
               "echo \"\n",
               "ETCD_NAME=${IP}\n",
@@ -1650,7 +1669,10 @@
               "\\\" \"> /etc/etcd/etcd.conf\n",
               "\n",
               "systemctl daemon-reload && systemctl restart etcd\n",
-              "yum -y install docker-engine-1.10.3-1.el7.centos.x86_64\n",
+              "pvcreate /dev/xvdb\n",
+              "vgcreate vg-docker /dev/xvdb\n",
+              "lvcreate -l 95%VG -n data vg-docker\n",
+              "lvcreate -l 5%VG -n metadata vg-docker\n",
               "sed -i 's/ExecStart\\(.*\\)$/ExecStart\\1 -H tcp:\\\/\\\/0.0.0.0:4243 --cluster-store=etcd:\\\/\\\/",
                 {
                 "Fn::GetAtt": [
@@ -1658,7 +1680,7 @@
                   "PrivateIp"
                 ]
               },
-              ":2379 --cluster-advertise=eth0:4243 --label tier=public/g' /usr/lib/systemd/system/docker.service\n",
+              ":2379 --cluster-advertise=eth0:4243 --label tier=public --storage-driver=devicemapper --storage-opt dm.datadev=\\/dev\\/vg-docker\\/data --storage-opt dm.metadatadev=\\/dev\\/vg-docker\\/metadata/g' /usr/lib/systemd/system/docker.service\n",
               "systemctl daemon-reload && systemctl restart docker\n",
               "docker run --restart=\"always\" --name docker-swarm-node -d swarm join --addr=${IP}:4243 etcd://",
               {
@@ -1746,15 +1768,23 @@
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
         "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/sda1",
-                        "Ebs": {
-                            "DeleteOnTermination": "true",
-                            "VolumeSize": 50,
-                            "VolumeType": "gp2"
-                        }
-                    }
-                ],
+            {
+                "DeviceName": "/dev/sda1",
+                "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "VolumeSize": 8,
+                    "VolumeType": "gp2"
+                }
+            },
+            {
+                "DeviceName": "/dev/sda2",
+                "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "VolumeSize": 50,
+                    "VolumeType": "gp2"
+                }
+            }
+        ],
         "ImageId": {
           "Fn::FindInMap": [
             "RegionMap",
@@ -1791,7 +1821,7 @@
               "gpgkey=https://yum.dockerproject.org/gpg\n",
               "EOF\n",
               "yum -y update\n",
-              "yum -y install etcd-2.2.2-5.el7.x86_64\n",
+              "yum -y install etcd-2.2.2-5.el7.x86_64 lvm2 docker-engine-1.10.3-1.el7.centos.x86_64\n",
               "service etcd start\n",
               "echo \"\n",
               "ETCD_NAME=${IP}\n",
@@ -1807,7 +1837,10 @@
               "\\\" \"> /etc/etcd/etcd.conf\n",
               "\n",
               "systemctl daemon-reload && systemctl restart etcd\n",
-              "yum -y install docker-engine-1.10.3-1.el7.centos.x86_64\n",
+              "pvcreate /dev/xvdb\n",
+              "vgcreate vg-docker /dev/xvdb\n",
+              "lvcreate -l 95%VG -n data vg-docker\n",
+              "lvcreate -l 5%VG -n metadata vg-docker\n",
               "sed -i 's/ExecStart\\(.*\\)$/ExecStart\\1 -H tcp:\\\/\\\/0.0.0.0:4243 --cluster-store=etcd:\\\/\\\/",
                 {
                 "Fn::GetAtt": [
@@ -1815,7 +1848,7 @@
                   "PrivateIp"
                 ]
               },
-              ":2379 --cluster-advertise=eth0:4243/g' /usr/lib/systemd/system/docker.service\n",
+              ":2379 --cluster-advertise=eth0:4243 --storage-driver=devicemapper --storage-opt dm.datadev=\\/dev\\/vg-docker\\/data --storage-opt dm.metadatadev=\\/dev\\/vg-docker\\/metadata/g' /usr/lib/systemd/system/docker.service\n",
               "systemctl daemon-reload && systemctl restart docker\n",
               "docker run --restart=\"always\" --name docker-swarm-node -d swarm join --addr=${IP}:4243 etcd://",
               {
@@ -1863,15 +1896,23 @@
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
         "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/sda1",
-                        "Ebs": {
-                            "DeleteOnTermination": "true",
-                            "VolumeSize": 50,
-                            "VolumeType": "gp2"
-                        }
-                    }
-                ],
+            {
+                "DeviceName": "/dev/sda1",
+                "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "VolumeSize": 8,
+                    "VolumeType": "gp2"
+                }
+            },
+            {
+                "DeviceName": "/dev/sda2",
+                "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "VolumeSize": 50,
+                    "VolumeType": "gp2"
+                }
+            }
+        ],
         "ImageId": {
           "Fn::FindInMap": [ "RegionMap", { "Ref": "AWS::Region" }, "CENTOSAMI" ]
         },
@@ -1896,16 +1937,20 @@
               "gpgcheck=1\n",
               "gpgkey=https://yum.dockerproject.org/gpg\n",
               "EOF\n",
-              "yum -y install git\n",
-              "curl -L https://github.com/docker/compose/releases/download/1.6.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose\n",
+              "yum -y install lvm2 git docker-engine-1.10.3-1.el7.centos.x86_64\n",
+              "pvcreate /dev/xvdb\n",
+              "vgcreate vg-docker /dev/xvdb\n",
+              "lvcreate -l 95%VG -n data vg-docker\n",
+              "lvcreate -l 5%VG -n metadata vg-docker\n",
+              "sed -i 's/ExecStart\\(.*\\)$/ExecStart\\1 --storage-driver=devicemapper --storage-opt dm.datadev=\\/dev\\/vg-docker\\/data --storage-opt dm.metadatadev=\\/dev\\/vg-docker\\/metadata/g' /usr/lib/systemd/system/docker.service\n",
+              "curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose\n",
               "chmod +x /usr/local/bin/docker-compose\n",
-              "yum -y install docker-engine-1.10.3-1.el7.centos.x86_64\n",
-              "service docker start\n",
+              "systemctl daemon-reload && systemctl restart docker\n",
               "docker run --restart=\"always\" -p 80:80 -p 2375:2375 -d -e TARGET=",
               { "Fn::GetAtt": [ "ProxyPrivateElasticLoadBalancer", "DNSName" ] },
               " -e SWARM_MASTER_HOST=",
               { "Fn::GetAtt": [ "MasterSwarmInstance", "PrivateIp" ] },
-              " -e SWARM_MASTER_PORT=2375 --name=outer-proxy-nginx -d accenture/adop-outer-proxy:0.1.0 \n"
+              " -e SWARM_MASTER_PORT=2375 --name=outer-proxy-nginx -d accenture/adop-outer-proxy:0.2.0 \n"
               ]
             ]
           }

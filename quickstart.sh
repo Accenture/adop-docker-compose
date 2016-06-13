@@ -47,7 +47,8 @@ provision_local() {
     if [ $? -eq 0 ]; then
         echo "Docker machine '$MACHINE_NAME' already exists"
     else
-        docker-machine create --driver virtualbox --virtualbox-memory 2048 ${MACHINE_NAME}
+	# To run adop stack locally atleast 6144 MB is required.
+        docker-machine create --driver virtualbox --virtualbox-memory 6144 ${MACHINE_NAME}
     fi
 
     # Reenable errexit
@@ -124,6 +125,10 @@ provision_aws() {
       echo "Using default AWS region from ~/.aws/config"
       eval $(grep -v '^\[' ~/.aws/config | sed 's/^\(region\)\s\?=\s\?/export AWS_DEFAULT_REGION=/')
     fi
+    
+    if [ -z ${AWS_DOCKER_MACHINE_SIZE} ]; then
+    	export AWS_DOCKER_MACHINE_SIZE="m4.xlarge"
+    fi
 
     # Create a file with AWS parameters
     source_aws
@@ -141,7 +146,7 @@ provision_aws() {
 				--driver amazonec2 \
 				--amazonec2-vpc-id ${AWS_VPC_ID} \
 				--amazonec2-zone $VPC_AVAIL_ZONE \
-				--amazonec2-instance-type m4.xlarge \
+				--amazonec2-instance-type ${AWS_DOCKER_MACHINE_SIZE} \
         --amazonec2-root-size 50"
 
 	if [ -n "${AWS_ACCESS_KEY_ID}" ]; then

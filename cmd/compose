@@ -23,7 +23,7 @@ help() {
     echo
     echo "Available subcommands are:"
     printf "    %-22s   %s\n" "init" "Initialises ADOP"
-    printf "    %-22s   %s\n" "init" "<--without-pull>" "Initialises ADOP without pulling images"
+    printf "    %-22s   %s\n" "init <--without-pull>" "Initialises ADOP without pulling images"
     printf "    %-22s   %s\n" "up" "docker-compose up for ADOP"
     printf "    %-22s   %s\n" "gen-certs <path>" "Generate client certificates for TLS-enabled Machine and copy to <path> in Jenkins Slave"
     printf "    %-22s   %s\n" "<command>" "Runs 'docker-compose <command>' for ADOP, where <command> is not listed above"
@@ -65,6 +65,10 @@ prep_env() {
     source ${CONF_DIR}/conf/env.provider.sh
     source ${CONF_DIR}/credentials.generate.sh
     source ${CONF_DIR}/env.config.sh
+    if [ -f "${CONF_DIR}/env.override.sh" ]; then
+	echo "Using ${CONF_DIR}/env.override.sh to override default values for environment variable."
+	source ${CONF_DIR}/env.override.sh
+    fi
 }
 
 init() {
