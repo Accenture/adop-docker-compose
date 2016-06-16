@@ -164,12 +164,11 @@ load_collection() {
 
   # Validate if the ADOP_CLI_URL is a valid url
   load_credentials
-  export TARGET_HOST=$(echo ${ADOP_CLI_ENDPOINT} | sed 's#http://##' | sed 's#/$##')
   export JOB_URL="${TARGET_HOST}/jenkins/job/${WORKSPACE_NAME}/job/${PROJECT_NAME}/job/Cartridge_Management/job/Load_Cartridge_Collection"
   export PARAMETERS="COLLECTION_URL=${CARTRIDGE_COLLECTION_URL}"
   echo "Loading the cartridge collection ..."
   set +e
-  curl -I --max-time 60 -s -X POST ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD}@${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
+  curl -I --max-time 60 -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
   CMD_RC=$?
   set -e
   if [ ${CMD_RC} -eq 0 ]; then
