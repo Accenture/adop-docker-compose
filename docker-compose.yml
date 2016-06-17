@@ -156,10 +156,11 @@ sensu-rabbitmq:
   image: rabbitmq:3.5.7-management
   net: ${CUSTOM_NETWORK_NAME}
   expose:
-    - "5672"
     - "5671"
     - "15672"
     - "15671"
+  ports:
+    - "5672:5672"
 
 sensu-redis:
   container_name: sensu-redis
