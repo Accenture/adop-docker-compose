@@ -1,0 +1,276 @@
+#!/bin/bash -e
+
+SUB_CMD_NAME="project"
+source ${CLI_DIR}/lib/adop_lib.sh
+
+cmd_desc() {
+    echo "For creating a project space within a workspace in ADOP jenkins instance."
+}
+
+cmd_usage() {
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} [<options>] <subcommand>"
+    echo "Options:"
+    printf "    %-12s   %s\n" "-p <PROJECT_NAME>" "The name of the project space. (Required)"
+    printf "    %-12s   %s\n" "-w <WORKSPACE_NAME>" "The name of the existing workspace. (Required)"
+}
+
+help() {
+    cmd_usage
+    echo
+    echo "Available subcommands are:"
+    printf "    %-20s   %s\n" "create [<options>]" "Create a new project in an existing workspace in jenkins."
+    printf "    %-20s   %s\n" "load [<options>]" "Load the cartridge into the specified workspace/project."
+    printf "    %-20s   %s\n" "load_collection [<options>]" "Load the collection of cartridges into the specified workspace/project."
+    echo
+    echo "Try '${CMD_NAME} ${SUB_CMD_NAME} <subcommand> -h' for details."
+    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} -p <PROJECT_NAME> -w <WORKSPACE_NAME> create' to create a project in an existing workpsace in adop jenkins instance."
+    echo
+}
+
+create_help() {
+    echo
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} -p <PROJECT_NAME> -w <WORKSPACE_NAME> create [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "-a <ADMIN_USERS>     : Comma separated list of users with administrator access to the created project space. (Optional) (Default : blank)"
+    printf "    %-3s   %s\n" "" "-d <DEVELOPER_USERS> : Comma separated list of users with developer access to the created project space. (Optional) (Default : blank)"
+    printf "    %-3s   %s\n" "" "-v <VIEWER_USERS>    : Comma seperated list of users with read only access to the created project space. (Optional) (Default : blank)"
+    printf "    %-3s   %s\n" "" "-h                   : Print this help."
+    echo
+}
+
+load_help() {
+    echo
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} -p <PROJECT_NAME> -w <WORKSPACE_NAME> load [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "-u <CARTRIDGE_CLONE_URL> : URL of the cartridge to be loaded. (Required) (Note : It has be a valid url, from the list of the available choices.)"
+    printf "    %-3s   %s\n" "" "-f <CARTRIDGE_FOLDER>    : Name of the folder where the cartridge will be loaded. (Optional) (By default loads the cartridge into workspace/project)"
+    printf "    %-3s   %s\n" "" "-n <FOLDER_DISPLAY_NAME> : Folder name displayed in Jenkins UI. (Optional)  (Default : <CARTRIDGE_FOLDER>)"
+    printf "    %-3s   %s\n" "" "-d <FOLDER_DESCRIPTION>  : Description of the folder where the cartridge will be loaded. (Optional) (Default : blank)"
+    printf "    %-3s   %s\n" "" "-r <ENABLE_CODE_REVIEW>  : This is to control whether to enable code review or not for the repositories loaded by cartridge. (Optional) (Default: false)"
+    printf "    %-3s   %s\n" "" "-h                   : Print this help."
+    echo
+    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} -p <PROJECT_NAME> -w <WORKSPACE_NAME> load -u ssh://jenkins@gerrit:29418/cartridges/adop-cartridge-java.git' to load java reference catridge in adop jenkins instance under existing workspace/project."
+    echo
+}
+
+load_collection_help() {
+    echo
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} -p <PROJECT_NAME> -w <WORKSPACE_NAME> load_collection [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "-c <CARTRIDGE_COLLECTION_URL> :   URL to a JSON file defining your cartridge collection. (Required)"
+    printf "    %-3s   %s\n" "" "-h                   : Print this help."
+    echo
+}
+
+load() {
+  # Set Default Parameters
+  export CARTRIDGE_CLONE_URL=""
+  export CARTRIDGE_FOLDER=""
+  export FOLDER_DISPLAY_NAME=""
+  export FOLDER_DESCRIPTION=""
+  export ENABLE_CODE_REVIEW=false
+
+  local OPTIND
+  # What if the parameters are provided from command line.
+  while getopts "u:f:n:d:r:h" opt; do
+    case $opt in
+      u)
+        export CARTRIDGE_CLONE_URL=${OPTARG}
+        ;;
+      f)
+        export CARTRIDGE_FOLDER=${OPTARG}
+        ;;
+      n)
+        export FOLDER_DISPLAY_NAME=${OPTARG}
+        ;;
+      d)
+        export FOLDER_DESCRIPTION=${OPTARG}
+        ;;
+      r)
+        export ENABLE_CODE_REVIEW=${OPTARG}
+        ;;
+      h)
+        load_help
+        exit 0
+        ;;
+      *)
+        echo "Invalid parameter(s) or option(s)."
+        load_help
+        exit 1
+        ;;
+    esac
+  done
+
+  # Validate required parameters are passed through CLI
+  if [ -z "${PROJECT_NAME}" ] || \
+        [ -z "${WORKSPACE_NAME}" ] || \
+                [ -z "${CARTRIDGE_CLONE_URL}" ]; then
+      echo "ERROR : Required CLI parameters are missing."
+      load_help
+      exit 1
+  fi
+
+
+  # Validate if the ADOP_CLI_URL is a valid url
+  load_credentials
+  export JOB_URL="${TARGET_HOST}/jenkins/job/${WORKSPACE_NAME}/job/${PROJECT_NAME}/job/Cartridge_Management/job/Load_Cartridge"
+  export PARAMETERS="CARTRIDGE_CLONE_URL=${CARTRIDGE_CLONE_URL}&CARTRIDGE_FOLDER=${CARTRIDGE_FOLDER}&FOLDER_DISPLAY_NAME=${FOLDER_DISPLAY_NAME}&FOLDER_DESCRIPTION=${FOLDER_DESCRIPTION}&ENABLE_CODE_REVIEW=${ENABLE_CODE_REVIEW}"
+  echo "Loading the cartridge ..."
+  set +e
+  curl -I --max-time 60 -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
+  CMD_RC=$?
+  set -e
+  if [ ${CMD_RC} -eq 0 ]; then
+        check_job_status
+        echo "Cartridge '${CARTRIDGE_CLONE_URL}' has been loaded successfully in jenkins. Visit ${TARGET_HOST}/jenkins/job/${WORKSPACE_NAME}/job/${PROJECT_NAME}."
+  else
+        echo "ERROR: Unable to trigger Load_Cartridge Job because it is not accesssible."
+        exit ${CMD_RC}
+  fi
+}
+
+load_collection() {
+  # Set Default Parameters
+  export CARTRIDGE_COLLECTION_URL=""
+
+  local OPTIND
+  # What if the parameters are provided from command line.
+  while getopts "c:" opt; do
+    case $opt in
+      c)
+        export CARTRIDGE_COLLECTION_URL=${OPTARG}
+        ;;
+      h)
+        load_collection_help
+        exit 0
+        ;;
+      *)
+        echo "Invalid parameter(s) or option(s)."
+        load_collection_help
+        exit 1
+        ;;
+    esac
+  done
+
+  # Validate required parameters are passed through CLI
+  if [ -z "${PROJECT_NAME}" ] || \
+        [ -z "${WORKSPACE_NAME}" ] || \
+                [ -z "${CARTRIDGE_COLLECTION_URL}" ]; then
+      echo "ERROR : Required CLI parameters are missing."
+      load_collection_help
+      exit 1
+  fi
+
+
+  # Validate if the ADOP_CLI_URL is a valid url
+  load_credentials
+  export JOB_URL="${TARGET_HOST}/jenkins/job/${WORKSPACE_NAME}/job/${PROJECT_NAME}/job/Cartridge_Management/job/Load_Cartridge_Collection"
+  export PARAMETERS="COLLECTION_URL=${CARTRIDGE_COLLECTION_URL}"
+  echo "Loading the cartridge collection ..."
+  set +e
+  curl -I --max-time 60 -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
+  CMD_RC=$?
+  set -e
+  if [ ${CMD_RC} -eq 0 ]; then
+        check_job_status
+        echo "Cartridge Collection defined in '${CARTRIDGE_COLLECTION_URL}' has been loaded successfully in jenkins. Visit ${TARGET_HOST}/jenkins/job/${WORKSPACE_NAME}/job/${PROJECT_NAME}."
+  else
+        echo "ERROR: Unable to trigger Load_Cartridge_Collection Job because it is not accesssible."
+        exit ${CMD_RC}
+  fi
+}
+
+
+create() {
+  # Set Default Parameters
+  export PROJECT_ADMINS=""
+  export PROJECT_DEVELOPERS=""
+  export PROJECT_VIEWERS=""
+
+  local OPTIND
+  # What if the parameters are provided from command line.
+  while getopts "a:d:v:" opt; do
+    case $opt in
+      a)
+        export PROJECT_ADMINS=${OPTARG}
+        ;;
+      d)
+        export PROJECT_DEVELOPERS=${OPTARG}
+        ;;
+      v)
+        export PROJECT_VIEWERS=${OPTARG}
+        ;;
+      h)
+        create_help
+        exit 0
+        ;;
+      *)
+        echo "Invalid parameter(s) or option(s)."
+        create_help
+        exit 1
+        ;;
+    esac
+  done
+
+  if [ -z "${PROJECT_NAME}" ] || \
+		[ -z "${WORKSPACE_NAME}" ]; then
+      echo "ERROR : Required parameters are missing."
+      create_help
+      exit 1
+  fi
+  
+  echo ${PROJECT_NAME} ${WORKSPACE_NAME}
+  # Validate if the ADOP_CLI_URL is a valid url
+  load_credentials
+  export JOB_URL="${TARGET_HOST}/jenkins/job/${WORKSPACE_NAME}/job/Project_Management/job/Generate_Project"
+  export PARAMETERS="PROJECT_NAME=${PROJECT_NAME}&ADMIN_USERS=${PROJECT_ADMINS}&DEVELOPER_USERS=${PROJECT_DEVELOPERS}&VIEWER_USERS=${PROJECT_VIEWERS}"
+  echo "Creating the project space ..."
+  set +e
+  curl --max-time 60 -I -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
+  CMD_RC=$?
+  set -e
+  if [ ${CMD_RC} -eq 0 ]; then
+        check_job_status
+	echo "Project '${PROJECT_NAME}' has been created successfully in workspace ${WORKSPACE_NAME}."
+  else
+        echo "ERROR: Unable to trigger Generate_Project Job because it is not accesssible."
+        exit ${CMD_RC}
+  fi
+}
+
+# Parameters
+while getopts "p:w:" opt; do
+  case $opt in
+    p)
+      export PROJECT_NAME=${OPTARG}
+      ;;
+    w)
+      export WORKSPACE_NAME=${OPTARG}
+      ;;
+    *)
+      echo "Invalid parameter(s) or option(s)."
+      cmd_usage
+      exit 1
+      ;;
+  esac
+done
+
+shift $(($OPTIND -1))
+SUBCOMMAND_OPT="${1:-help}"
+
+# Only shift if there are other parameters
+if [ $# -ge 1 ]; then
+    shift
+fi
+
+case ${SUBCOMMAND_OPT} in
+    "cmd_desc"|"help"|"create"|"load"|"load_collection")
+        ${SUBCOMMAND_OPT} "$@"
+        ;;
+    *)
+        echo "Invalid parameter(s) or option(s)."
+        help
+        exit 1
+        ;;
+esac
+
