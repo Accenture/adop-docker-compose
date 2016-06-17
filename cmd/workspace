@@ -1,0 +1,128 @@
+#!/bin/bash -e
+
+SUB_CMD_NAME="workspace"
+source ${CLI_DIR}/lib/adop_lib.sh
+
+cmd_desc() {
+    echo "For creating a workspace in ADOP jenkins instance."
+}
+
+cmd_usage() {
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} [<options>] <subcommand>"
+    echo "Options:"
+    printf "    %-12s   %s\n" "-w <WORKSPACE_NAME>" "The name of the workspace. (Required)"
+}
+
+help() {
+    cmd_usage
+    echo
+    echo "Available subcommands are:"
+    printf "    %-20s   %s\n" "create [<options>]" "Create a new workspace in jenkins."
+    echo
+    echo "Try '${CMD_NAME} ${SUB_CMD_NAME} <subcommand> -h' for details."
+    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} -w <WORKSPACE_NAME> create' to create a project in an existing workpsace in adop jenkins instance."
+    echo
+}
+
+create_help() {
+    echo
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} -w <WORKSPACE_NAME> create [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "-a <ADMIN_USERS>     : Comma separated list of users with administrator access to the created workspace. (Optional) (Default : blank)"
+    printf "    %-3s   %s\n" "" "-d <DEVELOPER_USERS> : Comma separated list of users with developer access to the created workspace. (Optional) (Default : blank)"
+    printf "    %-3s   %s\n" "" "-v <VIEWER_USERS>    : Comma seperated list of users with read only access to the created workspace. (Optional) (Default : blank)"
+    printf "    %-3s   %s\n" "" "-h                   : Print this help."
+    echo
+}
+
+create_workspace() {
+  # Set Default Parameters
+  export WORKSPACE_ADMINS=""
+  export WORKSPACE_DEVELOPERS=""
+  export WORKSPACE_VIEWERS=""
+
+  local OPTIND
+  # What if the parameters are provided from command line.
+  while getopts "a:d:v:h" opt; do
+    case $opt in
+      a)
+        export WORKSPACE_ADMINS=${OPTARG}
+        ;;
+      d)
+        export WORKSPACE_DEVELOPERS=${OPTARG}
+        ;;
+      v)
+        export WORKSPACE_VIEWERS=${OPTARG}
+        ;;
+      h)
+        create_help
+        exit 0
+        ;;
+      *)
+        echo "Invalid parameter(s) or option(s)."
+        create_help
+        exit 1
+        ;;
+    esac
+  done
+
+  if [ -z "${WORKSPACE_NAME}" ]; then
+      echo "Error : WORKSPACE_NAME can not be empty."
+      create_help
+      exit 1
+  fi
+
+  # Validate if the ADOP_CLI_URL is a valid url
+  load_credentials
+  export JOB_URL="${TARGET_HOST}/jenkins/job/Workspace_Management/job/Generate_Workspace"
+  export PARAMETERS="WORKSPACE_NAME=${WORKSPACE_NAME}&ADMIN_USERS=${WORKSPACE_ADMINS}&DEVELOPER_USERS=${WORKSPACE_DEVELOPERS}&VIEWER_USERS=${WORKSPACE_VIEWERS}"
+  echo "Creating the workspace ..."
+  set +e
+  curl -I --max-time 60 -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
+  CMD_RC=$?
+  set -e
+  if [ ${CMD_RC} -eq 0 ]; then
+        check_job_status
+	echo "Workspace '${WORKSPACE_NAME}' has been created successfully."
+  else
+        echo "ERROR: Unable to trigger Generate_Workspace Job as it is not accesssible. Please check ${JOB_URL}"
+        exit ${CMD_RC}
+  fi
+}
+
+# Parameters
+while getopts "w:" opt; do
+  case $opt in
+    w)
+      export WORKSPACE_NAME=${OPTARG}
+      ;;
+    *)
+      echo "Invalid parameter(s) or option(s)."
+      help
+      exit 1
+      ;;
+  esac
+done
+
+shift $(($OPTIND -1))
+SUBCOMMAND_OPT="${1:-help}"
+
+# Only shift if there are other parameters
+if [ $# -ge 1 ]; then
+    shift
+fi
+
+case ${SUBCOMMAND_OPT} in
+    "cmd_desc"|"help")
+        ${SUBCOMMAND_OPT} "$@"
+        ;;
+    "create")
+        create_workspace "$@"
+        ;;
+    *)
+        echo "Invalid parameter(s) or option(s)."
+        help
+        exit 1
+        ;;
+esac
+

@@ -58,9 +58,9 @@ set_target() {
     esac
   done
 
-  if [ -z ${ADOP_CLI_ENDPOINT} ] | \
-         [ -z ${ADOP_CLI_USER} ] | \
-          [ -z ${ADOP_CLI_PASSWORD} ] ; then
+  if [ -z ${ADOP_CLI_ENDPOINT} ] || \
+	[ -z ${ADOP_CLI_USER} ] || \
+	  [ -z ${ADOP_CLI_PASSWORD} ] ; then
       echo "ERROR : Required parameters are missing."
       set_help
       exit 1
