@@ -36,7 +36,8 @@ ldap:
     SLAPD_PASSWORD: ${LDAP_PWD}
     SLAPD_DOMAIN: ${LDAP_DOMAIN}
     SLAPD_FULL_DOMAIN: ${LDAP_FULL_DOMAIN}
-
+  ports:
+    - "389:389"
 gerrit-mysql:
   container_name: gerrit-mysql
   restart: always
