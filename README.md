@@ -78,9 +78,11 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
       Password: YOUR_PASSWORD
     ```
 1. Log in using the username and password you specified in the quickstart script:
-```
+    ```
 <INITIAL_ADMIN_USER> / <INITIAL_ADMIN_PASSWORD>
-```
+    ```
+
+1. Update the docker-machine security group in the AWS console to permit inbound http traffic on port 80 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32.
 
 # General Getting Started Instructions
 
