@@ -18,17 +18,37 @@ load_credentials() {
 
 check_job_status() {
   set +e
-  JOB_STATUS_URL=${JOB_URL}/lastBuild/api/json?tree=result
+  JOB_STATUS_URL=${JOB_URL}/api/json?
+  BUILD_STATUS_URL=${JOB_URL}/lastBuild/api/json?tree=result
   GREP_RC=0
+  GREP_RC1=0
+  GREP_RC2=0
   while [ $GREP_RC -eq 0 ]
   do
       echo "Waiting for job to complete..."
       sleep 10
-      curl --silent -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} $JOB_STATUS_URL | grep 'result":null' > /dev/null
+      
+      while [ $GREP_RC1 -eq 0 ]
+      do
+          echo "Checking if job has been built previously or if build has initialised..."
+          sleep 10
+          curl --silent -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} $JOB_STATUS_URL | grep 'lastBuild":null' > /dev/null
+          GREP_RC1=$?
+      done
+      
+      while [ $GREP_RC2 -eq 0 ]
+      do
+          echo "Checking if build is in queue..."
+          sleep 10
+          curl --silent -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} $JOB_STATUS_URL | grep 'inQueue":true' > /dev/null
+          GREP_RC2=$?
+      done
+      
+      curl --silent -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} $BUILD_STATUS_URL | grep 'result":null' > /dev/null
       GREP_RC=$?
   done
 
-  curl --silent -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} $JOB_STATUS_URL | grep 'result":"SUCCESS' > /dev/null
+  curl --silent -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} $BUILD_STATUS_URL | grep 'result":"SUCCESS' > /dev/null
   if [ $? -ne 0 ]; then
       echo "Unable to complete the job. Please check ${JOB_URL}"
       exit 1
