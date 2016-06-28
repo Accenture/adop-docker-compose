@@ -33,7 +33,7 @@ load_help() {
     printf "    %-3s   %s\n" "" "-c <AWS_CREDENTIALS> : AWS Credentials. (Required)"
     printf "    %-3s   %s\n" "" "-h                   : Prints this help."
     echo
-    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} load -u https://github.com/Accenture/adop-platform-extension-specification' to load an extension."
+    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} load -u https://github.com/Accenture/adop-platform-extension-specification -c aws' to load an extension."
     echo
 }
 
@@ -159,7 +159,7 @@ load_collection() {
   export PARAMETERS="COLLECTION_URL=${COLLECTION_URL}&AWS_CREDENTIALS=${AWS_CREDENTIALS}"
   echo "Loading the extension collection ..."
   set +e
-  curl --max-time 60 -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
+  curl -I --max-time 60 -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
   CMD_RC=$?
   set -e
   if [ ${CMD_RC} -eq 0 ]; then
@@ -236,7 +236,7 @@ add_credentials() {
      set -e
      [[ ${CMD_RC} -eq 0 ]] \
         && echo "Credentials have been added to jenkins with ID : ${CREDENTIAL_ID}" \
-           || echo "Unable to add credentials to jenkins with ID : ${CREDENTIAL_ID}"; exit 1
+           || (echo "Unable to add credentials to jenkins with ID : ${CREDENTIAL_ID}"; exit 1)
 
   fi
 
