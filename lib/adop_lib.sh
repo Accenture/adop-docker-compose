@@ -30,7 +30,7 @@ check_job_status() {
 
   curl --silent -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} $JOB_STATUS_URL | grep 'result":"SUCCESS' > /dev/null
   if [ $? -ne 0 ]; then
-      echo "Unable to complete the job. Please check http://${JOB_URL}"
+      echo "Unable to complete the job. Please check ${JOB_URL}"
       exit 1
   fi
   set -e
