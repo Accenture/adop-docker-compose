@@ -8,15 +8,12 @@ cmd_desc() {
 
 cmd_usage() {
     echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} <subcommand>"
-    echo "subcommand:"
-    printf "    %-12s   %s\n" "gen-certs" "Generate new ssl certificates for Nginx proxy."
-    printf "    %-12s   %s\n" "export-certs" "Export new certificates from letsencrypr."
 }
 
 help() {
     echo
     echo "Available subcommands are:"
-    printf "    %-22s   %s\n" "gen-certs" "Generate SSL certificates for Nginx ssl support"
+    printf "    %-22s   %s\n" "gen-certs" "Generate SSL certificates for Nginx ssl support. "
     printf "    %-22s   %s\n" "export-certs" "Export new SSL certificates for Nginx proxy"
     printf "    %-22s   %s\n" "help" "Prints this help information"
     echo
@@ -28,6 +25,23 @@ prep_env() {
 
 export-certs() {
     prep_env
+    export REGISTRY_DOMAIN_NAME=$1
+    
+    if [ -z ${REGISTRY_DOMAIN_NAME} ]; then
+         echo "
+           Usage : 
+            export-certs <REGISTRY_DOMAIN_NAME>
+             
+           
+           <REGISTRY_DOMAIN_NAME>: 
+             This is the host which will secured by letsencript ssl.
+               
+           Examples: 
+             export-certs registry.example.com
+         "
+         exit 1
+    fi
+
     docker cp -L ${LE_CERT_PATH}/live/${REGISTRY_DOMAIN_NAME}/fullchain.pem proxy:/etc/nginx/ssl/
     docker cp -L ${LE_CERT_PATH}/live/${REGISTRY_DOMAIN_NAME}/privkey.pem proxy:/etc/nginx/ssl/
     docker exec proxy ln -s /etc/nginx/sites-available/registry.conf /etc/nginx/sites-enabled/registry.conf
@@ -54,7 +68,7 @@ gen-certs() {
 
     echo "INFO: Will be requested new ssl certs for ${REGISTRY_DOMAIN_NAME}."
 
-    docker run --rm --name letsencrypt -it -p 80:80 -p 443:443 -v ${LE_CERT_PATH}:/etc/letsencrypt accenture/letsencrypt certonly --standalone -d ${REGISTRY_DOMAIN_NAME} --text --register-unsafely-without-email --agree-tos
+    docker run --rm --name letsencrypt -it -p 80:80 -p 443:443 -v ${LE_CERT_PATH}:/etc/letsencrypt accenture/letsencrypt:0.0.1 certonly --standalone -d ${REGISTRY_DOMAIN_NAME} --text --register-unsafely-without-email --agree-tos
 
 }
 
