@@ -1,0 +1,15 @@
+ mail-server:
+   image: tvial/docker-mailserver:v2
+   hostname: mail-server
+   domainname: "${PUBLIC_HOSTNAME}"
+   net: "${CUSTOM_NETWORK_NAME}"
+   container_name: mail-server
+   ports:
+    # Because port 25 may already be running on your host..
+     - "9025:25"
+     - "143:143"
+     - "587:587"
+     - "993:993"
+   volumes:
+     - maildata:/var/mail
+     - ../mail-config/:/tmp/docker-mailserver/
