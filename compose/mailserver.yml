@@ -2,6 +2,7 @@
    image: tvial/docker-mailserver:v2
    hostname: mail-server
    domainname: "${PUBLIC_HOSTNAME}"
+   restart: always
    net: "${CUSTOM_NETWORK_NAME}"
    container_name: mail-server
    ports:
