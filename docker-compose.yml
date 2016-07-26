@@ -173,7 +173,7 @@ sonar-mysql:
 sonar:
   container_name: sonar
   restart: always
-  image: accenture/adop-sonar:0.1.1
+  image: accenture/adop-sonar:0.2.0
   #build: ../images/docker-sonar/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
