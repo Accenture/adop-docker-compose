@@ -18,3 +18,9 @@ When submitting pull requests we have a few guidelines that we'd like people to 
 * Where applicable, Travis must be happy for a PR to be accepted
 * When contributing to any of the documentation, either the site or .md files, the changes must render correctly in their target viewer
     * For GitHub Pages this means you will need to publish your changes and either provide a link or a screenshot of them functioning
+
+[Maintainers](https://github.com/Accenture/adop-docker-compose/wiki/Project-Roster#project-maintainers) will follow these rules when reviewing and accepting Pull Requests:
+
+* Pull Requests shouldn't be accepted by the person that created them
+* Even if a change looks simple, crowd source some testing on Gitter to verify compatibility
+* PRs that add or remove something from the platform additionally needs approval from a [roadmap approver](https://github.com/Accenture/adop-docker-compose/wiki/Project-Roster#roadmap-approvers)
