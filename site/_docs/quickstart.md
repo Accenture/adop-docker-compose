@@ -11,7 +11,7 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
 1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet.
 1. On the "Step 2: VPC with a Single Public Subnet" page give your VPC a meaningful name and specify the availability zone as 'a', e.g. select eu-west-1a from the pulldown.
 1. Once the VPC is created note the VPC ID (e.g. vpc-1ed3sfgw)
-1. Clone this repository and then in a terminal window (this has been tested in GitBash):
+1. Clone this repository [adop-docker-compose](https://github.com/Accenture/adop-docker-compose) and then in a terminal window (this has been tested in GitBash):
     - Run:
 
         ```./quickstart.sh ```
