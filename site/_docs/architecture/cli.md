@@ -12,8 +12,7 @@ It makes use of Docker Machine (if applicable) and Docker Compose where required
 ## Getting started - init
 For simplicity some people will prefer to start from the [quickstart.sh](../quickstart.md) wrapper script.  However if you have:
 * Docker locally installed on your machine, or
-* already set up your shell to point to a the docker command line tool to a remote docker instance or Swarm),
-you can get started as follows:
+* already set up your shell to point to a the docker command line tool to a remote docker instance or Swarm), you can get started as follows:
 1. Clone the [https://github.com/Accenture/adop-docker-compose](https://github.com/Accenture/adop-docker-compose) repository and change into the adop-docker-compose directory
 2. Run
 ```
