@@ -195,17 +195,15 @@ Kibana 4 does not provide a configuration property that allow to define the defa
 - For the below drop-down select @timestamp for the Time-field name
 - Click on create button
 
-# User feedback
+# User Feedback
 
 ## Documentation
-Documentation can be found under the [`docker-library/docs` GitHub repo](https://github.com/docker-library/docs). Be sure to familiarize yourself with the [repository's `README.md` file](https://github.com/docker-library/docs/blob/master/README.md) before attempting a pull request.
+Documentation can be found [on our GitHub Pages site](http://accenture.github.io/adop-docker-compose).
 
 ## Issues
-If you have any problems with or questions about this image, please contact us through a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues).
+If you have any problems with or questions about this project, please contact us through [Gitter](https://gitter.im/Accenture/ADOP) or a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues).
 
 ## Contribute
-You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can.
+You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can. You can find more information in our [documentation](http://accenture.github.io/adop-docker-compose/docs/contributing/).
 
 Before you start to code, we recommend discussing your plans through a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues), especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.
-
-
