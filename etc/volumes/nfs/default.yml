@@ -1,87 +1,129 @@
-proxy:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/nginx_config:/etc/nginx
-    - ${NFS_HOST}/nfs/nginx_releasenote:/usr/share/nginx/html
+version: '2'
 
-ldap:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/ldap_db:/var/lib/ldap
-    - ${NFS_HOST}/nfs/ldap_static:/etc/ldap
-
-gerrit-mysql:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/gerrit_mysql_data:/var/lib/mysql
-
-gerrit:
-  user: root
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/git_repos:/var/git/repos 
-    - ${NFS_HOST}/nfs/gerrit_review_site:/var/gerrit/review_site 
-
-sensu-api:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sensu_api_conf:/etc/sensu/conf.d
-
-sensu-server:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sensu_server_conf:/etc/sensu/conf.d
-
-sensu-client:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sensu_client_conf:/etc/sensu/conf.d
-
-sensu-rabbitmq:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sensu_rabbitmq_data:/var/lib/rabbitmq
-
-sensu-redis:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sensu_redis_data:/data
-
-sonar-mysql:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sonar_mysql_data:/var/lib/mysql 
-
-sonar:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sonar_data:/opt/sonarqube/data
-    - ${NFS_HOST}/nfs/sonar_extensions:/opt/sonarqube/extensions
-    - ${NFS_HOST}/nfs/sonar_logs:/opt/sonarqube/logs
-
-jenkins:
-  user: root 
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/jenkins_home:/var/jenkins_home 
-
-selenium-node-chrome:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/selenium_config:/var/selenium-config
-
-selenium-node-firefox:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/selenium_config:/var/selenium-config
-
-nexus:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/nexus_sonatype_work:/sonatype-work
-
-registry:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/registry_certs:/certs
-    - ${NFS_HOST}/nfs/registry_data:/data
+volumes:
+    nginx_config:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/nginx_config
+    nginx_releasenote:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/nginx_releasenote
+    ldap_db:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/ldap_db
+    ldap_static:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/ldap_static
+    gerrit_mysql_data:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/gerrit_mysql_data
+    git_repos:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/git_repos
+    gerrit_review_site:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/gerrit_review_site
+    sensu_api_conf:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/sensu_api_conf
+    sensu_server_conf:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/sensu_server_conf
+    sensu_client_conf:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/sensu_client_conf
+    sensu_rabbitmq_data:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/sensu_rabbitmq_data
+    sensu_redis_data:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/sensu_redis_data
+    sonar_mysql_data:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/sonar_mysql_data
+    sonar_data:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/sonar_data
+    sonar_extensions:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/sonar_extensions
+    sonar_logs:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/sonar_logs
+    jenkins_home:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/jenkins_home
+    jenkins_slave_home:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/jenkins_slave_home
+    nexus_sonatype_work:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/nexus_sonatype_work
+    registry_certs:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/registry_certs
+    registry_data:
+      driver: local
+      driver_opts:
+        type: nfs
+        o=addr: "${NFS_HOST},rw"
+        device: /nfs/registry_data
