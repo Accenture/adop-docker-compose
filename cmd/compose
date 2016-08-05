@@ -127,6 +127,10 @@ esac
         echo "DOCKER_TLS_VERIFY not set to 1, skipping certificate generation"
     fi
     
+    # Wait for Nginx to come up before proceeding
+    echo "* Waiting for Nginx to become available"
+    until [[ $(curl -I -s -u ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN} http://${TARGET_HOST}/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Nginx unavailable, sleeping for 5s"; sleep 5; done
+    
     # Tell the user something useful
     echo
     echo '##########################################################'
