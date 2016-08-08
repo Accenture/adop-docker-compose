@@ -31,6 +31,18 @@ help() {
     echo
 }
 
+pretty_sleep() {
+    secs=${1:-60}
+    tool=${2:-service}
+    while [ $secs -gt 0 ]; do
+        echo -ne "$tool unavailable, sleeping for: $secs\033[0Ks\r"
+        sleep 1
+        : $((secs--))
+    done
+    echo "$tool was unavailable, so slept for: ${1:-60} secs"
+}
+
+
 prep_env() {
     # If the proxy IP has not been set work out the TARGET_HOST
     # Else just use it
@@ -112,9 +124,9 @@ esac
 
     # Wait for Jenkins and Gerrit to come up before proceeding
     echo "* Waiting for the Platform to become available - this can take a few minutes"
-    TOOL_SLEEP_TIME=60
-    until [[ $(docker exec jenkins curl -I -s jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Jenkins unavailable, sleeping for ${TOOL_SLEEP_TIME}s"; sleep ${TOOL_SLEEP_TIME}; done
-    until [[ $(docker exec gerrit curl -I -s gerrit:${PASSWORD_GERRIT}@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Gerrit unavailable, sleeping for ${TOOL_SLEEP_TIME}s"; sleep ${TOOL_SLEEP_TIME}; done
+    TOOL_SLEEP_TIME=30
+    until [[ $(docker exec jenkins curl -I -s jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Jenkins; done
+    until [[ $(docker exec gerrit curl -I -s gerrit:${PASSWORD_GERRIT}@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Gerrit; done
     
     # Trigger Load_Platform in Jenkins
     echo "* Initialising the Platform"
