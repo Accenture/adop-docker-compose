@@ -4,14 +4,14 @@ title: Quickstart
 permalink: /docs/quickstart/
 ---
 
-These instructions will spin up an instance in a single server in AWS (for evaluation purposes).
+These instructions will spin up an instance in a single server in AWS (for evaluation purposes). Please check the [prerequisites](/adop-docker-compose/docs/prerequisites/).
 
 NB. the instructions will also work in anywhere supported by [Docker Machine](https://docs.docker.com/machine/), just follow the relevant Docker Machine instructions for your target platform and then start at step 3 below and (you can set the VPC_ID to NA).
 
 1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet.
 1. On the "Step 2: VPC with a Single Public Subnet" page give your VPC a meaningful name and specify the availability zone as 'a', e.g. select eu-west-1a from the pulldown.
 1. Once the VPC is created note the VPC ID (e.g. vpc-1ed3sfgw)
-1. Clone this repository and then in a terminal window (this has been tested in GitBash):
+1. Clone this repository [adop-docker-compose](https://github.com/Accenture/adop-docker-compose) and then in a terminal window (this has been tested in GitBash):
     - Run:
 
         ```./quickstart.sh ```
@@ -52,3 +52,5 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
 
 1. Log in using the username and password you specified in the quickstart script.
     - These can also be found in your "platform.secrets.sh" file
+
+1. Update the docker-machine security group in the AWS console to permit inbound http traffic on port 80 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32.
