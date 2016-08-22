@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: sensu-server
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: sensu-server
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - env:
+        - name: API_HOST
+          value: "{{.Values.API_HOST}}"
+        - name: SENSU_CLIENT_NAME
+          value: "{{.Values.SENSU_CLIENT_NAME}}"
+        - name: RABBITMQ_URL
+          value: "{{.Values.RABBITMQ_URL}}"
+        - name: REDIS_URL
+          value: "{{.Values.REDIS_URL}}"
+        - name: SENSU_API_PORT
+          value: "{{default 4567 .Values.SENSU_API_PORT}}"
+        image: accenture/adop-sensu:{{default "latest" .Values.imageTag}}
+        name: sensu-server
+        resources:
+          limits:
+            memory: "{{.Values.mem_limit}}"
+          requests:
+            memory: "{{.Values.mem_request}}"
+        command:
+          - sensu-server
+      restartPolicy: Always

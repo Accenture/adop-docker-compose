@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: sonar-mysql
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: sonar-mysql
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - volumeMounts:
+          - name: data
+            mountPath: /var/lib/mysql
+        env:
+        - name: MYSQL_DATABASE
+          value: "{{.Values.MYSQL_DATABASE}}"
+        - name: MYSQL_PASSWORD
+          value: "{{.Values.MYSQL_PASSWORD}}"
+        - name: MYSQL_ROOT_PASSWORD
+          value: "{{.Values.MYSQL_ROOT_PASSWORD}}"
+        - name: MYSQL_USER
+          value: "{{.Values.MYSQL_USER}}"
+        image: mysql:{{default "5.6.25" .Values.imageTag}}
+        name: sonar-mysql
+        ports:
+          - name: mysql
+            containerPort: 3306
+      restartPolicy: Always
+      volumes:
+        - name: data
+          emptyDir: {}

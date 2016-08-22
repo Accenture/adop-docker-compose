@@ -1,0 +1,11 @@
+# Default values for selenium-node-chrome.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+imageTag: latest
+mem_limit: 512Mi
+mem_request: 64Mi
+
+SE_OPTS: -nodeConfig /var/selenium-config/config-chrome.json
+HUB_PORT_4444_TCP_ADDR: selenium-hub
+HUB_PORT_4444_TCP_PORT: 4444

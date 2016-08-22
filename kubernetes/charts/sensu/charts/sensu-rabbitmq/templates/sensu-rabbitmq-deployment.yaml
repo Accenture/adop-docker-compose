@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: sensu-rabbitmq
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: sensu-rabbitmq
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - image: rabbitmq:{{default "latest" .Values.imageTag}}
+        name: sensu-rabbitmq
+        ports:
+          - name: http
+            containerPort: 15672
+          - name: amqp
+            containerPort: 5672
+      restartPolicy: Always

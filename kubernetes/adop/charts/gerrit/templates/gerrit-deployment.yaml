@@ -1,0 +1,99 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: gerrit
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: gerrit
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - volumeMounts:
+          - name: git
+            mountPath: /var/git/repos
+          - name: gerrit
+            mountPath: /var/gerrit/review_site
+        env:
+        - name: WEBURL
+          value: {{.Values.WEBURL | quote }}
+        - name: DB_NAME
+          value: {{.Values.DB_NAME | quote }}
+        - name: AUTH_TYPE
+          value: {{.Values.AUTH_TYPE | quote }}
+        - name: INITIAL_ADMIN_PASSWORD
+          value: {{.Values.INITIAL_ADMIN_PASSWORD | quote }}
+        - name: LDAP_ACCOUNTPATTERN
+          value: {{.Values.LDAP_ACCOUNTPATTERN | quote }}
+        - name: LDAP_SERVER
+          value: {{.Values.LDAP_SERVER | quote }}
+        - name: LDAP_ACCOUNTBASE
+          value: {{.Values.LDAP_ACCOUNTBASE | quote }}
+        - name: LDAP_USERNAME
+          value: {{.Values.LDAP_USERNAME | quote }}
+        - name: LDAP_PASSWORD
+          value: {{.Values.LDAP_PASSWORD | quote }}
+        - name: DB_HOSTNAME
+          value: {{.Values.DB_HOSTNAME | quote }}
+        - name: DB_USER
+          value: {{.Values.DB_USER | quote }}
+        - name: HTTPD_LISTENURL
+          value: {{.Values.HTTPD_LISTENURL | quote }}
+        - name: DATABASE_TYPE
+          value: {{.Values.DATABASE_TYPE | quote }}
+        - name: GERRIT_PASSWORD
+          value: {{.Values.GERRIT_PASSWORD | quote }}
+        - name: INITIAL_ADMIN_USER
+          value: {{.Values.INITIAL_ADMIN_USER | quote }}
+        - name: LDAP_GROUPPATTERN
+          value: {{.Values.LDAP_GROUPPATTERN | quote }}
+        - name: USER_NAME
+          value: {{.Values.USER_NAME | quote }}
+        - name: LDAP_ACCOUNTEMAILADDRESS
+          value: {{.Values.LDAP_ACCOUNTEMAILADDRESS | quote }}
+        - name: DOWNLOAD_SCHEME
+          value: {{.Values.DOWNLOAD_SCHEME | quote }}
+        - name: LDAP_ACCOUNTFULLNAME
+          value: {{.Values.LDAP_ACCOUNTFULLNAME | quote }}
+        - name: LDAP_GROUPMEMBERPATTERN
+          value: {{.Values.LDAP_GROUPMEMBERPATTERN | quote }}
+        - name: LDAP_GROUPBASE
+          value: {{.Values.LDAP_GROUPBASE | quote }}
+        - name: USER_EMAIL
+          value: {{.Values.USER_EMAIL | quote }}
+        - name: REPO_PATH
+          value: {{.Values.REPO_PATH | quote }}
+        - name: DB_PORT
+          value: {{.Values.DB_PORT | quote }}
+        - name: DB_PASSWORD
+          value: {{.Values.DB_PASSWORD | quote }}
+        - name: AUTH_LOGOUTURL
+          value: {{.Values.AUTH_LOGOUTURL | quote }}
+        - name: JENKINS_PASSWORD
+          value: {{.Values.JENKINS_PASSWORD | quote }}
+        image: accenture/adop-gerrit:{{default "latest" .Values.imageTag}}
+        name: gerrit
+        ports:
+          - name: http
+            containerPort: 8080
+          - name: ssh
+            containerPort: 29418
+        resources:
+          limits:
+            memory: "{{.Values.mem_limit}}"
+          requests:
+            memory: "{{.Values.mem_request}}"
+        securityContext:
+          privileged: true
+      restartPolicy: Always
+      volumes:
+        - name: git
+          emptyDir: {}
+        - name: gerrit
+          emptyDir: {}

@@ -1,0 +1,112 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: jenkins
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: jenkins
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - env:
+        - name: SONAR_ADDITIONAL_PROPS
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_ROOTDN
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: NODEJS_VERSION
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: SONAR_ACCOUNT_PASSWORD
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: DOCKER_HOST
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: SONAR_RUNNER_VERSION
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_MAIL_ADDRESS_ATTRIBUTE_NAME
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: GERRIT_HOST_NAME
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: SONAR_DB_PASSWORD
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: JENKINS_OPTS
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_GROUP_MEMBERSHIP_FILTER
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: SONAR_PLUGIN_VERSION
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_MANAGER_DN
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: ROOT_URL
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: SONAR_DB_URL
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: GERRIT_JENKINS_USERNAME
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_GROUP_SEARCH_BASE
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: NODEJS_GLOBAL_PACKAGES
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: INITIAL_ADMIN_PASSWORD
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: GIT_GLOBAL_CONFIG_EMAIL
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_GROUP_SEARCH_FILTER
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: ANT_VERSION
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: ADOP_PLATFORM_MANAGEMENT_VERSION
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_DISABLE_MAIL_ADDRESS_RESOLVER
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: GERRIT_FRONT_END_URL
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: DOCKER_CLIENT_CERT_PATH
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: DOCKER_NETWORK_NAME
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: SONAR_SERVER_URL
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: GERRIT_JENKINS_PASSWORD
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_USER_SEARCH_BASE
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: NODEJS_PACKAGES_REFRESH_HOURS
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_SERVER
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_MANAGER_PASSWORD
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: DOCKER_TLS_VERIFY
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_DISPLAY_NAME_ATTRIBUTE_NAME
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: INITIAL_ADMIN_USER
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: GIT_GLOBAL_CONFIG_NAME
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_INHIBIT_INFER_ROOTDN
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: SONAR_DB_LOGIN
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: LDAP_USER_SEARCH
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: SONAR_ACCOUNT_LOGIN
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: MAVEN_VERSION
+          value: "{{.Values.SWARM_PASSWORD}}"
+        image: accenture/adop-jenkins:{{default "latest" .Values.imageTag}}
+        name: jenkins
+        securityContext:
+          privileged: true
+        ports:
+          - name: http
+            containerPort: 8080
+          - name: agent
+            containerPort: 50000
+      restartPolicy: Always

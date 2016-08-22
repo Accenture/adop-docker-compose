@@ -1,0 +1,49 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: jenkins-slave
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: jenkins-slave
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - volumeMounts:
+          - name: docker
+            mountPath: /var/run/docker.sock
+            name: workspace
+            mountPath: /workspace
+        env:
+        - name: SWARM_PASSWORD
+          value: "{{.Values.SWARM_PASSWORD}}"
+        - name: INITIAL_ADMIN_PASSWORD
+          value: "{{.Values.INITIAL_ADMIN_USER}}"
+        - name: INITIAL_ADMIN_USER
+          value: "{{.Values.INITIAL_ADMIN_PASSWORD}}"
+        - name: SLAVE_EXECUTORS
+          value: "{{.Values.SLAVE_EXECUTORS}}"
+        - name: SLAVE_LABELS
+          value: "{{.Values.SLAVE_LABELS}}"
+        image: accenture/adop-jenkins-slave:{{default "latest" .Values.imageTag}}
+        name: jenkins-slave
+        resources:
+          limits:
+            memory: "{{.Values.mem_limit}}"
+          requests:
+            memory: "{{.Values.mem_request}}"
+        securityContext:
+          privileged: true
+      restartPolicy: Always
+      volumes:
+        - name: docker
+          hostPath:
+            path: /var/run/docker.sock
+        - name: workspace
+          emptyDir: {}

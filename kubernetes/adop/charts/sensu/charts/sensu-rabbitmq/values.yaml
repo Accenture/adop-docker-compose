@@ -1,0 +1,7 @@
+# Default values for sensu-rabbitmq.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+imageTag: 3.5.7-management
+amqpPort: 5672
+httpPort: 80

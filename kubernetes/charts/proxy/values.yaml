@@ -1,0 +1,15 @@
+# Default values for proxy.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+imageTag: 0.2.0
+httpPort: 80
+httpsPort: 443
+
+LDAP_SERVER: ldap:389
+LDAP_USERNAME: cn=admin,dc=ldap,dc=example,dc=com
+LDAP_PASSWORD: ${LDAP_PWD}
+LDAP_USER_BASE_DN: ou=people,dc=ldap,dc=example,dc=com
+LDAP_GROUP_ATTRIBUTE: member
+LDAP_USER_ID_ATTRIBUTE: cn
+LDAP_USER_OBJECT_CLASS: inetOrgPerson

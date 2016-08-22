@@ -1,0 +1,12 @@
+# Default values for sensu.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+imageTag: latest
+mem_limit: 512Mi
+mem_request: 64Mi
+
+SENSU_CLIENT_NAME: core
+API_HOST: sensu-api
+RABBITMQ_URL: amqp://guest:guest@sensu-rabbitmq
+REDIS_URL: redis://sensu-redis

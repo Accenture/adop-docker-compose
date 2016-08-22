@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: selenium-node-chrome
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: selenium-node-chrome
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - env:
+        - name: SE_OPTS
+          value: "{{.Values.SE_OPTS}}"
+        - name: HUB_PORT_4444_TCP_ADDR
+          value: "{{.Values.HUB_PORT_4444_TCP_ADDR}}"
+        - name: HUB_PORT_4444_TCP_PORT
+          value: "{{.Values.HUB_PORT_4444_TCP_PORT}}"
+        image: selenium/node-chrome:{{default "latest" .Values.imageTag}}
+        name: selenium-node-chrome
+        resources:
+          limits:
+            memory: "{{.Values.mem_limit}}"
+          requests:
+            memory: "{{.Values.mem_request}}"
+      restartPolicy: Always

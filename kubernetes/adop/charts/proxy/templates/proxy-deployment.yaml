@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: proxy
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: proxy
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - volumeMounts:
+          - name: html
+            mountPath: /usr/share/nginx/html
+        env:
+        - name: LDAP_GROUP_ATTRIBUTE
+          value: "{{.Values.LDAP_GROUP_ATTRIBUTE}}"
+        - name: LDAP_USER_ID_ATTRIBUTE
+          value: "{{.Values.LDAP_USER_ID_ATTRIBUTE}}"
+        - name: LDAP_USER_OBJECT_CLASS
+          value: "{{.Values.LDAP_USER_OBJECT_CLASS}}"
+        - name: LDAP_SERVER
+          value: "{{.Values.LDAP_SERVER}}"
+        - name: LDAP_USERNAME
+          value: "{{.Values.LDAP_USERNAME}}"
+        - name: LDAP_PASSWORD
+          value: "{{.Values.LDAP_PASSWORD}}"
+        - name: LDAP_USER_BASE_DN
+          value: "{{.Values.LDAP_USER_BASE_DN}}"
+        image: {{default "accenture/adop-nginx" .Values.image}}:{{default "latest" .Values.imageTag}}
+        name: proxy
+        ports:
+        - containerPort: 80
+          protocol: TCP
+          name: http
+        - containerPort: 443
+          protocol: TCP
+          name: https
+      restartPolicy: Always
+      volumes:
+        - name: html
+          emptyDir: {}

@@ -1,0 +1,121 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: jenkins
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: jenkins
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - env:
+        - name: SONAR_ADDITIONAL_PROPS
+          value: "{{.Values.SONAR_ADDITIONAL_PROPS}}"
+        - name: LDAP_ROOTDN
+          value: "{{.Values.LDAP_ROOTDN}}"
+        - name: NODEJS_VERSION
+          value: "{{.Values.NODEJS_VERSION}}"
+        - name: SONAR_ACCOUNT_PASSWORD
+          value: "{{.Values.SONAR_ACCOUNT_PASSWORD}}"
+        - name: DOCKER_HOST
+          value: "{{.Values.DOCKER_HOST}}"
+        - name: SONAR_RUNNER_VERSION
+          value: "{{.Values.SONAR_RUNNER_VERSION}}"
+        - name: LDAP_MAIL_ADDRESS_ATTRIBUTE_NAME
+          value: "{{.Values.LDAP_MAIL_ADDRESS_ATTRIBUTE_NAME}}"
+        - name: GERRIT_HOST_NAME
+          value: "{{.Values.GERRIT_HOST_NAME}}"
+        - name: SONAR_DB_PASSWORD
+          value: "{{.Values.SONAR_DB_PASSWORD}}"
+        - name: JENKINS_OPTS
+          value: "{{.Values.JENKINS_OPTS}}"
+        {{ if .Values.LDAP_GROUP_MEMBERSHIP_FILTER }}
+        - name: LDAP_GROUP_MEMBERSHIP_FILTER
+          value: "{{.Values.LDAP_GROUP_MEMBERSHIP_FILTER}}"
+        {{ end }}
+        {{ if .Values.SONAR_PLUGIN_VERSION }}
+        - name: SONAR_PLUGIN_VERSION
+          value: "{{.Values.SONAR_PLUGIN_VERSION}}"
+        {{ end }}
+        - name: LDAP_MANAGER_DN
+          value: "{{.Values.LDAP_MANAGER_DN}}"
+        - name: ROOT_URL
+          value: "{{.Values.ROOT_URL}}"
+        - name: SONAR_DB_URL
+          value: "{{.Values.SONAR_DB_URL}}"
+        - name: GERRIT_JENKINS_USERNAME
+          value: "{{.Values.GERRIT_JENKINS_USERNAME}}"
+        - name: LDAP_GROUP_SEARCH_BASE
+          value: "{{.Values.LDAP_GROUP_SEARCH_BASE}}"
+        - name: NODEJS_GLOBAL_PACKAGES
+          value: "{{.Values.NODEJS_GLOBAL_PACKAGES}}"
+        - name: INITIAL_ADMIN_PASSWORD
+          value: "{{.Values.INITIAL_ADMIN_PASSWORD}}"
+        - name: GIT_GLOBAL_CONFIG_EMAIL
+          value: "{{.Values.GIT_GLOBAL_CONFIG_EMAIL}}"
+        - name: LDAP_GROUP_SEARCH_FILTER
+          value: "{{.Values.LDAP_GROUP_SEARCH_FILTER}}"
+        - name: ANT_VERSION
+          value: "{{.Values.ANT_VERSION}}"
+        - name: ADOP_PLATFORM_MANAGEMENT_VERSION
+          value: "{{.Values.ADOP_PLATFORM_MANAGEMENT_VERSION}}"
+        - name: LDAP_DISABLE_MAIL_ADDRESS_RESOLVER
+          value: "{{.Values.SWARMLDAP_DISABLE_MAIL_ADDRESS_RESOLVER_PASSWORD}}"
+        - name: GERRIT_FRONT_END_URL
+          value: "{{.Values.GERRIT_FRONT_END_URL}}"
+        - name: DOCKER_CLIENT_CERT_PATH
+          value: "{{.Values.DOCKER_CLIENT_CERT_PATH}}"
+        - name: DOCKER_NETWORK_NAME
+          value: "{{.Values.DOCKER_NETWORK_NAME}}"
+        - name: SONAR_SERVER_URL
+          value: "{{.Values.SONAR_SERVER_URL}}"
+        - name: GERRIT_JENKINS_PASSWORD
+          value: "{{.Values.GERRIT_JENKINS_PASSWORD}}"
+        - name: LDAP_USER_SEARCH_BASE
+          value: "{{.Values.LDAP_USER_SEARCH_BASE}}"
+        - name: NODEJS_PACKAGES_REFRESH_HOURS
+          value: "{{.Values.NODEJS_PACKAGES_REFRESH_HOURS}}"
+        - name: LDAP_SERVER
+          value: "{{.Values.LDAP_SERVER}}"
+        - name: LDAP_MANAGER_PASSWORD
+          value: "{{.Values.LDAP_MANAGER_PASSWORD}}"
+        - name: DOCKER_TLS_VERIFY
+          value: "{{.Values.DOCKER_TLS_VERIFY}}"
+        - name: LDAP_DISPLAY_NAME_ATTRIBUTE_NAME
+          value: "{{.Values.LDAP_DISPLAY_NAME_ATTRIBUTE_NAME}}"
+        - name: INITIAL_ADMIN_USER
+          value: "{{.Values.INITIAL_ADMIN_USER}}"
+        - name: GIT_GLOBAL_CONFIG_NAME
+          value: "{{.Values.GIT_GLOBAL_CONFIG_NAME}}"
+        - name: LDAP_INHIBIT_INFER_ROOTDN
+          value: "{{.Values.LDAP_INHIBIT_INFER_ROOTDN}}"
+        - name: SONAR_DB_LOGIN
+          value: "{{.Values.SONAR_DB_LOGIN}}"
+        - name: LDAP_USER_SEARCH
+          value: "{{.Values.LDAP_USER_SEARCH}}"
+        - name: SONAR_ACCOUNT_LOGIN
+          value: "{{.Values.SONAR_ACCOUNT_LOGIN}}"
+        - name: MAVEN_VERSION
+          value: "{{.Values.MAVEN_VERSION}}"
+        image: accenture/adop-jenkins:{{default "latest" .Values.imageTag}}
+        name: jenkins
+        resources:
+          limits:
+            memory: "{{.Values.mem_limit}}"
+          requests:
+            memory: "{{.Values.mem_request}}"
+        securityContext:
+          privileged: true
+        ports:
+          - name: http
+            containerPort: 8080
+          - name: agent
+            containerPort: 50000
+      restartPolicy: Always

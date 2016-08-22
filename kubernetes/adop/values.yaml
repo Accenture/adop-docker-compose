@@ -1,0 +1,65 @@
+# Default values for adop.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+
+gerrit:
+  imageTag: 0.1.2
+  WEBURL: http://192.168.99.100:30080/gerrit/
+  AUTH_LOGOUTURL: http://192.168.99.100:30080/gerrit/
+  mysql:
+    imageTag: 5.6.25
+
+jenkins:
+  jenkins-slave:
+    imageTag: 0.1.3
+  imageTag: 0.1.5
+  ADOP_PLATFORM_MANAGEMENT_VERSION: 0.1.1
+  SONAR_RUNNER_VERSION: 2.4
+  ANT_VERSION: 1.9.4
+  MAVEN_VERSION: 3.0.5
+  NODEJS_VERSION: 0.12.2
+  ROOT_URL: http://192.168.99.100:30080/jenkins/
+
+
+ldap:
+  imageTag: 0.1.2
+  ldap-ltb:
+    imageTag: 0.1.0
+  ldap-phpadmin:
+    imageTag: 0.1.0
+
+nexus:
+  # imageTag: 0.1.0
+  registry: willies/adop-nexus
+  imageTag: 28ca99e_kube.0
+  NEXUS_BASE_URL: http://192.168.99.100:30080/nexus
+
+proxy:
+  image: willies/adop-nginx
+  imageTag: 9033eda_kube.1
+
+selenium:
+  imageTag: 2.46.0
+  selenium-node-chrome:
+    imageTag: 2.46.0
+  selenium-node-firefox:
+    imageTag: 2.46.0
+
+sensu:
+  imageTag: 0.1.0
+  sensu-api:
+    imageTag: 0.1.0
+  sensu-client:
+    imageTag: 0.1.0
+  sensu-rabbitmq:
+    imageTag: 3.5.7-management
+  sensu-redis:
+    imageTag: 3.0.7
+  sensu-uchiwa:
+    imageTag: 0.15.0
+
+sonar:
+  imageTag: 0.2.0
+  mysql:
+    imageTag: 5.6.25

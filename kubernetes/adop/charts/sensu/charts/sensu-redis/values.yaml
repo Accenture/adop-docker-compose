@@ -1,0 +1,6 @@
+# Default values for sensu-redis.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+imageTag: 3.0.7
+clientPort: 6379

@@ -1,0 +1,51 @@
+# Default values for jenkins.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+imageTag: latest
+httpPort: 8080
+agentPort: 50000
+mem_limit: 512Mi
+mem_request: 64Mi
+
+ADOP_PLATFORM_MANAGEMENT_VERSION: 0.1.1
+JENKINS_OPTS: --prefix=/jenkins
+ROOT_URL: http://localhost/jenkins/
+LDAP_SERVER: ldap:389
+LDAP_ROOTDN: dc=ldap,dc=example,dc=com
+LDAP_USER_SEARCH_BASE: ou=people
+LDAP_USER_SEARCH: uid={0}
+LDAP_GROUP_SEARCH_BASE: ou=groups
+LDAP_GROUP_SEARCH_FILTER:
+LDAP_GROUP_MEMBERSHIP_FILTER:
+LDAP_MANAGER_DN: cn=admin,dc=ldap,dc=example,dc=com
+LDAP_MANAGER_PASSWORD: Jpk66g63ZifGYIcShSGM
+LDAP_INHIBIT_INFER_ROOTDN: false
+LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: false
+LDAP_DISPLAY_NAME_ATTRIBUTE_NAME: displayName
+LDAP_MAIL_ADDRESS_ATTRIBUTE_NAME: mail
+INITIAL_ADMIN_USER: adop
+INITIAL_ADMIN_PASSWORD: adop
+GERRIT_HOST_NAME: gerrit
+GERRIT_FRONT_END_URL: http://gerrit:8080/gerrit
+GERRIT_JENKINS_USERNAME: jenkins
+GERRIT_JENKINS_PASSWORD: jenkins
+SONAR_SERVER_URL: http://sonar:9000/sonar/
+SONAR_ACCOUNT_LOGIN: jenkins
+SONAR_ACCOUNT_PASSWORD: jenkins
+SONAR_DB_URL: jdbc:mysql://sonar-mysql:3306/sonar?useUnicode=true&amp;characterEncoding=utf8
+SONAR_DB_LOGIN: sonar
+SONAR_DB_PASSWORD: sonar
+SONAR_PLUGIN_VERSION:
+SONAR_ADDITIONAL_PROPS:
+SONAR_RUNNER_VERSION: 2.4
+ANT_VERSION: 1.9.4
+MAVEN_VERSION: 3.0.5
+NODEJS_VERSION: 0.12.2
+NODEJS_GLOBAL_PACKAGES: grunt-cli@~0.1.13 bower@~1.3.12 plato@~1.2.1
+NODEJS_PACKAGES_REFRESH_HOURS: 72
+GIT_GLOBAL_CONFIG_NAME: ADOP Jenkins
+GIT_GLOBAL_CONFIG_EMAIL: jenkins@ldap.example.com
+DOCKER_TLS_VERIFY: false
+DOCKER_HOST: localhost
+DOCKER_CLIENT_CERT_PATH: //root/.docker/

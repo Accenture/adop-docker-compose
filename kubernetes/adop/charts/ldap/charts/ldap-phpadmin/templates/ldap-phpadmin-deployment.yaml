@@ -1,0 +1,34 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: ldap-phpadmin
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: ldap-phpadmin
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - env:
+        - name: LDAP_SERVER_NAME
+          value: "{{.Values.LDAP_SERVER_NAME}}"
+        - name: LDAP_SERVER_PORT
+          value: "{{.Values.LDAP_SERVER_PORT}}"
+        - name: LDAP_SERVER_BASE_DN
+          value: "{{.Values.LDAP_SERVER_BASE_DN}}"
+        - name: LDAP_SERVER_BIND_ID
+          value: "{{.Values.LDAP_SERVER_BIND_ID}}"
+        - name: LDAP_SERVER_HOST
+          value: "{{.Values.LDAP_SERVER_HOST}}"
+        image: accenture/adop-ldap-phpadmin:{{default "latest" .Values.imageTag}}
+        name: ldap-phpadmin
+        ports:
+          - name: http
+            containerPort: 80
+      restartPolicy: Always

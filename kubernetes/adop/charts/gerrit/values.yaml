@@ -1,0 +1,45 @@
+# Default values for gerrit.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+imageTag: latest
+httpPort: 8080
+sshPort: 29418
+mem_limit: 512Mi
+mem_request: 64Mi
+
+# dependency:container==gerrit-mysql
+REPO_PATH: /var/git/repos
+WEBURL: http://localhost/gerrit/
+AUTH_LOGOUTURL: http://localhost/gerrit/
+AUTH_TYPE: LDAP
+DATABASE_TYPE: mysql
+DB_HOSTNAME: gerrit-mysql
+DB_PORT: 3306
+DB_NAME: gerrit
+DB_USER: gerrit
+DB_PASSWORD: gerrit
+GERRIT_PASSWORD: gerrit
+JENKINS_PASSWORD: jenkins
+INITIAL_ADMIN_USER: adop
+INITIAL_ADMIN_PASSWORD: adop
+LDAP_SERVER: ldap:389
+LDAP_USERNAME: cn=admin,dc=ldap,dc=example,dc=com
+LDAP_PASSWORD: Jpk66g63ZifGYIcShSGM
+LDAP_ACCOUNTPATTERN: (cn=${username})
+LDAP_ACCOUNTFULLNAME: ${cn}
+LDAP_ACCOUNTEMAILADDRESS: mail
+LDAP_ACCOUNTBASE: dc=ldap,dc=example,dc=com
+LDAP_GROUPBASE: ou=groups,dc=ldap,dc=example,dc=com
+LDAP_GROUPPATTERN: (cn=${groupname})
+LDAP_GROUPMEMBERPATTERN: (uniqueMember=${dn})
+HTTPD_LISTENURL: proxy-http://0.0.0.0:8080/gerrit
+USER_NAME: Gerrit Code Review
+USER_EMAIL: gerrit@adop
+DOWNLOAD_SCHEME: http
+
+mysql:
+  MYSQL_ROOT_PASSWORD: gerrit
+  MYSQL_USER: gerrit
+  MYSQL_PASSWORD: gerrit
+  MYSQL_DATABASE: gerrit

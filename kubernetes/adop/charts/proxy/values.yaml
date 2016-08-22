@@ -1,0 +1,20 @@
+# Default values for proxy.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+# image: accenture/adop-nginx
+# imageTag: latest
+image: willies/adop-nginx
+imageTag: 9033eda_kube.4
+httpPort: 80
+httpsPort: 443
+nodePort: 30080
+portType: NodePort
+
+LDAP_SERVER: ldap:389
+LDAP_USERNAME: cn=admin,dc=ldap,dc=example,dc=com
+LDAP_PASSWORD: Jpk66g63ZifGYIcShSGM
+LDAP_USER_BASE_DN: ou=people,dc=ldap,dc=example,dc=com
+LDAP_GROUP_ATTRIBUTE: member
+LDAP_USER_ID_ATTRIBUTE: cn
+LDAP_USER_OBJECT_CLASS: inetOrgPerson

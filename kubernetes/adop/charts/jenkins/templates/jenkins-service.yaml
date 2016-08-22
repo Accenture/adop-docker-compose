@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+spec:
+  ports:
+  - port: {{default 80 .Values.httpPort | quote }}
+    targetPort: http
+    protocol: TCP
+    name: http
+  - port: {{default 50000 .Values.agentPort | quote }}
+    targetPort: agent
+    protocol: TCP
+    name: agent
+  selector:
+    service: jenkins

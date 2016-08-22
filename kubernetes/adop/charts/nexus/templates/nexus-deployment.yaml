@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: nexus
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: nexus
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - env:
+        - name: LDAP_SEARCH_BASE
+          value: "{{.Values.LDAP_SEARCH_BASE}}"
+        - name: LDAP_USER_PASSWORD_ATTRIBUTE
+          value: "{{.Values.LDAP_USER_PASSWORD_ATTRIBUTE}}"
+        - name: LDAP_BIND_DN
+          value: "{{.Values.LDAP_BIND_DN}}"
+        - name: LDAP_URL
+          value: "{{.Values.LDAP_URL}}"
+        - name: NEXUS_BASE_URL
+          value: "{{.Values.NEXUS_BASE_URL}}"
+        - name: LDAP_USER_BASE_DN
+          value: "{{.Values.LDAP_USER_BASE_DN}}"
+        - name: LDAP_ENABLED
+          value: "{{.Values.LDAP_ENABLED}}"
+        - name: LDAP_BIND_PASSWORD
+          value: "{{.Values.LDAP_BIND_PASSWORD}}"
+        - name: LDAP_GROUP_BASE_DN
+          value: "{{.Values.LDAP_GROUP_BASE_DN}}"
+        image: {{ .Values.registry }}:{{default "latest" .Values.imageTag}}
+        name: nexus
+        resources:
+          limits:
+            memory: "{{.Values.mem_limit}}"
+          requests:
+            memory: "{{.Values.mem_request}}"
+        ports:
+          - name: http
+            containerPort: 8081
+      restartPolicy: Always

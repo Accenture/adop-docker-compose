@@ -1,0 +1,13 @@
+# Default values for jenkins-slave.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+imageTag: latest
+mem_limit: 512Mi
+mem_request: 64Mi
+
+SLAVE_LABELS: aws ldap java8 docker
+SWARM_PASSWORD: jenkins
+SLAVE_EXECUTORS: 1
+INITIAL_ADMIN_USER: adop
+INITIAL_ADMIN_PASSWORD: adop

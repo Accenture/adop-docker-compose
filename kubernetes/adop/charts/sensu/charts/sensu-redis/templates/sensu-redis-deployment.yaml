@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: sensu-redis
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: sensu-redis
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - image: redis:3.0.7
+        name: sensu-redis
+        ports:
+          - name: client
+            containerPort: 6379
+      restartPolicy: Always

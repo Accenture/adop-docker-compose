@@ -1,0 +1,11 @@
+# Default values for ldap-ltb.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+imageTag: latest
+httpPort: 80
+
+LDAP_LTB_URL: ldap://ldap:389
+LDAP_LTB_DN: cn=admin,dc=ldap,dc=example,dc=com
+LDAP_LTB_PWD: Jpk66g63ZifGYIcShSGM
+LDAP_LTB_BS: dc=ldap,dc=example,dc=com

@@ -1,0 +1,12 @@
+# Default values for ldap-phpadmin.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+imageTag: latest
+httpPort: 80
+
+LDAP_SERVER_NAME: LDAP
+LDAP_SERVER_HOST: ldap
+LDAP_SERVER_PORT: 389
+LDAP_SERVER_BIND_ID: cn=admin,dc=ldap,dc=example,dc=com
+LDAP_SERVER_BASE_DN: dc=ldap,dc=example,dc=com

@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: ldap-ltb
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: ldap-ltb
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - env:
+        - name: LDAP_LTB_DN
+          value: "{{.Values.LDAP_LTB_DN}}"
+        - name: LDAP_LTB_PWD
+          value: "{{.Values.LDAP_LTB_PWD}}"
+        - name: LDAP_LTB_URL
+          value: "{{.Values.LDAP_LTB_URL}}"
+        - name: LDAP_LTB_BS
+          value: "{{.Values.LDAP_LTB_BS}}"
+        image: accenture/adop-ldap-ltb:{{default "latest" .Values.imageTag}}
+        name: ldap-ltb
+        ports:
+          - name: http
+            containerPort: 80
+      restartPolicy: Always

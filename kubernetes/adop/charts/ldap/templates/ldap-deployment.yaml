@@ -1,0 +1,62 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: ldap
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: ldap
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - volumeMounts:
+          - name: var-lib-ldap
+            mountPath: /var/lib/ldap
+            name: etc-ldap
+            mountPath: /etc/ldap
+        env:
+        - name: SLAPD_PASSWORD
+          value: "{{.Values.global.SLAPD_PASSWORD}}"
+        - name: GERRIT_PASSWORD
+          value: "{{.Values.global.GERRIT_PASSWORD}}"
+        - name: INITIAL_ADMIN_PASSWORD
+          value: "{{.Values.global.INITIAL_ADMIN_PASSWORD}}"
+        - name: INITIAL_ADMIN_USER
+          value: "{{.Values.global.INITIAL_ADMIN_USER}}"
+        - name: JENKINS_PASSWORD
+          value: "{{.Values.global.JENKINS_PASSWORD}}"
+        - name: SLAPD_DOMAIN
+          value: "{{.Values.SLAPD_DOMAIN}}"
+        - name: SLAPD_FULL_DOMAIN
+          value: "{{.Values.SLAPD_FULL_DOMAIN}}"
+        ports:
+          - name: ldap
+            containerPort: 389
+        image: "accenture/adop-ldap:{{default "latest" .Values.imageTag}}"
+        # command:
+        #   - /entrypoint.sh
+        #   - slapd
+        #   - -d
+        #   - "128"
+        #   - -u
+        #   - openldap
+        #   - -g
+        #   - openldap
+        name: ldap
+        resources:
+          limits:
+            memory: "{{.Values.mem_limit}}"
+          requests:
+            memory: "{{.Values.mem_request}}"
+      restartPolicy: Always
+      volumes:
+        - name: var-lib-ldap
+          emptyDir: {}
+          name: etc-ldap
+          emptyDir: {}

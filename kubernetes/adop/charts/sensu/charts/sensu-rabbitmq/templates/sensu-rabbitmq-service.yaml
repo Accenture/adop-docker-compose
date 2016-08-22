@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: sensu-rabbitmq
+spec:
+  ports:
+  - name: http
+    port: {{default 80 .Values.httpPort}}
+    protocol: TCP
+    targetPort: http
+  - name: amqp
+    port: {{default 5672 .Values.amqpPort}}
+    protocol: TCP
+    targetPort: amqp
+  selector:
+    service: sensu-rabbitmq

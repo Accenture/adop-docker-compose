@@ -1,0 +1,51 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: sonar
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: sonar
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - env:
+        - name: LDAP_URL
+          value: "{{.Values.LDAP_URL}}"
+        - name: LDAP_BIND_PASSWORD
+          value: "{{.Values.LDAP_BIND_PASSWORD}}"
+        - name: LDAP_USER_REQUEST
+          value: "{{.Values.LDAP_USER_REQUEST}}"
+        - name: LDAP_GROUP_REQUEST
+          value: "{{.Values.LDAP_GROUP_REQUEST}}"
+        - name: LDAP_BIND_DN
+          value: "{{.Values.LDAP_BIND_DN}}"
+        - name: LDAP_USER_BASE_DN
+          value: "{{.Values.LDAP_USER_BASE_DN}}"
+        - name: LDAP_USER_REAL_NAME_ATTRIBUTE
+          value: "{{.Values.LDAP_USER_REAL_NAME_ATTRIBUTE}}"
+        - name: LDAP_USER_EMAIL_ATTRIBUTE
+          value: "{{.Values.LDAP_USER_EMAIL_ATTRIBUTE}}"
+        - name: LDAP_GROUP_BASE_DN
+          value: "{{.Values.LDAP_GROUP_BASE_DN}}"
+        - name: LDAP_GROUP_ID_ATTRIBUTE
+          value: "{{.Values.LDAP_GROUP_ID_ATTRIBUTE}}"
+        - name: SONARQUBE_JDBC_URL
+          value: "{{.Values.SONARQUBE_JDBC_URL}}"
+        image: accenture/adop-sonar:{{default "latest" .Values.imageTag}}
+        name: sonar
+        resources:
+          limits:
+            memory: "{{.Values.mem_limit}}"
+          requests:
+            memory: "{{.Values.mem_request}}"        
+        ports:
+          - name: http
+            containerPort: 9000
+      restartPolicy: Always

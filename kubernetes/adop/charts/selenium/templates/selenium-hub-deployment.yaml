@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  name: selenium-hub
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: selenium-hub
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - image: selenium/hub:{{default "latest" .Values.imageTag}}
+        name: selenium-hub
+        ports:
+          - name: hub
+            containerPort: 4444
+        resources:
+          limits:
+            memory: "{{.Values.mem_limit}}"
+          requests:
+            memory: "{{.Values.mem_request}}"            
+      restartPolicy: Always
