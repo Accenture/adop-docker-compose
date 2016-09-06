@@ -58,9 +58,9 @@ set_target() {
     esac
   done
 
-  if [ -z ${ADOP_CLI_ENDPOINT} ] | \
-         [ -z ${ADOP_CLI_USER} ] | \
-          [ -z ${ADOP_CLI_PASSWORD} ] ; then
+  if [ -z ${ADOP_CLI_ENDPOINT} ] || \
+	[ -z ${ADOP_CLI_USER} ] || \
+	  [ -z ${ADOP_CLI_PASSWORD} ] ; then
       echo "ERROR : Required parameters are missing."
       set_help
       exit 1
@@ -69,12 +69,10 @@ set_target() {
       set +e
       URL_RC=$(curl --max-time 60 -I -s -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${ADOP_CLI_ENDPOINT})
       CMD_RC=$?
-      CMD=$(echo ${ADOP_CLI_ENDPOINT} | egrep 'http://[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/?$')
-      CMD_RC=$(($CMD_RC + $?))
       set -e
 
       if [ ${CMD_RC} != 0 ] ; then
-          echo "ERROR: ENDPOINT ${ADOP_CLI_ENDPOINT} is invalid. Check the endpoint url."
+          echo "ERROR: ENDPOINT ${ADOP_CLI_ENDPOINT} is invalid - return code ${CMD_RC}. Check the endpoint url."
           exit 2
       elif [ $(echo ${URL_RC} |head -n 1|cut -d$' ' -f2) != 200 ]; then
           echo "ERROR: ENDPOINT ${ADOP_CLI_ENDPOINT} is inaccessible using CLI credentials ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD}. Check the endpoint and credentials"
@@ -115,4 +113,3 @@ if [ ! -z ${SUBCOMMAND_OPT} ]; then
         ;;
   esac
 fi
-

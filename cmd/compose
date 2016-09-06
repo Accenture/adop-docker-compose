@@ -23,6 +23,7 @@ help() {
     echo
     echo "Available subcommands are:"
     printf "    %-22s   %s\n" "init" "Initialises ADOP"
+    printf "    %-22s   %s\n" "init <--without-load>" "Initialises ADOP without loading the platform"
     printf "    %-22s   %s\n" "init <--without-pull>" "Initialises ADOP without pulling images"
     printf "    %-22s   %s\n" "up" "docker-compose up for ADOP"
     printf "    %-22s   %s\n" "gen-certs <path>" "Generate client certificates for TLS-enabled Machine and copy to <path> in Jenkins Slave"
@@ -30,6 +31,18 @@ help() {
     printf "    %-22s   %s\n" "help" "Prints this help information"
     echo
 }
+
+pretty_sleep() {
+    secs=${1:-60}
+    tool=${2:-service}
+    while [ $secs -gt 0 ]; do
+        echo -ne "$tool unavailable, sleeping for: $secs\033[0Ks\r"
+        sleep 1
+        : $((secs--))
+    done
+    echo "$tool was unavailable, so slept for: ${1:-60} secs"
+}
+
 
 prep_env() {
     # If the proxy IP has not been set work out the TARGET_HOST
@@ -77,7 +90,10 @@ case "$1" in
     --without-pull)
         export PULL="NO"
         ;;
-        *)
+    --without-load)
+        export LOAD="NO"
+        ;;
+    *)
 esac
 
     echo ' 
@@ -113,13 +129,17 @@ esac
 
     # Wait for Jenkins and Gerrit to come up before proceeding
     echo "* Waiting for the Platform to become available - this can take a few minutes"
-    TOOL_SLEEP_TIME=60
-    until [[ $(docker exec jenkins curl -I -s jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Jenkins unavailable, sleeping for ${TOOL_SLEEP_TIME}s"; sleep ${TOOL_SLEEP_TIME}; done
-    until [[ $(docker exec gerrit curl -I -s gerrit:${PASSWORD_GERRIT}@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Gerrit unavailable, sleeping for ${TOOL_SLEEP_TIME}s"; sleep ${TOOL_SLEEP_TIME}; done
+    TOOL_SLEEP_TIME=30
+    until [[ $(docker exec jenkins curl -I -s jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Jenkins; done
+    until [[ $(docker exec gerrit curl -I -s gerrit:${PASSWORD_GERRIT}@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Gerrit; done
     
     # Trigger Load_Platform in Jenkins
-    echo "* Initialising the Platform"
-    docker exec jenkins curl -s -X POST jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/job/Load_Platform/buildWithParameters --data token=gAsuE35s
+    if [ "${LOAD}" = "NO" ]; then
+        echo "* Skipping Loading the Platform"
+    else
+        echo "* Loading the Platform"
+        docker exec jenkins curl -s -X POST jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/job/Load_Platform/buildWithParameters --data token=gAsuE35s
+    fi
 
     # Generate and copy the certificates to jenkins slave if TLS is enabled
     if [ "${DOCKER_TLS_VERIFY}" = "1" ]; then
@@ -127,6 +147,10 @@ esac
     else
         echo "DOCKER_TLS_VERIFY not set to 1, skipping certificate generation"
     fi
+    
+    # Wait for Nginx to come up before proceeding
+    echo "* Waiting for Nginx to become available"
+    until [[ $(curl -I -s -u ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN} http://${TARGET_HOST}/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Nginx unavailable, sleeping for 5s"; sleep 5; done
     
     # Tell the user something useful
     echo

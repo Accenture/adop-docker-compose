@@ -6,7 +6,7 @@ services:
 
 env:
   global:
-    - DOCKER_COMPOSE_VERSION=1.6.0
+    - DOCKER_COMPOSE_VERSION=1.6.2
     - INITIAL_ADMIN_USER=admin.user
     - INITIAL_ADMIN_PASSWORD_PLAIN=admin123
     - COMPOSE_FILES="-f site/docker-compose.yml"
@@ -21,6 +21,9 @@ script:
  - ./adop
  - ./adop compose init
  - ./adop target set -t http://127.0.0.1 -u ${INITIAL_ADMIN_USER} -p ${INITIAL_ADMIN_PASSWORD_PLAIN}
+ - sleep 30
+ - ./adop workspace -w Travis create
+ - ./adop project -p TestProject -w Travis create
  - ./adop compose down
  - docker-compose ${COMPOSE_FILES} build
  - docker-compose ${COMPOSE_FILES} -p adopdockercompose up -d

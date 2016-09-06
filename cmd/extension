@@ -1,0 +1,264 @@
+#!/bin/bash -e
+
+SUB_CMD_NAME="extension"
+source ${CLI_DIR}/lib/adop_lib.sh
+
+cmd_desc() {
+    echo "For loading the platform extensions."
+}
+
+cmd_usage() {
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} <subcommand>"
+}
+
+help() {
+    cmd_usage
+    echo
+    echo "Available subcommands are:"
+    printf "    %-30s   %s\n" "load [<options>]" "Load an extension into adop stack."
+    printf "    %-30s   %s\n" "load_collection [<options>]" "Load the collection of extensions into adop stack."
+    printf "    %-30s   %s\n" "add_credentials [<options>]" "Add the credentials to jenkins in adop stack."
+    echo
+    echo "Try '${CMD_NAME} ${SUB_CMD_NAME} <subcommand> -h' for details."
+    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} load -u https://github.com/Accenture/adop-platform-extension-specification' to load an extension."
+    echo
+}
+
+load_help() {
+    echo
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} load [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "-u <GIT_URL>         : Git repository url to load extension. (Required)"
+    printf "    %-3s   %s\n" "" "-r <GIT_REF>         : Git reference name. (Optional) (Deafult : master)"
+    printf "    %-3s   %s\n" "" "-c <AWS_CREDENTIALS> : AWS Credentials. (Required)"
+    printf "    %-3s   %s\n" "" "-h                   : Prints this help."
+    echo
+    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} load -u https://github.com/Accenture/adop-platform-extension-specification -c aws' to load an extension."
+    echo
+}
+
+load_collection_help() {
+    echo
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} load_collection [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "-u <EXTENSION_COLLECTION_URL> : URL to a JSON file defining the extension collection. (Required)"
+    printf "    %-3s   %s\n" "" "-c <AWS_CREDENTIALS>          : AWS Credentials. (Required)"
+    printf "    %-3s   %s\n" "" "-h                            : Prints this help."
+    echo
+}
+
+creds_help() {
+    echo
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} add_credentials [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "-u <USERNAME>        : Username for jenkins credentials."
+    printf "    %-3s   %s\n" "" "-p <PASSWORD>        : Password for jenkins credentials."
+    printf "    %-3s   %s\n" "" "-i <CREDENTIAL_ID>   : ID with which the credentials will be saved to jenkins. (Required) (HINT : -i basic-auth) (Must be unique)"
+    printf "    %-3s   %s\n" "" "-h                   : Prints this help."
+    echo
+    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} add_credentials -u <AWS_ACCESS_KEY_ID> -p <AWS_SECRET_ACCESS_KEY> -i <aws-credentials>' to add a aws credential to jenkins."
+    echo
+}
+
+load() {
+  # Set Default Parameters
+  export GIT_URL=""
+  export GIT_REF="master"
+  export AWS_CREDENTIALS=""
+
+  local OPTIND
+  # What if the parameters are provided from command line.
+  while getopts "u:r:c:h" opt; do
+    case $opt in
+      u)
+        export GIT_URL=${OPTARG}
+        ;;
+      r)
+        export GIT_REF=${OPTARG}
+        ;;
+      c)
+        export AWS_CREDENTIALS=${OPTARG}
+        ;;
+      h)
+        load_help
+        exit 0
+        ;;
+      *)
+        echo "Invalid parameter(s) or option(s)."
+        load_help
+        exit 1
+        ;;
+    esac
+  done
+
+  # Validate required parameters are passed through CLI
+  if [ -z "${GIT_URL}" ] | \
+         [ -z "${AWS_CREDENTIALS}" ]; then
+      echo "ERROR : Required CLI parameters are missing."
+      load_help
+      exit 1
+  fi
+
+
+  # Trigger Job
+  load_credentials
+  export JOB_URL="${TARGET_HOST}/jenkins/job/Platform_Management/job/Load_Platform_Extension"
+  export PARAMETERS="GIT_URL=${GIT_URL}&GIT_REF=${GIT_REF}&AWS_CREDENTIALS=${AWS_CREDENTIALS}"
+  echo "Loading the extension ..."
+  set +e
+  curl -I --max-time 60 -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
+  CMD_RC=$?
+  set -e
+  if [ ${CMD_RC} -eq 0 ]; then
+        check_job_status
+        echo "Extension '${GIT_URL}' has been loaded successfully in jenkins."
+  else
+        echo "ERROR: Unable to trigger Load_Platform_Extension Job because it is not accesssible."
+        exit ${CMD_RC}
+  fi
+}
+
+load_collection() {
+  # Set Default Parameters
+  export COLLECTION_URL=""
+
+  local OPTIND
+  # What if the parameters are provided from command line.
+  while getopts "u:c:h" opt; do
+    case $opt in
+      u)
+        export COLLECTION_URL=${OPTARG}
+        ;;
+      c)
+        export AWS_CREDENTIALS=${OPTARG}
+        ;;
+      h)
+        load_collection_help
+        exit 0
+        ;;
+      *)
+        echo "Invalid parameter(s) or option(s)."
+        load_collection_help
+        exit 1
+        ;;
+    esac
+  done
+
+  # Validate required parameters are passed through CLI
+  if [ -z "${AWS_CREDENTIALS}" ] | \
+          [ -z "${COLLECTION_URL}" ]; then
+      echo "ERROR : Required CLI parameters are missing."
+      load_collection_help
+      exit 1
+  fi
+
+
+  # Trigger Job
+  load_credentials
+  export JOB_URL="${TARGET_HOST}/jenkins/job/Platform_Management/job/Load_Platform_Extension_Collection"
+  export PARAMETERS="COLLECTION_URL=${COLLECTION_URL}&AWS_CREDENTIALS=${AWS_CREDENTIALS}"
+  echo "Loading the extension collection ..."
+  set +e
+  curl -I --max-time 60 -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
+  CMD_RC=$?
+  set -e
+  if [ ${CMD_RC} -eq 0 ]; then
+        check_job_status
+        echo "Extension collection defined in '${COLLECTION_URL}' has been loaded successfully in jenkins."
+  else
+        echo "ERROR: Unable to trigger Load_Platform_Extension_Collection Job because it is not accesssible."
+        exit ${CMD_RC}
+  fi
+}
+
+add_credentials() {
+  local OPTIND
+  # What if the parameters are provided from command line.
+  while getopts "u:p:i:h" opt; do
+    case $opt in
+      u)
+        export USERNAME=${OPTARG}
+        ;;
+      p)
+        export PASSWORD=${OPTARG}
+        ;;
+      i)
+        export CREDENTIAL_ID=${OPTARG}
+        ;;
+      h)
+        creds_help
+        exit 0
+        ;;
+      *)
+        echo "Invalid parameter(s) or option(s)."
+        creds_help
+        exit 1
+        ;;
+    esac
+  done
+
+  # Validate required parameters are passed through CLI
+  if [ -z "${USERNAME}" ] | \
+       [ -z "${PASSWORD}" ] | \
+         [ -z "${CREDENTIAL_ID}" ]; then
+      echo "ERROR : Required CLI parameters are missing."
+      creds_help
+      exit 1
+  fi
+
+  # Trigger Job
+  load_credentials
+  export CRED_URL="${TARGET_HOST}/jenkins/credential-store/domain/_/createCredentials"
+  export CRED_EXISTS=${TARGET_HOST}/jenkins/credential-store/domain/_/credential/${CREDENTIAL_ID}/
+  set +e
+  curl -I --max-time 60 -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${CRED_EXISTS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 200 >/dev/null
+  CMD_RC=$?
+  set -e
+  if [ ${CMD_RC} -eq 0 ]; then
+     echo "AWS Credentials already exists with ID '${CREDENTIAL_ID}' in jenkins. Please use different credential ID."
+     creds_help
+     exit 1
+  else
+     echo "Creating AWS credentials in jenkins..."
+     curl --max-time 60 -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${CRED_URL} \
+       --data-urlencode "json={
+         \"\": \"0\",
+         \"credentials\": {
+            \"scope\": \"GLOBAL\",
+            \"id\": \"${CREDENTIAL_ID}\",
+            \"username\": \"${USERNAME}\",
+            \"password\": \"${PASSWORD}\",
+            \"description\": \"${USERNAME} Credentials\",
+            \"\$class\": \"com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl\"
+        }
+      }"
+     CMD_RC=$?
+     set -e
+     [[ ${CMD_RC} -eq 0 ]] \
+        && echo "Credentials have been added to jenkins with ID : ${CREDENTIAL_ID}" \
+           || (echo "Unable to add credentials to jenkins with ID : ${CREDENTIAL_ID}"; exit 1)
+
+  fi
+
+}
+
+
+shift $(($OPTIND -1))
+SUBCOMMAND_OPT="${1:-help}"
+
+# Only shift if there are other parameters
+if [ $# -ge 1 ]; then
+    shift
+fi
+
+case ${SUBCOMMAND_OPT} in
+    "cmd_desc"|"help"|"load"|"load_collection"|"add_credentials")
+        ${SUBCOMMAND_OPT} "$@"
+        ;;
+    *)
+        echo "Invalid parameter(s) or option(s)."
+        help
+        exit 1
+        ;;
+esac
+

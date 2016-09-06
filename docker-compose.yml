@@ -12,10 +12,10 @@ proxy:
     - "443:443"
   environment:
     - "constraint:tier==public"
-    - "LDAP_SERVER=ldap:389"
-    - "LDAP_USERNAME=cn=admin,${LDAP_FULL_DOMAIN}"
+    - "LDAP_SERVER=${LDAP_SERVER}"
+    - "LDAP_USERNAME=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     - "LDAP_PASSWORD=${LDAP_PWD}"
-    - "LDAP_USER_BASE_DN=ou=people,${LDAP_FULL_DOMAIN}"
+    - "LDAP_USER_BASE_DN=${LDAP_USER_BASE_DN},${LDAP_FULL_DOMAIN}"
     - "LDAP_GROUP_ATTRIBUTE=member"
     - "LDAP_USER_ID_ATTRIBUTE=cn"
     - "LDAP_USER_OBJECT_CLASS=inetOrgPerson"
@@ -77,16 +77,16 @@ gerrit:
     - "JENKINS_PASSWORD=${PASSWORD_JENKINS}"
     - "INITIAL_ADMIN_USER=${INITIAL_ADMIN_USER}"
     - "INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD_PLAIN}"
-    - "LDAP_SERVER=ldap:389"
+    - "LDAP_SERVER=${LDAP_SERVER}"
     - "LDAP_ACCOUNTBASE=${LDAP_FULL_DOMAIN}"
-    - "LDAP_ACCOUNTPATTERN=(cn=$${username})"
-    - "LDAP_ACCOUNTFULLNAME=$${cn}"
+    - "LDAP_ACCOUNTPATTERN=${LDAP_ACCOUNTPATTERN}"
+    - "LDAP_ACCOUNTFULLNAME=${LDAP_ACCOUNTFULLNAME}"
     - "LDAP_ACCOUNTEMAILADDRESS=mail"
-    - "LDAP_USERNAME=cn=admin,${LDAP_FULL_DOMAIN}"
+    - "LDAP_USERNAME=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     - "LDAP_PASSWORD=${LDAP_PWD}"
-    - "LDAP_GROUPBASE=ou=groups,${LDAP_FULL_DOMAIN}"
-    - "LDAP_GROUPPATTERN=(cn=$${groupname})"
-    - "LDAP_GROUPMEMBERPATTERN=(uniqueMember=$${dn})"
+    - "LDAP_GROUPBASE=${LDAP_GROUP_BASE_DN},${LDAP_FULL_DOMAIN}"
+    - "LDAP_GROUPPATTERN=${LDAP_GROUPPATTERN}"
+    - "LDAP_GROUPMEMBERPATTERN=${LDAP_GROUPMEMBERPATTERN}"
     - "HTTPD_LISTENURL=proxy-${PROTO}://0.0.0.0:8080/gerrit"
     - "USER_NAME=${GERRIT_USER_NAME}"
     - "USER_EMAIL=${GERRIT_USER_EMAIL}"
@@ -187,21 +187,21 @@ sonar-mysql:
 sonar:
   container_name: sonar
   restart: always
-  image: accenture/adop-sonar:0.1.1
+  image: accenture/adop-sonar:0.2.0
   #build: ../images/docker-sonar/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "9000"
   environment:
     - "dependency:container==sonar-mysql"
-    - "LDAP_URL=ldap://ldap:389"
-    - "LDAP_BIND_DN=cn=admin,${LDAP_FULL_DOMAIN}"
+    - "LDAP_URL=ldap://${LDAP_SERVER}"
+    - "LDAP_BIND_DN=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     - "LDAP_BIND_PASSWORD=${LDAP_PWD}"
-    - "LDAP_USER_BASE_DN=ou=people,${LDAP_FULL_DOMAIN}"
+    - "LDAP_USER_BASE_DN=${LDAP_USER_BASE_DN},${LDAP_FULL_DOMAIN}"
     - "LDAP_USER_REQUEST=(&(objectClass=inetOrgPerson)(uid={login}))"
     - "LDAP_USER_REAL_NAME_ATTRIBUTE=displayName"
     - "LDAP_USER_EMAIL_ATTRIBUTE=mail"
-    - "LDAP_GROUP_BASE_DN=ou=groups,${LDAP_FULL_DOMAIN}"
+    - "LDAP_GROUP_BASE_DN=${LDAP_GROUP_BASE_DN},${LDAP_FULL_DOMAIN}"
     - "LDAP_GROUP_REQUEST=(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))"
     - "LDAP_GROUP_ID_ATTRIBUTE=cn"
     - "SONARQUBE_JDBC_URL=jdbc:mysql://sonar-mysql:3306/${SONAR_MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
@@ -220,24 +220,25 @@ jenkins:
     ADOP_PLATFORM_MANAGEMENT_VERSION: "0.1.1"
     JENKINS_OPTS: "--prefix=/jenkins"
     ROOT_URL: "${PROTO}://${TARGET_HOST}/jenkins/"
-    LDAP_SERVER: "ldap:389"
+    LDAP_SERVER: "${LDAP_SERVER}"
     LDAP_ROOTDN: "${LDAP_FULL_DOMAIN}"
-    LDAP_USER_SEARCH_BASE: "ou=people"
-    LDAP_USER_SEARCH: "uid={0}"
-    LDAP_GROUP_SEARCH_BASE: "ou=groups"
+    LDAP_USER_SEARCH_BASE: "${LDAP_USER_BASE_DN}"
+    LDAP_USER_SEARCH: "${LDAP_USER_SEARCH}"
+    LDAP_GROUP_SEARCH_BASE: "${LDAP_GROUP_BASE_DN}"
     LDAP_GROUP_SEARCH_FILTER: ""
     LDAP_GROUP_MEMBERSHIP_FILTER: ""
-    LDAP_MANAGER_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
+    LDAP_MANAGER_DN: "${LDAP_MANAGER_DN}"
     LDAP_MANAGER_PASSWORD: ${LDAP_PWD}
     LDAP_INHIBIT_INFER_ROOTDN: "false"
     LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"
     LDAP_DISPLAY_NAME_ATTRIBUTE_NAME: "displayName"
     LDAP_MAIL_ADDRESS_ATTRIBUTE_NAME: "mail"
+    LDAP_GROUP_NAME_ADMIN: "${LDAP_GROUP_NAME_ADMIN}"
     INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
     INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD_PLAIN}
     GERRIT_HOST_NAME: "gerrit"
     GERRIT_FRONT_END_URL: "http://gerrit:8080/gerrit"
-    GERRIT_JENKINS_USERNAME: "jenkins"
+    GERRIT_JENKINS_USERNAME: "${GERRIT_JENKINS_USERNAME}"
     GERRIT_JENKINS_PASSWORD: ${PASSWORD_JENKINS}
     SONAR_SERVER_URL: "http://sonar:9000/sonar/"
     SONAR_ACCOUNT_LOGIN: ${SONAR_ACCOUNT_LOGIN}
@@ -313,10 +314,10 @@ nexus:
     LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
     LDAP_ENABLED: "true"
     LDAP_URL: "ldap"
-    LDAP_BIND_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
+    LDAP_BIND_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
-    LDAP_USER_BASE_DN: "ou=people"
-    LDAP_GROUP_BASE_DN: "ou=groups"
+    LDAP_USER_BASE_DN: "${LDAP_USER_BASE_DN}"
+    LDAP_GROUP_BASE_DN: "${LDAP_GROUP_BASE_DN}"
     LDAP_BIND_PASSWORD: ${LDAP_PWD}
 
 docker-registry:
@@ -358,8 +359,8 @@ ldap-ltb:
   expose:
     - "80"
   environment:
-    LDAP_LTB_URL: "ldap://ldap:389"
-    LDAP_LTB_DN: "cn=admin,${LDAP_FULL_DOMAIN}"
+    LDAP_LTB_URL: "ldap://${LDAP_SERVER}"
+    LDAP_LTB_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     LDAP_LTB_PWD: "${LDAP_PWD}"
     LDAP_LTB_BS: "${LDAP_FULL_DOMAIN}"
 
@@ -374,6 +375,6 @@ ldap-phpadmin:
     LDAP_SERVER_NAME: "LDAP"
     LDAP_SERVER_HOST: "ldap"
     LDAP_SERVER_PORT: "389"
-    LDAP_SERVER_BIND_ID: "cn=admin,${LDAP_FULL_DOMAIN}"
+    LDAP_SERVER_BIND_ID: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     LDAP_SERVER_BASE_DN: "${LDAP_FULL_DOMAIN}"
 
