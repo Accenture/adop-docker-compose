@@ -137,32 +137,31 @@ provision_aws() {
 
     # Create Docker machine if one doesn't already exist with the same name
     docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        echo "Docker machine '$MACHINE_NAME' already exists"
-    else
-
-	MACHINE_CREATE_CMD="docker-machine create \
-				--driver amazonec2 \
-				--amazonec2-vpc-id ${AWS_VPC_ID} \
-				--amazonec2-zone $VPC_AVAIL_ZONE \
-				--amazonec2-instance-type ${AWS_DOCKER_MACHINE_SIZE} \
-				--amazonec2-root-size ${AWS_ROOT_SIZE:-32}"
-
-    if [ -n "${AWS_ACCESS_KEY_ID}" ] && [ -n "${AWS_SECRET_ACCESS_KEY}" ] && [ -n "${AWS_DEFAULT_REGION}" ]; then
-        MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
-                    --amazonec2-access-key ${AWS_ACCESS_KEY_ID} \
-                    --amazonec2-secret-key ${AWS_SECRET_ACCESS_KEY} \
-                    --amazonec2-region ${AWS_DEFAULT_REGION}"
-    fi
-
-	MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} ${MACHINE_NAME}"
-    ${MACHINE_CREATE_CMD}
-
-    fi
-
+    rc=$?
+    
     # Reenable errexit
     set -e
+    
+    if [ ${rc} -eq 0 ]; then
+        echo "Docker machine '$MACHINE_NAME' already exists"
+    else
+        MACHINE_CREATE_CMD="docker-machine create \
+                    --driver amazonec2 \
+                    --amazonec2-vpc-id ${AWS_VPC_ID} \
+                    --amazonec2-zone $VPC_AVAIL_ZONE \
+                    --amazonec2-instance-type ${AWS_DOCKER_MACHINE_SIZE} \
+                    --amazonec2-root-size ${AWS_ROOT_SIZE:-32}"
 
+        if [ -n "${AWS_ACCESS_KEY_ID}" ] && [ -n "${AWS_SECRET_ACCESS_KEY}" ] && [ -n "${AWS_DEFAULT_REGION}" ]; then
+            MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
+                        --amazonec2-access-key ${AWS_ACCESS_KEY_ID} \
+                        --amazonec2-secret-key ${AWS_SECRET_ACCESS_KEY} \
+                        --amazonec2-region ${AWS_DEFAULT_REGION}"
+        fi
+
+        MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} ${MACHINE_NAME}"
+        ${MACHINE_CREATE_CMD}
+    fi
 }
 
 while getopts "t:m:a:s:c:z:r:u:p:" opt; do
