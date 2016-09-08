@@ -45,11 +45,15 @@ function createPassword {
 
 ###############################
 if [ -f ./platform.secrets.sh ]; then
-	echo "Your secrets file already exists, moving on..."
+	echo "Your secrets file already exists, will not re-create..."
 else
 	echo "Creating a new secrets file..."
 	cp ./platform.secrets.sh.example ./platform.secrets.sh
 	
+	# Adding commit ID to track version of example secrets file
+	VERSION_ID=$(git log -1 --format="%H" HEAD platform.secrets.sh.example)
+	sed -i'' -e "s/###VERSION_ID###/$VERSION_ID/g" platform.secrets.sh
+
 	# Check for username, prompt one if not entered and write it to secrets file
 	if [[ -z $INITIAL_ADMIN_USER ]] || [[ ${INITIAL_ADMIN_USER} = "admin" ]]; then
 		echo "You have entered an invalid username. Username can not be blank or 'admin'. Please enter a valid username: "
@@ -86,11 +90,22 @@ else
 	
 	PASSWORD_SQL=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_SQL_PLAIN###/$PASSWORD_SQL/g" platform.secrets.sh
+
 fi
 
 # Source all the variables that were written to the secrets file
 echo "Sourcing variables from platform.secrets.sh file..."
 source platform.secrets.sh
+
+# Check the version of the secrets file template
+if [[ -z $VERSION_ID ]] || [[ $VERSION_ID != $(git log -1 --format="%H" HEAD platform.secrets.sh.example) ]]; then
+	echo "ERROR: The version of the secrets file you currently have is not up to date."
+	echo "Version '$VERSION_ID' does not match '$(git log -1 --format='%H' HEAD platform.secrets.sh.example)'"
+	echo "Please delete or update the secrets file and then, re-run this credentials generation script."
+	exit
+else
+	echo "The version of your secrets file is up to date, moving on..."
+fi
 
 # Check to make sure the default tokens are not being used
 if  [ $INITIAL_ADMIN_PASSWORD_PLAIN == "###INITIAL_ADMIN_PASSWORD_PLAIN###" ] || \
@@ -98,7 +113,7 @@ if  [ $INITIAL_ADMIN_PASSWORD_PLAIN == "###INITIAL_ADMIN_PASSWORD_PLAIN###" ] ||
 	[ $PASSWORD_GERRIT == "###PASSWORD_GERRIT_PLAIN###" ] || \
 	[ $PASSWORD_SQL == "###PASSWORD_SQL_PLAIN###" ]; then
 	echo "Your passwords are set to the default tokens provided in the example secrets file, this is not allowed."
-	echo "Delete the platform.secrets.sh file and re-run the credentials.generate.sh script"
+	echo "Delete the platform.secrets.sh file or edit it and then, re-run the credentials.generate.sh script"
 	exit
 fi
 
