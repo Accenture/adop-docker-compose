@@ -24,7 +24,7 @@ ldap:
   container_name: ldap
   restart: always
   #build: ../images/docker-ldap/
-  image: accenture/adop-ldap:0.1.2
+  image: accenture/adop-ldap:0.1.3
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "389"
