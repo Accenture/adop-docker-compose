@@ -80,8 +80,8 @@ else
 	fi
 	sed -i'' -e "s/###INITIAL_ADMIN_PASSWORD_PLAIN###/$INITIAL_ADMIN_PASSWORD_PLAIN/g" platform.secrets.sh
 		
-	# Generate random passwords for Jenkins, Gerrit and SQL and place them in secrets file
-	echo "Generating random passwords for Jenkins, Gerrit and SQL..."
+	# Generate random passwords for Jenkins, Gerrit, SQL, LDAP Admin and place them in secrets file
+	echo "Generating random passwords for Jenkins, Gerrit, SQL and LDAP admin..."
 	PASSWORD_JENKINS=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_JENKINS_PLAIN###/$PASSWORD_JENKINS/g" platform.secrets.sh
 	
@@ -90,6 +90,9 @@ else
 	
 	PASSWORD_SQL=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_SQL_PLAIN###/$PASSWORD_SQL/g" platform.secrets.sh
+
+	PASSWORD_LDAP=$(createPassword)
+	sed -i'' -e "s/###LDAP_PWD###/$PASSWORD_LDAP/g" platform.secrets.sh
 
 fi
 
@@ -111,13 +114,14 @@ fi
 if  [ $INITIAL_ADMIN_PASSWORD_PLAIN == "###INITIAL_ADMIN_PASSWORD_PLAIN###" ] || \
 	[ $PASSWORD_JENKINS == "###PASSWORD_JENKINS_PLAIN###" ] || \
 	[ $PASSWORD_GERRIT == "###PASSWORD_GERRIT_PLAIN###" ] || \
-	[ $PASSWORD_SQL == "###PASSWORD_SQL_PLAIN###" ]; then
+	[ $PASSWORD_SQL == "###PASSWORD_SQL_PLAIN###" ] || \
+	[ $LDAP_PWD == "###LDAP_PWD###" ]; then
 	echo "Your passwords are set to the default tokens provided in the example secrets file, this is not allowed."
 	echo "Delete the platform.secrets.sh file or edit it and then, re-run the credentials.generate.sh script"
 	exit
 fi
 
-# Export the passwords in base64 to be passed in as environment variable for LDAP container
+# Export the passwords in base64 to be passed in as environment variables for LDAP container
 export INITIAL_ADMIN_PASSWORD=$(echo -n $INITIAL_ADMIN_PASSWORD_PLAIN | base64)
 export JENKINS_PWD=$(echo -n $PASSWORD_JENKINS | base64)
 export GERRIT_PWD=$(echo -n $PASSWORD_GERRIT | base64)
