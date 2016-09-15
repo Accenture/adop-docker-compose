@@ -57,9 +57,8 @@ init_help() {
     echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} init [<options>]"
     printf "    %-2s   %s\n" "" "Options:"
     printf "    %-3s   %s\n" "" "-s <SUBDIR>          : Name of subfolder create the cartridge in (Optional) (Default : adop)"
-    printf "    %-3s   %s\n" "" "-t <TEMPLATE>        : Cartridge template to use.  Do not combine with -t. (Optional, options: $(list_template_names)) (Default : 'example = https://github.com/Accenture/adop-cartridge-skeleton.git')"
+    printf "    %-3s   %s\n" "" "-t <TEMPLATE>        : Cartridge template to use.  Do not combine with -c. (Optional, options: $(list_template_names)) (Default : 'example = https://github.com/Accenture/adop-cartridge-skeleton.git')"
     printf "    %-3s   %s\n" "" "-c <SKELURL>         : URL of skeleton cartidge to re-use (Optional) (Default : defers to -t option/)"
-    printf "    %-3s   %s\n" "" "-p                   : Preview the commands as opposed to running (Optional) (Default : false)"
     printf "    %-3s   %s\n" "" "-h                   : Prints this help."
     echo
     echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} init' to create a cartridge in the current directory"
@@ -136,7 +135,7 @@ init() {
     exit 1;
   fi
 
-  # Set preview correctly if needed
+  # Clone the template cartridge
   echo "Creating a cartridge skeleton in:" $SUBDIR "using:" $SKELURL
 
   git clone --depth=1 $SKELURL $SUBDIR
