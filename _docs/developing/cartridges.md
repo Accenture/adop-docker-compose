@@ -109,7 +109,7 @@ To do this:
 1. Push cartridge to a Git repository
 1. Add the cartridge URL so it can be loaded 
     1. Via platform-management
-    1. Via modifying Load_Cartridge
+    1. Via [modifying Load_Cartridge](#adding-cartridges)
         * Once a project has been created there will be a "Cartridge_Management/Load_Cartridge" job
         * This can be modified to add the cartridge Git repository URL to the parameter list (by default the cartridge development cartridge is included as an option)
 1. Create Workspace
@@ -123,6 +123,27 @@ To do this:
 1. [Make any necessary fixes/updates & push to your Git repository](#using-the-cartridge-development-cartridge)
 1. Rinse repeat 4-9
 
+#### Adding cartridges
+
+Once you have [developed a cartridge](/adop-docker-compose/docs/developing/cartridges/), you can then add your cartridges' URL to "Load_Cartridge".
+
+1. Access "Load_Cartridge" job under "Cartridge Management" folder of your [project](/adop-docker-compose/docs/operating/projects).
+1. Click "Configure".
+1. Add the [path](#finding-cartridge-url) to your cartridge URL in parameter "Choices", under "Choice Parameter" section.
+1. Click "Save".
+
+Your very own cartridge should now be visible in the `CARTRIDGE_CLONE_URL` list of choices.
+
+#### Finding cartridge URL
+
+Easiest way to find a path to your custom cartridge:
+
+1. Access Gerrit via ADOP platform.
+1. Click on "Projects", navigate to "List".
+1. Find your cartridge path (i.e. ExampleWorkspace/CartridgesProject/DevCart/my-new-cartridge), copy it - you will need it in the next step.
+1. Adjust the path: ssh://jenkins@gerrit:29418/ `<YOUR_PATH>` .git
+
+Now you have a full path to your cartridge which, if you wish, you can add it to the `CARTRIDGE_CLONE_URL` list of "Load_Platform" job.
 
 ## Publishing Cartridges
 Coming soon.
