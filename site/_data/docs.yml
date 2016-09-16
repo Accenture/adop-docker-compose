@@ -26,7 +26,6 @@
   - operating/workspaces
   - operating/projects
   - operating/cartridges
-  - operating/cli
 
 - title: Developing
   docs:
