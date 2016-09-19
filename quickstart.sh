@@ -226,4 +226,11 @@ case ${MACHINE_TYPE} in
 esac
 
 # Use the ADOP CLI
+eval $(docker-machine env ${MACHINE_NAME})
+
 ./adop compose -m "${MACHINE_NAME}" ${CLI_COMPOSE_OPTS} init
+
+# Generate and export Self-Signed SSL certificate for Docker Registry, applicable only for AWS type
+if [ ${MACHINE_TYPE} == "aws" ]; then
+    ./adop certbot gen-export-certs "registry.$(docker-machine ip ${MACHINE_NAME}).nip.io" registry
+fi
