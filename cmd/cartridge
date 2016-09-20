@@ -1,0 +1,200 @@
+#!/bin/bash -e
+
+SUB_CMD_NAME="cartridge"
+source ${CLI_DIR}/lib/adop_lib.sh
+
+# Templates to build the cartridge from\
+declare -A templates
+templates['example']=https://github.com/Accenture/adop-cartridge-skeleton.git
+# TODO actually need a node template!
+templates['node']=https://github.com/Accenture/adop-cartridge-skeleton.git
+templates['java']=https://github.com/Accenture/adop-cartridge-java.git
+templates['docker']=https://github.com/Accenture/adop-cartridge-docker.git
+templates['chef']=https://github.com/Accenture/adop-cartridge-chef.git
+
+
+list_init_templates() {
+  printf "\nThe following templates can be used to build your inital cartridge.  (The default is example.)\n\n"
+  for name in ${!templates[@]}; do
+    printf "${name}:\t${templates[$name]}\n"
+  done
+}
+
+list_template_names() {
+  for name in ${!templates[@]}; do
+    printf "${name} "
+  done
+}
+
+list_template_urls() {
+  for name in ${templates[@]}; do
+    echo $name
+  done
+}
+
+cmd_desc() {
+  echo "For creating cartridges."
+}
+
+cmd_usage() {
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} <subcommand>"
+}
+
+help() {
+    cmd_usage
+    echo
+    echo "Available subcommands are:"
+    printf "    %-30s   %s\n" "init [<options>]" "Create a cartridge skeleton in the current directory."
+    printf "    %-30s   %s\n" "list_init_templates [<options>]" "List the templates that can be used to initialise a new cartridge in your currently working directory."
+    echo
+    echo "Try '${CMD_NAME} ${SUB_CMD_NAME} <subcommand> -h' for details."
+    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} init' to create a cartridge in the current directory"
+    echo
+}
+
+init_help() {
+    echo
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} init [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "-s <SUBDIR>          : Name of subfolder create the cartridge in (Optional) (Default : adop)"
+    printf "    %-3s   %s\n" "" "-t <TEMPLATE>        : Cartridge template to use.  Do not combine with -c. (Optional, options: $(list_template_names)) (Default : 'example = https://github.com/Accenture/adop-cartridge-skeleton.git')"
+    printf "    %-3s   %s\n" "" "-c <SKELURL>         : URL of skeleton cartidge to re-use (Optional) (Default : defers to -t option/)"
+    printf "    %-3s   %s\n" "" "-h                   : Prints this help."
+    echo
+    echo "HINT: Run '${CMD_NAME} ${SUB_CMD_NAME} init' to create a cartridge in the current directory"
+    echo "HINT: If you are looking to load a cartridge, instead try: adop platform cartridge"
+    echo
+}
+
+init() {
+
+  local OPTIND
+  # If the parameters are provided from command line.
+  while getopts "c:s:t:h" opt; do
+    case $opt in
+      s)
+        export SUBDIR=${OPTARG}
+        ;;
+      c)
+        export SKELURL=${OPTARG}
+        ;;
+      t)
+        export TEMPLATE=${OPTARG}
+        ;;
+      h)
+        init_help
+        exit 0
+        ;;
+      *)
+        echo "Invalid parameter(s) or option(s)."
+        init_help
+        exit 1
+        ;;
+    esac
+  done
+
+  # Validate c and t aren't both provided (or set as env vars)
+  if [ ! -z "${SKELURL}" ] && [ ! -z "${TEMPLATE}" ]; then
+    echo "ERROR: Both a template name ${TEMPLATE} and a skeleton repo URL ${SKELURL} were provided. Please state just one or neither."
+    exit 1
+  fi
+
+  # Default t if neither are provided (or set as env vars)
+  if [ -z "${SKELURL}" ] && [ -z "${TEMPLATE}" ]; then
+    export TEMPLATE=${TEMPLATE:-"example"}
+  fi
+
+  #Find url for template
+  if [ ! -z "${TEMPLATE}" ]; then
+    export SKELURL=${templates[$TEMPLATE]}
+    if [ -z $SKELURL ]; then
+      echo "ERROR: $TEMPLATE type not yet supported"
+      list_init_templates
+      exit 1;
+    fi
+  fi 
+
+  # Default s if not provided as an arg or available as an env var
+  export SUBDIR=${SUBDIR:-"adop"}
+
+  # Not the current directory if it contains a git repo (because the clone would collide with the current repo)
+  if [[ "${SUBDIR}" == "." ]] && [ -d .git ]; then  
+    echo "ERROR: cannot create cartridge in the current directory because it is a git repo."
+    exit 1
+  fi
+  
+  # No paths outside the current dir
+  if [[ "${SUBDIR}" == *".."* ]]; then	
+    echo "ERROR: the cartridge subdirectory name must not contain '..'."
+    exit 1
+  fi
+  
+  # No absolulte paths
+  if [[ "${SUBDIR}" == "/"* ]]; then
+    echo "ERROR: the cartridge subdirectory name must not be supplied as an absolute path."
+    exit 1;
+  fi
+
+  # Clone the template cartridge
+  echo "Creating a cartridge skeleton in:" $SUBDIR "using:" $SKELURL
+
+  git clone --depth=1 $SKELURL $SUBDIR
+
+  # Attempt to customise the cartridge template
+  if [ ! -d ".git" ]; then
+    echo "WARNING: it doesn't appear that your are running this from the root directory of a git repository.  Therefore unable to pre-populate src/urls.txt in your cartridge.  Please do this manually. See http://accenture.github.io/adop-docker-compose/docs/developing/cartridges/#developing-cartridge-content"
+  else 
+    THIS_URL=`git remote -v | grep push | awk '{print $2}'`
+    if [ ! -z "$THIS_URL" ]; then
+      # pre-populate the urls.txt with this repo
+      echo "Adding $THIS_URL to ${SUBDIR}/src/urls.txt"
+      #TODO would this work better as a sed substitution for some cartridge templates - might need to support comments in urls.txt
+      echo `git remote -v | grep push | awk '{print $2}'` >> ${SUBDIR}/src/urls.txt
+
+      # infer this repo name
+      THIS_REPO_NAME=`echo $THIS_URL | sed 's/.*\/\([^.]\+\)\(\.git\)\?/\1/'`
+      # attempt to customise job DSL
+      echo "Adding $THIS_URL to ${SUBDIR}/src/urls.txt"      
+      find ${SUBDIR}/jenkins/jobs/dsl/*.groovy | while read DSLFILE; do
+	CKSUMB4=`cksum $DSLFILE`
+	# TODO add more sed rules here to support other templates
+        sed -i'' -e  "s/def referenceAppgitRepo \+= \+.*/def referenceAppgitRepo = \"${THIS_REPO_NAME}\"/g" ${DSLFILE}
+	if [[ `cksum $DSLFILE` != $CKSUMB4 ]]; then
+	  echo Customised git URL in: $DSLFILE to point to $THIS_REPO_NAME
+        fi
+      done
+
+    else
+      echo "WARNING: your git repository doesn't have any remotes.  Therefore unable to pre-populate src/urls.txt in your cartridge.  Please do this manually. See http://accenture.github.io/adop-docker-compose/docs/developing/cartridges/#developing-cartridge-content"
+    fi
+  fi
+
+
+  # We don't want the cartridge dir to be it's own git repo
+  rm -rf ${SUBDIR}/.git
+
+  printf "\nCartridge skeleton successfully created.\n\nYou can now load it into an ADOP instance: http://accenture.github.io/adop-docker-compose/docs/developing/cartridges/#testing-the-cartridge\n"
+
+}
+
+
+shift $(($OPTIND -1))
+SUBCOMMAND_OPT="${1:-help}"
+
+# Only shift if there are other parameters
+if [ $# -ge 1 ]; then
+    shift
+fi
+
+case ${SUBCOMMAND_OPT} in
+    "cmd_desc"|"help"|"init"|"list_init_templates"|"list_template_urls")
+
+        ${SUBCOMMAND_OPT} "$@"
+        ;;
+    *)
+        echo "Invalid parameter(s) or option(s)."
+        help
+        exit 1
+        ;;
+esac
+
