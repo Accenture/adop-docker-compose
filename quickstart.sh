@@ -37,6 +37,8 @@ Usage:
 	    [-m <MACHINE_NAME>]
 	    [-l <AZURE_LOCATION>]
 	    [-g <AZURE_RESOURCE_GROUP>]
+	    [-u <INITIAL_ADMIN_USER>] 
+	    [-p <INITIAL_ADMIN_PASSWORD>]
 
 END_USAGE
 }
