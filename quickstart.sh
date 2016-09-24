@@ -31,6 +31,13 @@ Usage:
 	    [-u <INITIAL_ADMIN_USER>] 
 	    [-p <INITIAL_ADMIN_PASSWORD>]
 
+        ./quickstart.sh 
+	    -t azure
+	    -i <AZURE_SUBSCIPTION_ID>
+	    [-m <MACHINE_NAME>]
+	    [-l <AZURE_LOCATION>]
+	    [-g <AZURE_RESOURCE_GROUP>]
+
 END_USAGE
 }
 
@@ -55,7 +62,51 @@ provision_local() {
     set -e
 
 }
-    
+
+provision_azure() {
+    if [ -z ${AZURE_SUBSCIPTION_ID} ]; then
+        echo "ERROR: Mandatory parameters missing!"
+        usage
+        exit 1
+    fi
+
+    if [ -z ${MACHINE_NAME} ]; then
+        echo "No machine name specified - using default [adop]."
+        MACHINE_NAME=adop
+    fi
+
+    if [ -z ${AZURE_LOCATION} ]; then
+        echo "No Azure Location specified - using default [westeurope]."
+        AZURE_LOCATION=westeurope
+    fi
+
+    if [ -z ${AZURE_RESOURCE_GROUP} ]; then
+        echo "No resource group name specified - using default [docker-machine]."
+        AZURE_RESOURCE_GROUP=docker-machine
+    fi
+
+    # Allow script to continue if error returned by docker-machine command
+    set +e
+
+    # Create Docker machine if one doesn't already exist with the same name
+    docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "Docker machine '$MACHINE_NAME' already exists"
+    else
+        docker-machine create --driver azure \
+          --azure-subscription-id "${AZURE_SUBSCIPTION_ID}" \
+          --azure-location "${AZURE_LOCATION}" \
+          --azure-resource-group "${AZURE_RESOURCE_GROUP}" \
+          --azure-size Standard_DS3_v2 \
+          --azure-open-port 80 ${MACHINE_NAME}
+    fi
+
+    # Reenable errexit
+    set -e
+
+}
+
+
 # Function to create AWS-specific environment variables file
 source_aws() {  
   AWS_FILE='./conf/provider/env.provider.aws.sh'
@@ -164,7 +215,7 @@ provision_aws() {
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:" opt; do
+while getopts "t:m:a:s:c:z:r:u:p:i:l:g:" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -193,6 +244,15 @@ while getopts "t:m:a:s:c:z:r:u:p:" opt; do
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
       ;;      
+    i)
+      export AZURE_SUBSCIPTION_ID=${OPTARG}
+      ;;      
+    l)
+      export AZURE_LOCATION=${OPTARG}
+      ;;      
+    g)
+      export AZURE_RESOURCE_GROUP=${OPTARG}
+      ;;      
     *)
       echo "Invalid parameter(s) or option(s)."
       usage
@@ -217,6 +277,9 @@ case ${MACHINE_TYPE} in
     "aws")
         provision_aws
         CLI_COMPOSE_OPTS="-f etc/aws/default.yml"
+        ;;
+    "azure")
+        provision_azure
         ;;
     *)
         echo "Invalid parameter(s) or option(s)."
