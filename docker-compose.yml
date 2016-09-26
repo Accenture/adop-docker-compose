@@ -338,16 +338,21 @@ ldap-phpadmin:
 interlock:
   container_name: interlock
   image: mihailivanov/adop-interlock
+  net: ${CUSTOM_NETWORK_NAME}
   command: -D run -c /etc/interlock/config.toml
   tty: true
   ports:
     - 2222
   volumes:
+    - /etc/docker:/docker:ro
     - /var/run/docker.sock:/var/run/docker.sock
   environment:      
     INTERLOCK_CONFIG: |
       ListenAddr = ":2222"
       DockerURL = "unix:///var/run/docker.sock"
+      TLSCACert = "/docker/ca.pem"
+      TLSCert = "/docker/server.pem"
+      TLSKey = "/docker/server-key.pem"
       [[Extensions]]
       Name = "nginx"
       ConfigPath = "/etc/nginx/sites-enabled/tools-context.conf"
@@ -356,3 +361,7 @@ interlock:
       BackendOverrideAddress = "172.17.0.1"
       MaxConn = 1024
       Port = 80
+
+
+
+

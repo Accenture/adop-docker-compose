@@ -330,7 +330,7 @@ if [ $# -ge 1 ]; then
 fi
 
 # Setting Compose File Lists
-ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
+ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml -f ${CLI_DIR}/etc/labels/interlock/default.yml"
 ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
 
 case ${SUBCOMMAND_OPT} in
