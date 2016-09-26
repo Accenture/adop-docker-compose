@@ -1,0 +1,64 @@
+# These labels are used be interlock to identify containers
+
+proxy:
+  labels:
+    interlock.ext.name: "nginx"
+
+# ldap:
+# ignored by interlock
+
+# gerrit-mysql:
+# ignored by interlock
+
+gerrit:
+  labels:
+    interlock.port: "8080"
+    interlock.context_root: "/gerrit"
+
+# sensu-uchiwa:
+# ignored by interlock
+
+# sensu-api:
+# ignored by interlock
+
+# sensu-server:
+# ignored by interlock
+
+# sensu-client:
+# ignored by interlock
+
+# sensu-rabbitmq:
+# ignored by interlock
+
+# sensu-redis:
+# ignored by interlock
+
+# sonar-mysql:
+# ignored by interlock
+
+# sonar:
+# ignored by interlock
+
+jenkins:
+  labels:
+    interlock.port: "8082"
+    interlock.context_root: "/jenkins"
+
+# jenkins-slave:
+# ignored by interlock
+
+selenium-hub:
+  labels:
+    interlock.port: "4444"
+    interlock.context_root: "/selenium-hub"
+    interlock.context_root_rewrite: "/"
+
+# selenium-node-chrome:
+# ignored by interlock
+
+# selenium-node-firefox:
+# ignored by interlock
+
+# nexus:
+# ignored by interlock
+
