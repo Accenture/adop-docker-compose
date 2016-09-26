@@ -337,7 +337,7 @@ ldap-phpadmin:
 
 interlock:
   container_name: interlock
-  image: adop-interlock
+  image: mihailivanov/adop-interlock
   command: -D run -c /etc/interlock/config.toml
   tty: true
   ports:
