@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Globals
-
-export LDAP_PWD="Jpk66g63ZifGYIcShSGM"
 
 # LDAP
 
