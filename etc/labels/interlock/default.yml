@@ -15,8 +15,10 @@ gerrit:
     interlock.port: "8080"
     interlock.context_root: "/gerrit"
 
-# sensu-uchiwa:
-# ignored by interlock
+sensu-uchiwa:
+  labels:
+    interlock.port: "3000"
+    interlock.context_root: "/sensu-uchiwa"
 
 # sensu-api:
 # ignored by interlock
@@ -36,8 +38,11 @@ gerrit:
 # sonar-mysql:
 # ignored by interlock
 
-# sonar:
-# ignored by interlock
+sonar:
+  labels:
+    interlock.port: "9000"
+    interlock.context_root: "/sonar"
+    interlock.context_root_rewrite: "/"
 
 jenkins:
   labels:
@@ -59,6 +64,8 @@ selenium-hub:
 # selenium-node-firefox:
 # ignored by interlock
 
-# nexus:
-# ignored by interlock
-
+nexus:
+  labels:
+    interlock.port: "8081"
+    interlock.context_root: "/nexus"
+    interlock.context_root_rewrite: "/"
