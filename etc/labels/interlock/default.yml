@@ -18,7 +18,7 @@ gerrit:
 sensu-uchiwa:
   labels:
     interlock.port: "3000"
-    interlock.context_root: "/sensu-uchiwa"
+    interlock.context_root: "/sensu"
     interlock.context_root_rewrite: "/"
 
 # sensu-api:
@@ -43,7 +43,6 @@ sonar:
   labels:
     interlock.port: "9000"
     interlock.context_root: "/sonar"
-    interlock.context_root_rewrite: "/"
 
 jenkins:
   labels:
@@ -69,4 +68,21 @@ nexus:
   labels:
     interlock.port: "8081"
     interlock.context_root: "/nexus"
+
+kibana: 
+  labels:
+    interlock.port: "5601"
+    interlock.context_root: "/kibana"
+    interlock.context_root_rewrite: "/"
+
+# TODO(mihail): investigate and add more Kibana context
+
+ldap-ltb:
+  labels:
+    interlock.context_root: "/ldap-ltb"
+    interlock.context_root_rewrite: "/"
+
+ldap-phpadmin:
+  labels:
+    interlock.context_root: "/ldap-phpadmin"
     interlock.context_root_rewrite: "/"
