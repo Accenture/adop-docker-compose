@@ -200,7 +200,7 @@ jenkins:
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
-    - "8081:8080"
+    - "8082:8080"
   expose:
     - "50000"
   privileged: true
