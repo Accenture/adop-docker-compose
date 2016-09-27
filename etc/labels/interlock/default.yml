@@ -19,6 +19,7 @@ sensu-uchiwa:
   labels:
     interlock.port: "3000"
     interlock.context_root: "/sensu-uchiwa"
+    interlock.context_root_rewrite: "/"
 
 # sensu-api:
 # ignored by interlock

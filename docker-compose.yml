@@ -100,8 +100,8 @@ sensu-uchiwa:
   environment:
     SENSU_HOSTNAME: sensu-api
     SENSU_DC_NAME: Sensu
-  expose:
-    - "3000"
+  ports:
+    - "3000:3000"
 
 sensu-api:
   container_name: sensu-api
@@ -177,8 +177,8 @@ sonar:
   image: accenture/adop-sonar:0.2.0
   #build: ../images/docker-sonar/
   net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "9000"
+  ports:
+    - "9000:9000"
   environment:
     - "dependency:container==sonar-mysql"
     - "LDAP_URL=ldap://${LDAP_SERVER}"
@@ -295,8 +295,8 @@ nexus:
   restart: always
   image:  accenture/adop-nexus:0.1.0
   net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "8081"
+  ports:
+    - "8081:8081"
   environment:
     NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
     LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
