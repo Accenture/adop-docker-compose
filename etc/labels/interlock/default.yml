@@ -79,10 +79,12 @@ nexus:
 
 ldap-ltb:
   labels:
+    interlock.port: "8084"
     interlock.context_root: "/ldap-ltb"
     interlock.context_root_rewrite: "/"
 
 ldap-phpadmin:
   labels:
+    interlock.port: "8085"
     interlock.context_root: "/ldap-phpadmin"
     interlock.context_root_rewrite: "/"
