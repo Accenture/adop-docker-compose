@@ -21,6 +21,11 @@ Usage:
 	    [-p <INITIAL_ADMIN_PASSWORD>]
 
         ./quickstart.sh 
+	    -t mac 
+	    [-u <INITIAL_ADMIN_USER>] 
+	    [-p <INITIAL_ADMIN_PASSWORD>]
+
+        ./quickstart.sh 
 	    -t aws 
 	    -m <MACHINE_NAME> 
 	    -c <AWS_VPC_ID> 
@@ -213,10 +218,20 @@ CLI_COMPOSE_OPTS=""
 case ${MACHINE_TYPE} in
     "local")
         provision_local
+
+        # Use the ADOP CLI
+        ./adop compose -m "${MACHINE_NAME}" ${CLI_COMPOSE_OPTS} init
+        ;;
+    "mac")
+        # Use the ADOP CLI
+        ./adop compose ${CLI_COMPOSE_OPTS} init
         ;;
     "aws")
         provision_aws
         CLI_COMPOSE_OPTS="-f etc/aws/default.yml"
+
+        # Use the ADOP CLI
+        ./adop compose -m "${MACHINE_NAME}" ${CLI_COMPOSE_OPTS} init
         ;;
     *)
         echo "Invalid parameter(s) or option(s)."
@@ -224,6 +239,3 @@ case ${MACHINE_TYPE} in
         exit 1
         ;;
 esac
-
-# Use the ADOP CLI
-./adop compose -m "${MACHINE_NAME}" ${CLI_COMPOSE_OPTS} init

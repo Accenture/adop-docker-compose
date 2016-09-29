@@ -45,41 +45,46 @@ pretty_sleep() {
 
 
 prep_env() {
-    # If the proxy IP has not been set work out the TARGET_HOST
-    # Else just use it
-    if [ -z "${PROXY_IP}" ]; then
-        # If MACHINE_NAME is not the default or it is and it exists
-        # Else fall back to localhost
-        if [ "${MACHINE_NAME}" != "${DEFAULT_MACHINE_NAME}" ] || ([ "${MACHINE_NAME}" = "${DEFAULT_MACHINE_NAME}" ] && $(docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1) ); then
-            # Check the machine exists first
-            if ! $(docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1) ; then
-               echo "The specified Docker Machine does not exist: ${MACHINE_NAME}"
-               echo "HINT: Either specify one with 'adop compose -m <name>', or use 'eval \$(docker-machine env ${MACHINE_NAME})'"
-               exit 1
-            else
-                # Set the machine
-                eval $(docker-machine env $MACHINE_NAME --shell bash)
+    # No longer assume docker-machine is used.
+    if [ -n "$MACHINE_NAME" ]; then
+        # If the proxy IP has not been set work out the TARGET_HOST
+        # Else just use it
+        if [ -z "${PROXY_IP}" ]; then
+            # If MACHINE_NAME is not the default or it is and it exists
+            # Else fall back to localhost
+            if [ "${MACHINE_NAME}" != "${DEFAULT_MACHINE_NAME}" ] || ([ "${MACHINE_NAME}" = "${DEFAULT_MACHINE_NAME}" ] && $(docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1) ); then
+                # Check the machine exists first
+                if ! $(docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1) ; then
+                   echo "The specified Docker Machine does not exist: ${MACHINE_NAME}"
+                   echo "HINT: Either specify one with 'adop compose -m <name>', or use 'eval \$(docker-machine env ${MACHINE_NAME})'"
+                   exit 1
+                else
+                   # Set the machine
+                   eval $(docker-machine env $MACHINE_NAME --shell bash)
 
-                export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
-                export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
+                   export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
+                   export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
+                fi
+            else
+                echo "Docker Machine is not available or the default machine does not exist, defaulting to localhost"
+                echo "HINT: Either specify one with 'adop compose -m <name>', or use 'eval \$(docker-machine env ${MACHINE_NAME})'"
+                export TARGET_HOST=$( host $( hostname -f ) | sed -n '/has address/s/.*address //p' )
+                export LOGSTASH_HOST=$TARGET_HOST
             fi
         else
-            echo "Docker Machine is not available or the default machine does not exist, defaulting to localhost"
-            echo "HINT: Either specify one with 'adop compose -m <name>', or use 'eval \$(docker-machine env ${MACHINE_NAME})'"
-            export TARGET_HOST=localhost
-            export LOGSTASH_HOST=localhost
+            export TARGET_HOST=${PROXY_IP}
+            export LOGSTASH_HOST=${PROXY_IP}
         fi
     else
-        export TARGET_HOST=${PROXY_IP}
-        export LOGSTASH_HOST=${PROXY_IP}
+            export TARGET_HOST=localhost
+            export LOGSTASH_HOST=localhost
     fi
-
     source ${CONF_DIR}/conf/env.provider.sh
     source ${CONF_DIR}/credentials.generate.sh
     source ${CONF_DIR}/env.config.sh
     if [ -f "${CONF_DIR}/env.override.sh" ]; then
-	echo "Using ${CONF_DIR}/env.override.sh to override default values for environment variable."
-	source ${CONF_DIR}/env.override.sh
+	        echo "Using ${CONF_DIR}/env.override.sh to override default values for environment variable."
+	        source ${CONF_DIR}/env.override.sh
     fi
 }
 
@@ -95,14 +100,14 @@ case "$1" in
     *)
 esac
 
-    echo ' 
-          ###    ########   #######  ########  
-         ## ##   ##     ## ##     ## ##     ## 
-        ##   ##  ##     ## ##     ## ##     ## 
-       ##     ## ##     ## ##     ## ########  
-       ######### ##     ## ##     ## ##        
-       ##     ## ##     ## ##     ## ##        
-       ##     ## ########   #######  ##        
+    echo '
+          ###    ########   #######  ########
+         ## ##   ##     ## ##     ## ##     ##
+        ##   ##  ##     ## ##     ## ##     ##
+       ##     ## ##     ## ##     ## ########
+       ######### ##     ## ##     ## ##
+       ##     ## ##     ## ##     ## ##
+       ##     ## ########   #######  ##
     '
 
     echo "* Initialising ADOP"
@@ -131,7 +136,7 @@ esac
     TOOL_SLEEP_TIME=30
     until [[ $(docker exec jenkins curl -I -s jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Jenkins; done
     until [[ $(docker exec gerrit curl -I -s gerrit:${PASSWORD_GERRIT}@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Gerrit; done
-    
+
     # Trigger Load_Platform in Jenkins
     if [ "${LOAD}" = "NO" ]; then
         echo "* Skipping Loading the Platform"
@@ -146,11 +151,11 @@ esac
     else
         echo "DOCKER_TLS_VERIFY not set to 1, skipping certificate generation"
     fi
-    
+
     # Wait for Nginx to come up before proceeding
     echo "* Waiting for Nginx to become available"
     until [[ $(curl -I -s -u ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN} http://${TARGET_HOST}/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Nginx unavailable, sleeping for 5s"; sleep 5; done
-    
+
     # Tell the user something useful
     echo
     echo '##########################################################'
@@ -183,23 +188,23 @@ gen_certs() {
     CERT_PATH=$1
     if [ -z ${CERT_PATH} ]; then
         echo "
-          Usage : 
+          Usage :
             gen-certs <docker_client_certificate_path>
-          
-          <docker_client_certificate_path>: 
+
+          <docker_client_certificate_path>:
             This is the path of the certificate on jenkins slave container
             to be able to run docker commands against docker swarm.
             Note - absolute path is required.
-              
-          Example: 
+
+          Example:
             gen-certs /root/.docker
         "
         exit 1
     fi
 
     ####
-    # Windows Git bash terminal identifies 
-    # /CN=client as a path and appends the absolute path 
+    # Windows Git bash terminal identifies
+    # /CN=client as a path and appends the absolute path
     # of parent directory to it
     ####
     HOST_OS=$(uname)
@@ -211,7 +216,7 @@ gen_certs() {
 
     ####
     # Fresh start
-    #### 
+    ####
     TEMP_CERT_PATH="${HOME}/docker_certs"
     rm -rf ${TEMP_CERT_PATH}
     mkdir -p ${TEMP_CERT_PATH}
@@ -250,7 +255,7 @@ gen_certs() {
 
     ####
     # * Remove unnecessary files
-    # * Copy the certificates to slave 
+    # * Copy the certificates to slave
     ####
     echo "Uploading certificates to Jenkins Slave at: ${CERT_PATH}"
     rm -f ${TEMP_CERT_PATH}/extfile.cnf ${TEMP_CERT_PATH}/client.csr
@@ -278,16 +283,13 @@ run_compose() {
     fi
 }
 
-# Defaults
-DEFAULT_MACHINE_NAME="default"
-export MACHINE_NAME=${DOCKER_MACHINE_NAME:-${DEFAULT_MACHINE_NAME}}
-
 export VOLUME_DRIVER=local
 export LOGGING_DRIVER=syslog
 export CUSTOM_NETWORK_NAME=local_network
 export OVERRIDES=""
 export TOTAL_OVERRIDES=""
 export PULL="YES"
+export MACHINE_NAME=""
 
 # Parameters
 while getopts "m:f:F:v:l:n:i:" opt; do
