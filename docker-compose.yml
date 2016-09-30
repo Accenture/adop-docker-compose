@@ -195,7 +195,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.1.5
+  image: accenture/adop-jenkins:0.2.0
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
