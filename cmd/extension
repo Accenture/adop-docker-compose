@@ -219,8 +219,9 @@ add_credentials() {
      creds_help
      exit 1
   else
+     set +e
      echo "Creating credentials in jenkins..."
-     curl --max-time 60 -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${CRED_URL} \
+     curl -w "%{http_code} %{url_effective}\\n" -f -k --max-time 60 -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${CRED_URL} \
        --data-urlencode "json={
          \"\": \"0\",
          \"credentials\": {
