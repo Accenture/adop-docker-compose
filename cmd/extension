@@ -208,18 +208,18 @@ add_credentials() {
 
   # Trigger Job
   load_credentials
-  export CRED_URL="${TARGET_HOST}/jenkins/credential-store/domain/_/createCredentials"
-  export CRED_EXISTS=${TARGET_HOST}/jenkins/credential-store/domain/_/credential/${CREDENTIAL_ID}/
+  export CRED_URL="${TARGET_HOST}/jenkins/credentials/store/system/domain/_/createCredentials"
+  export CRED_EXISTS=${TARGET_HOST}/jenkins/credentials/store/system/domain/_/credential/${CREDENTIAL_ID}/
   set +e
   curl -I --max-time 60 -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${CRED_EXISTS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 200 >/dev/null
   CMD_RC=$?
   set -e
   if [ ${CMD_RC} -eq 0 ]; then
-     echo "AWS Credentials already exists with ID '${CREDENTIAL_ID}' in jenkins. Please use different credential ID."
+     echo "Credentials already exists with ID '${CREDENTIAL_ID}' in jenkins. Please use different credential ID."
      creds_help
      exit 1
   else
-     echo "Creating AWS credentials in jenkins..."
+     echo "Creating credentials in jenkins..."
      curl --max-time 60 -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${CRED_URL} \
        --data-urlencode "json={
          \"\": \"0\",
