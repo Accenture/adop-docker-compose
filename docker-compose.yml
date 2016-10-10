@@ -198,6 +198,8 @@ jenkins:
   image: accenture/adop-jenkins:0.2.0
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
+  ports:
+    - "50000/tcp:50000/tcp"
   expose:
     - "8080"
     - "50000"
