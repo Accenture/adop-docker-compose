@@ -45,13 +45,14 @@ Separate 'master' and 'node' security groups control access between the nodes. T
 	- You can get the `ELBPublicDNSName` from cloudformation outputs as mentioned in above section. Outer proxy server acts as a bastion host.
 	- KeyName is the private key selected from the drop down list while creating the stack.
 - Clone ([this repository](https://github.com/Accenture/adop-docker-compose))
+- Run: cd adop-docker-compose
 - Run: export DOCKER\_HOST=tcp://\<SwarmMasterIP\>:2375
 	- You can get the `SwarmMasterIP` from cloudformation outputs as mentioned in above section.
-- Run: export TARGET\_HOST=\<ELBPublicDNSName\>
-	- You can get the `ELBPublicDNSName` from cloudformation outputs as mentioned in above section. 
+- Run: echo "export PROTO=https" >> env.override.sh
 - Optionally Run: export CUSTOM\_NETWORK\_NAME=\<CUSTOM\_NETWORK\_NAME\>
 	- By default the custom docker network is created with name `local_network`
-- Run: ./adop compose init
+- Run: ./adop compose -i \<ELBPublicDNSName\> init
+	- You can get the `ELBPublicDNSName` from cloudformation outputs as mentioned in above section.
 	- This command will prompt you to set the admin user name and generates a random password for admin use. If you want to have a predefined admin username and credentials for your adop stack then set the following variables -
 		- export INITIAL_ADMIN_USER=\<your admin username\>
 		- export INITIAL_ADMIN_PASSWORD_PLAIN=\<your admin password\>
