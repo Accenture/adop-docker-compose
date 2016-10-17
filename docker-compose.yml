@@ -180,6 +180,8 @@ sonar:
     - "9000"
   environment:
     - "dependency:container==sonar-mysql"
+    - "SONARQUBE_JDBC_USERNAME=${SONAR_MYSQL_USER}"
+    - "SONARQUBE_JDBC_PASSWORD=${SONAR_MYSQL_PASSWORD}"
     - "LDAP_URL=ldap://${LDAP_SERVER}"
     - "LDAP_BIND_DN=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     - "LDAP_BIND_PASSWORD=${LDAP_PWD}"
