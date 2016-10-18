@@ -200,9 +200,12 @@ jenkins:
   image: accenture/adop-jenkins:0.2.0
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "8080"
-    - "50000"
+  #expose:
+   # - "8080"
+    #- "50000"
+  ports:
+    - "8080:8080"
+    - "50000:50000"
   privileged: true
   environment:
     ADOP_PLATFORM_MANAGEMENT_VERSION: "0.1.1"
