@@ -4,7 +4,7 @@
 proxy:
   container_name: proxy
   restart: always
-  image: accenture/adop-nginx:0.2.0
+  image: dockerhub.accenture.com/mihail.ivanov/adop-nginx:no-sleep-less-config
   #build: ../images/docker-nginx/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -57,8 +57,9 @@ gerrit:
   image: accenture/adop-gerrit:0.1.2
   privileged: true
   net: ${CUSTOM_NETWORK_NAME}
+  ports:
+    - "8080:8080"
   expose:
-    - "8080"
     - "29418"
   environment:
     - "dependency:container==gerrit-mysql"
@@ -99,8 +100,8 @@ sensu-uchiwa:
   environment:
     SENSU_HOSTNAME: sensu-api
     SENSU_DC_NAME: Sensu
-  expose:
-    - "3000"
+  ports:
+    - "3000:3000"
 
 sensu-api:
   container_name: sensu-api
@@ -176,8 +177,8 @@ sonar:
   image: accenture/adop-sonar:0.2.0
   #build: ../images/docker-sonar/
   net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "9000"
+  ports:
+    - "9000:9000"
   environment:
     - "dependency:container==sonar-mysql"
     - "SONARQUBE_JDBC_USERNAME=${SONAR_MYSQL_USER}"
@@ -200,8 +201,9 @@ jenkins:
   image: accenture/adop-jenkins:0.2.0
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
+  ports:
+    - "8082:8080"
   expose:
-    - "8080"
     - "50000"
   privileged: true
   environment:
@@ -267,8 +269,8 @@ selenium-hub:
   restart: always
   image: selenium/hub:2.53.0
   net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "4444"
+  ports:
+    - "4444:4444"
 
 selenium-node-chrome:
   container_name: selenium-node-chrome
@@ -297,8 +299,8 @@ nexus:
   restart: always
   image:  accenture/adop-nexus:0.1.0
   net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "8081"
+  ports:
+    - "8081:8081"
   environment:
     NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
     LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
@@ -315,8 +317,8 @@ ldap-ltb:
   restart: always
   image: accenture/adop-ldap-ltb:0.1.0
   net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "80"
+  ports:
+    - "8084:80"
   environment:
     LDAP_LTB_URL: "ldap://${LDAP_SERVER}"
     LDAP_LTB_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
@@ -328,11 +330,42 @@ ldap-phpadmin:
   restart: always
   image: accenture/adop-ldap-phpadmin:0.1.0
   net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "80"
+  ports:
+    - "8085:80"
   environment:
     LDAP_SERVER_NAME: "LDAP"
     LDAP_SERVER_HOST: "ldap"
     LDAP_SERVER_PORT: "389"
     LDAP_SERVER_BIND_ID: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     LDAP_SERVER_BASE_DN: "${LDAP_FULL_DOMAIN}"
+
+interlock:
+  container_name: interlock
+  image: mihailivanov/adop-interlock
+  net: ${CUSTOM_NETWORK_NAME}
+  command: -D run -c /etc/interlock/config.toml
+  tty: true
+  ports:
+    - 2222
+  volumes:
+    - /etc/docker:/docker:ro
+    - /var/run/docker.sock:/var/run/docker.sock
+  environment:      
+    INTERLOCK_CONFIG: |
+      ListenAddr = ":2222"
+      DockerURL = "unix:///var/run/docker.sock"
+      TLSCACert = "/docker/ca.pem"
+      TLSCert = "/docker/server.pem"
+      TLSKey = "/docker/server-key.pem"
+      [[Extensions]]
+      Name = "nginx"
+      ConfigPath = "/etc/nginx/sites-enabled/tools-context.conf"
+      PidPath = "/var/run/nginx.pid"
+      TemplatePath = "/etc/interlock/nginx.conf.template"
+      BackendOverrideAddress = "172.17.0.1"
+      MaxConn = 1024
+      Port = 80
+
+
+
+
