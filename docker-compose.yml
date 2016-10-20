@@ -180,6 +180,8 @@ sonar:
     - "9000"
   environment:
     - "dependency:container==sonar-mysql"
+    - "SONARQUBE_JDBC_USERNAME=${SONAR_MYSQL_USER}"
+    - "SONARQUBE_JDBC_PASSWORD=${SONAR_MYSQL_PASSWORD}"
     - "LDAP_URL=ldap://${LDAP_SERVER}"
     - "LDAP_BIND_DN=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     - "LDAP_BIND_PASSWORD=${LDAP_PWD}"
@@ -195,7 +197,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.1.5
+  image: accenture/adop-jenkins:0.2.0
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -263,7 +265,7 @@ jenkins-slave:
 selenium-hub:
   container_name: selenium-hub
   restart: always
-  image: selenium/hub:2.46.0
+  image: selenium/hub:2.53.0
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "4444"
@@ -271,20 +273,22 @@ selenium-hub:
 selenium-node-chrome:
   container_name: selenium-node-chrome
   restart: always
-  image: selenium/node-chrome:2.46.0
+  image: selenium/node-chrome:2.53.0
   net: ${CUSTOM_NETWORK_NAME}
   environment:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-chrome.json"
+    REMOTE_HOST: "http://selenium-node-chrome:5555"
     HUB_PORT_4444_TCP_ADDR: "selenium-hub"
     HUB_PORT_4444_TCP_PORT: "4444"
 
 selenium-node-firefox:
   container_name: selenium-node-firefox
   restart: always
-  image: selenium/node-firefox:2.46.0
+  image: selenium/node-firefox:2.53.0
   net: ${CUSTOM_NETWORK_NAME}
   environment:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-firefox.json"
+    REMOTE_HOST: "http://selenium-node-firefox:5555"
     HUB_PORT_4444_TCP_ADDR: "selenium-hub"
     HUB_PORT_4444_TCP_PORT: "4444"
 

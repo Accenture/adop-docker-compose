@@ -1709,7 +1709,7 @@
               "systemctl daemon-reload && systemctl restart docker\n",
               "docker run --restart=\"always\" -p 80:80 -d -e TARGET=",
               { "Fn::GetAtt": [ "ProxyPrivateElasticLoadBalancer", "DNSName" ] },
-              " --name=outer-proxy-nginx -d accenture/adop-outer-proxy:0.2.0 \n"
+              " --name=outer-proxy-nginx -d accenture/adop-outer-proxy:0.2.1 \n"
               ]
             ]
           }
