@@ -1,3 +1,4 @@
+---
 version: "2"
 
 # set TARGET_HOST to dns/ip of proxy
@@ -5,32 +6,59 @@ version: "2"
 
 networks:
   front:
-    driver: overlay
+    external:
+      name: compose_front
   back:
-    driver: overlay
+    external:
+      name: compose_back
 
 
 services:
   proxy:
     container_name: proxy
     restart: always
-    image: accenture/adop-nginx:0.2.0
-    #build: ../images/docker-nginx/
+    image: adop-proxy
+    # adop-proxy
+    # accenture/adop-nginx:0.2.0
+    build: ../images/
     networks:
-    - front
     - back
+    - front
     ports:
       - "80:80"
       - "443:443"
     environment:
-      - "constraint:tier==public"
-      - "LDAP_SERVER=${LDAP_SERVER}"
-      - "LDAP_USERNAME=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-      - "LDAP_PASSWORD=${LDAP_PWD}"
-      - "LDAP_USER_BASE_DN=${LDAP_USER_BASE_DN},${LDAP_FULL_DOMAIN}"
-      - "LDAP_GROUP_ATTRIBUTE=member"
-      - "LDAP_USER_ID_ATTRIBUTE=cn"
-      - "LDAP_USER_OBJECT_CLASS=inetOrgPerson"
+      "constraint:node": "=${STACK_NAME}-proxy"
+      "LDAP_SERVER": "${LDAP_SERVER}"
+      "LDAP_USERNAME": "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+      "LDAP_PASSWORD": "${LDAP_PWD}"
+      "LDAP_USER_BASE_DN": "${LDAP_USER_BASE_DN},${LDAP_FULL_DOMAIN}"
+      "LDAP_GROUP_ATTRIBUTE": "member"
+      "LDAP_USER_ID_ATTRIBUTE": "cn"
+      "LDAP_USER_OBJECT_CLASS": "inetOrgPerson"
+
+  testproxy:
+    container_name: testproxy
+    restart: always
+    image: test-adop-proxy
+    # adop-proxy
+    # accenture/adop-nginx:0.2.0
+    build: ./adop-nginx/
+    networks:
+    - back
+    - front
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      "constraint:node": "=${STACK_NAME}-proxy"
+      "LDAP_SERVER": "${LDAP_SERVER}"
+      "LDAP_USERNAME": "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+      "LDAP_PASSWORD": "${LDAP_PWD}"
+      "LDAP_USER_BASE_DN": "${LDAP_USER_BASE_DN},${LDAP_FULL_DOMAIN}"
+      "LDAP_GROUP_ATTRIBUTE": "member"
+      "LDAP_USER_ID_ATTRIBUTE": "cn"
+      "LDAP_USER_OBJECT_CLASS": "inetOrgPerson"
 
   ldap:
     container_name: ldap
@@ -50,6 +78,7 @@ services:
       SLAPD_DOMAIN: ${LDAP_DOMAIN}
       SLAPD_FULL_DOMAIN: ${LDAP_FULL_DOMAIN}
 
+# TODO replace GitLab postgres with mysql
   gerrit-mysql:
     container_name: gerrit-mysql
     restart: always
@@ -64,47 +93,39 @@ services:
       MYSQL_PASSWORD: ${GERRIT_MYSQL_PASSWORD}
       MYSQL_DATABASE: ${GERRIT_MYSQL_DATABASE}
 
-  gerrit:
-    container_name: gerrit
+  gitlab:
+    container_name: gitlab
     restart: always
-    #build: ../images/docker-gerrit/
-    image: accenture/adop-gerrit:0.1.2
-    privileged: true
+    image: gitlab/gitlab-ce:latest
     networks:
     - back
+    ports:
+      - "9080:9080"
+      - "9443:443"
+      - "9022:22"
+      - "8080:8080"
     expose:
-      - "8080"
-      - "29418"
+      - "9880"
     environment:
-      - "dependency:container==gerrit-mysql"
-      - "REPO_PATH=/var/git/repos"
-      - "WEBURL=${PROTO}://${TARGET_HOST}/gerrit/"
-      - "DATABASE_TYPE=mysql"
-      - "DB_HOSTNAME=gerrit-mysql"
-      - "DB_PORT=3306"
-      - "DB_NAME=${GERRIT_MYSQL_DATABASE}"
-      - "DB_USER=${GERRIT_MYSQL_USER}"
-      - "DB_PASSWORD=${GERRIT_MYSQL_PASSWORD}"
-      - "AUTH_LOGOUTURL=${PROTO}://${TARGET_HOST}/gerrit/"
-      - "AUTH_TYPE=LDAP"
-      - "GERRIT_PASSWORD=${PASSWORD_GERRIT}"
-      - "JENKINS_PASSWORD=${PASSWORD_JENKINS}"
-      - "INITIAL_ADMIN_USER=${INITIAL_ADMIN_USER}"
-      - "INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD_PLAIN}"
-      - "LDAP_SERVER=${LDAP_SERVER}"
-      - "LDAP_ACCOUNTBASE=${LDAP_FULL_DOMAIN}"
-      - "LDAP_ACCOUNTPATTERN=${LDAP_ACCOUNTPATTERN}"
-      - "LDAP_ACCOUNTFULLNAME=${LDAP_ACCOUNTFULLNAME}"
-      - "LDAP_ACCOUNTEMAILADDRESS=mail"
-      - "LDAP_USERNAME=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-      - "LDAP_PASSWORD=${LDAP_PWD}"
-      - "LDAP_GROUPBASE=${LDAP_GROUP_BASE_DN},${LDAP_FULL_DOMAIN}"
-      - "LDAP_GROUPPATTERN=${LDAP_GROUPPATTERN}"
-      - "LDAP_GROUPMEMBERPATTERN=${LDAP_GROUPMEMBERPATTERN}"
-      - "HTTPD_LISTENURL=proxy-${PROTO}://0.0.0.0:8080/gerrit"
-      - "USER_NAME=${GERRIT_USER_NAME}"
-      - "USER_EMAIL=${GERRIT_USER_EMAIL}"
-      - "DOWNLOAD_SCHEME=http"
+      "constraint:node": "=${STACK_NAME}-proxy"
+      GITLAB_ROOT_PASSWORD: ${GITLAB_ROOT_PASSWORD} 
+      GITLAB_OMNIBUS_CONFIG: |
+       external_url 'http://${TARGET_HOST}/gitlab'
+       gitlab_rails['ldap_enabled'] = true
+       gitlab_rails['ldap_servers'] = YAML.load <<-'EOS'
+         main:
+           label: 'LDAP'
+           host: ldap
+           port: 389
+           uid: 'uid'
+           method: 'plain'
+           bind_dn: 'cn=admin,${LDAP_FULL_DOMAIN}'
+           password: '${LDAP_PWD}'
+           active_directory: false
+           allow_username_or_email_login: false
+           block_auto_created_users: false
+           base: '${LDAP_FULL_DOMAIN}'
+       EOS
 
   sensu-uchiwa:
     container_name: sensu-uchiwa
@@ -215,6 +236,7 @@ services:
       - "LDAP_GROUP_ID_ATTRIBUTE=cn"
       - "SONARQUBE_JDBC_URL=jdbc:mysql://sonar-mysql:3306/${SONAR_MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
 
+# TODO cleanup jenkins environment variables for GitLab
   jenkins:
     container_name: jenkins
     restart: always
