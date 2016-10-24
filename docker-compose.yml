@@ -310,31 +310,45 @@ services:
   selenium-hub:
     container_name: selenium-hub
     restart: always
-    image: selenium/hub:2.46.0
+    image: avsdeveng/hub:2.53.1
     networks:
     - back
     expose:
-      - "4444"
+    - "4444"
+    ports:
+    - "4444:4444"
 
   selenium-node-chrome:
     container_name: selenium-node-chrome
     restart: always
-    image: selenium/node-chrome:2.46.0
+    #image: avsdeveng/node-chrome:2.53.1
+    image: avsdeveng/node-chrome-debug:2.53.1
+    shm_size: 4g
+    depends_on:
+    - selenium-hub
     networks:
     - back
     environment:
-      SE_OPTS: "-nodeConfig /var/selenium-config/config-chrome.json"
+      #SE_OPTS: "-nodeConfig /var/selenium-config/config-chrome.json"
+      DBUS_SESSION_BUS_ADDRESS: "/dev/null"
       HUB_PORT_4444_TCP_ADDR: "selenium-hub"
       HUB_PORT_4444_TCP_PORT: "4444"
+    expose:
+    - "5900"
+    ports:
+    - "5900:5900"
+      #comment expose if it's not debug image
 
   selenium-node-firefox:
     container_name: selenium-node-firefox
     restart: always
-    image: selenium/node-firefox:2.46.0
+    image: avsdeveng/node-firefox:2.53.1
+    depends_on:
+    - selenium-hub
     networks:
     - back
     environment:
-      SE_OPTS: "-nodeConfig /var/selenium-config/config-firefox.json"
+      #SE_OPTS: "-nodeConfig /var/selenium-config/config-firefox.json"
       HUB_PORT_4444_TCP_ADDR: "selenium-hub"
       HUB_PORT_4444_TCP_PORT: "4444"
 
