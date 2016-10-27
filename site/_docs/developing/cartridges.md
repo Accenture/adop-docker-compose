@@ -10,6 +10,7 @@ The process for developing a cartridge is:
 * [Spin up ADOP](/adop-docker-compose/docs/quickstart/)
 * Read the [development guidelines](#development-guidelines)
 * Read about the [cartridge architecture](/adop-docker-compose/docs/architecture/cartridges/)
+* Take a look at the [cartridge cookbook](/adop-cartridges-cookbook/)
 * Utilise the [Cartridge Development cartridge](#using-the-cartridge-development-cartridge)
 * [Develop the cartridge content](#developing-cartridge-content)
 * [Test the cartridge against the platform](#testing-the-cartridge)
