@@ -69,13 +69,11 @@ nexus:
     interlock.port: "8081"
     interlock.context_root: "/nexus"
 
-# kibana: 
-#   labels:
-#     interlock.port: "5601"
-#     interlock.context_root: "/kibana"
-#     interlock.context_root_rewrite: "/"
-
-# TODO(mihail): investigate and add more Kibana context
+kibana: 
+  labels:
+    interlock.port: "5601"
+    interlock.context_root: "/kibana"
+    interlock.context_root_rewrite: "/"
 
 ldap-ltb:
   labels:
