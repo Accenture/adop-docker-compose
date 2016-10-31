@@ -55,8 +55,8 @@ jenkins:
 selenium-hub:
   labels:
     interlock.port: "4444"
-    interlock.context_root: "/selenium-hub"
-    interlock.context_root_rewrite: "/"
+    interlock.context_root: "/selenium"
+    interlock.context_root_rewrite: "/grid/console"
 
 # selenium-node-chrome:
 # ignored by interlock
