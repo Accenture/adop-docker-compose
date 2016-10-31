@@ -1,0 +1,7 @@
+# These labels are used be interlock to identify containers
+
+kibana: 
+  labels:
+    interlock.port: "5601"
+    interlock.context_root: "/kibana"
+    interlock.context_root_rewrite: "/"
