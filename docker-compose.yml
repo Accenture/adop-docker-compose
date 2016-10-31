@@ -4,7 +4,7 @@
 proxy:
   container_name: proxy
   restart: always
-  image: dockerhub.accenture.com/mihail.ivanov/adop-nginx:no-sleep-less-config
+  image: mihailivanov/adop-nginx:PR
   #build: ../images/docker-nginx/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
