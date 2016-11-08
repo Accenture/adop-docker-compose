@@ -105,35 +105,38 @@ sensu-uchiwa:
 sensu-api:
   container_name: sensu-api
   restart: always
-  image: accenture/adop-sensu:0.1.0
+  image: accenture/adop-sensu:0.2.0
   net: ${CUSTOM_NETWORK_NAME}
   command: api
   expose:
     - "4567"
   environment:
+    TRANSPORT_NAME: rabbitmq
     RABBITMQ_HOST: sensu-rabbitmq
     REDIS_HOST: sensu-redis
 
 sensu-server:
   container_name: sensu-server
   restart: always
-  image: accenture/adop-sensu:0.1.0
+  image: accenture/adop-sensu:0.2.0
   net: ${CUSTOM_NETWORK_NAME}
   command: server
   environment:
-    CLIENT_NAME: core
     API_HOST: sensu-api
     RABBITMQ_HOST: sensu-rabbitmq
     REDIS_HOST: sensu-redis
+    TRANSPORT_NAME: rabbitmq
 
 sensu-client:
   container_name: sensu-client
   restart: always
-  image: accenture/adop-sensu:0.1.0
+  image: accenture/adop-sensu:0.2.0
   net: ${CUSTOM_NETWORK_NAME}
   command: client
   environment:
+    TRANSPORT_NAME: rabbitmq
     CLIENT_NAME: core
+    CLIENT_ADDRESS: 127.0.0.1
     RABBITMQ_HOST: sensu-rabbitmq
     JENKINS_PREFIX: jenkins
     CLIENT_SUBSCRIPTIONS: "proxy,gerrit,jenkins,nexus,sonarqube,sensu,kibana"
