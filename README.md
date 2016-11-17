@@ -39,8 +39,9 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
                                -c <AWS_VPC_ID> 
                                -r <AWS_DEFAULT_REGION> 
                                -z <VPC_AVAIL_ZONE>(optional)
+                               -i <AWS_AMI_ID>(optional)
                                -a <AWS_ACCESS_KEY>(optional) 
-                               -s <AWS_SECRET_ACCESS_EY>(optional) 
+                               -s <AWS_SECRET_ACCESS_KEY>(optional) 
                                -u <INITIAL_ADMIN_USER>
                                -p <INITIAL_ADMIN_PASSWORD>(optional) ...
         ```

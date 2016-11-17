@@ -28,6 +28,7 @@ Usage:
 	    [-z <AVAILABILITY_ZONE_LETTER>] 
 	    [-a <AWS_ACCESS_KEY>] 
 	    [-s <AWS_SECRET_ACCESS_KEY>] 
+	    [-i <AWS_AMI_ID>] 
 	    [-u <INITIAL_ADMIN_USER>] 
 	    [-p <INITIAL_ADMIN_PASSWORD>]
 
@@ -159,12 +160,17 @@ provision_aws() {
                         --amazonec2-region ${AWS_DEFAULT_REGION}"
         fi
 
+        if [ -n "${AWS_AMI_ID}" ]; then
+            MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
+                        --amazonec2-ami ${AWS_AMI_ID}"
+        fi
+
         MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} ${MACHINE_NAME}"
         ${MACHINE_CREATE_CMD}
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:" opt; do
+while getopts "t:m:a:s:c:z:r:i:u:p:" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -186,6 +192,9 @@ while getopts "t:m:a:s:c:z:r:u:p:" opt; do
       ;;
     r)
       export AWS_DEFAULT_REGION=${OPTARG}
+      ;;
+    i)
+      export AWS_AMI_ID=${OPTARG}
       ;;
     u)
       export INITIAL_ADMIN_USER=${OPTARG}
