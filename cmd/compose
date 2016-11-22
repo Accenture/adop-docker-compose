@@ -86,18 +86,27 @@ prep_env() {
 
 init() {
 
-case "$1" in
-    --without-pull)
-        export PULL="NO"
-        ;;
-    --without-load)
-        export LOAD="NO"
-        ;;
-    --with-stdout)
-        export LOGS="NO"
-        ;;
-    *)
-esac
+while [[ $1 ]]; do
+    case "$1" in
+        --without-pull)
+            export PULL="NO"
+            shift
+            ;;
+        --without-load)
+            export LOAD="NO"
+            shift
+            ;;
+        --with-stdout)
+            export LOGS="NO"
+            shift
+            ;;
+        *)
+            echo "Unrecognized option: $1"
+            help
+            exit 1
+            ;;
+    esac
+done
 
     echo ' 
           ###    ########   #######  ########  
