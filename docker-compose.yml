@@ -54,7 +54,7 @@ gerrit:
   container_name: gerrit
   restart: always
   #build: ../images/docker-gerrit/
-  image: accenture/adop-gerrit:0.1.2
+  image: accenture/adop-gerrit:0.1.3
   privileged: true
   net: ${CUSTOM_NETWORK_NAME}
   expose:
