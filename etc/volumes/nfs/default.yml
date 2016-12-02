@@ -79,3 +79,8 @@ nexus:
   volume_driver: nfs
   volumes:
     - ${NFS_HOST}/nfs/nexus_sonatype_work:/sonatype-work
+
+registry:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/registry_data:/data

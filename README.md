@@ -167,6 +167,15 @@ Create ssl certificate for jenkins to allow connectivity with docker engine.
 
 Note : For Windows run this command from a terminal (Git Bash) as administrator.
 
+###### Generate ssl certificate for docker registry host
+
+Create ssl certificate for nginx and docker registry to allow run docker registry under ssl.
+
+* RUN : ./adop letsencrypt gen-certs REGISTRY_DOMAIN_NAME
+* RUN : ./adop letsencrypt export-certs REGISTRY_DOMAIN_NAME
+
+Note : **REGISTRY_DOMAIN_NAME** you should provide. **./adop letsencrypt gen-certs** you should run before **./adop compose init** and **./adop letsencrypt export-certs REGISTRY_DOMAIN_NAME** after.
+
 ###### Load Platform
 
 * Access the target host url `http://<TARGET_HOST>` with the your username and password

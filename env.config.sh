@@ -54,3 +54,6 @@ export DOCKER_CLIENT_CERT_PATH="//root/.docker/"
 
 # SSL Settings
 export PROTO="http"
+
+## default letsencrypt path
+export LE_CERT_PATH="/etc/ssl"
