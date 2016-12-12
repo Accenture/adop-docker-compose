@@ -19,6 +19,7 @@ To run ADOP in evaluation mode you will need:
     * Only required for evaluation mode
     * Docker Machine 0.9.0
 
+
 To run ADOP outside of evaluation mode (i.e. using the CLI directly) you will need:
 
 * All of the above, except Docker Machine
