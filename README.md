@@ -111,7 +111,7 @@ eval $(docker-machine env <YOUR_MACHINE_NAME>)
 
 - Create a local Docker Engine (replace the placeholders and their <> markers):
 ```sh
-docker-machine create --driver virtualbox --virtualbox-memory 2048 <YOUR_MACHINE_NAME>
+docker-machine create --driver virtualbox --virtualbox-memory 8192 <YOUR_MACHINE_NAME>
 ```
 
 - Set your local environment variables to point docker-machine to your new instance:
