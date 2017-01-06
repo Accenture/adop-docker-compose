@@ -13,11 +13,11 @@ To run ADOP in evaluation mode you will need:
     * Docker Toolbox can install Git Bash for you
 * Docker & Docker Compose
     * Can be installed separately or via Docker Toolbox
-    * Docker Engine 1.9.1
-    * Docker Compose 1.6.2
+    * Docker Engine 1.10.x
+    * Docker Compose 1.9.0
 * Docker Machine
     * Only required for evaluation mode
-    * Docker Machine 0.6.0
+    * Docker Machine 0.9.0
 
 To run ADOP outside of evaluation mode (i.e. using the CLI directly) you will need:
 
