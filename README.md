@@ -37,7 +37,7 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
         Usage: ./quickstart.sh -t aws
                                -m <MACHINE_NAME>  
                                -c <AWS_VPC_ID> 
-                               -r <AWS_DEFAULT_REGION>(optional) 
+                               -r <AWS_DEFAULT_REGION> 
                                -z <VPC_AVAIL_ZONE>(optional)
                                -a <AWS_ACCESS_KEY>(optional) 
                                -s <AWS_SECRET_ACCESS_EY>(optional) 

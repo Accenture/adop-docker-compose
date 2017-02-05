@@ -24,7 +24,7 @@ ldap:
   container_name: ldap
   restart: always
   #build: ../images/docker-ldap/
-  image: accenture/adop-ldap:0.1.2
+  image: accenture/adop-ldap:0.1.3
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "389"
@@ -55,7 +55,7 @@ gerrit:
   container_name: gerrit
   restart: always
   #build: ../images/docker-gerrit/
-  image: accenture/adop-gerrit:0.1.2
+  image: accenture/adop-gerrit:0.1.3
   privileged: true
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -106,35 +106,38 @@ sensu-uchiwa:
 sensu-api:
   container_name: sensu-api
   restart: always
-  image: accenture/adop-sensu:0.1.0
+  image: accenture/adop-sensu:0.2.0
   net: ${CUSTOM_NETWORK_NAME}
   command: api
   expose:
     - "4567"
   environment:
+    TRANSPORT_NAME: rabbitmq
     RABBITMQ_HOST: sensu-rabbitmq
     REDIS_HOST: sensu-redis
 
 sensu-server:
   container_name: sensu-server
   restart: always
-  image: accenture/adop-sensu:0.1.0
+  image: accenture/adop-sensu:0.2.0
   net: ${CUSTOM_NETWORK_NAME}
   command: server
   environment:
-    CLIENT_NAME: core
     API_HOST: sensu-api
     RABBITMQ_HOST: sensu-rabbitmq
     REDIS_HOST: sensu-redis
+    TRANSPORT_NAME: rabbitmq
 
 sensu-client:
   container_name: sensu-client
   restart: always
-  image: accenture/adop-sensu:0.1.0
+  image: accenture/adop-sensu:0.2.0
   net: ${CUSTOM_NETWORK_NAME}
   command: client
   environment:
+    TRANSPORT_NAME: rabbitmq
     CLIENT_NAME: core
+    CLIENT_ADDRESS: 127.0.0.1
     RABBITMQ_HOST: sensu-rabbitmq
     JENKINS_PREFIX: jenkins
     CLIENT_SUBSCRIPTIONS: "proxy,gerrit,jenkins,nexus,sonarqube,sensu,kibana"
@@ -194,6 +197,8 @@ sonar:
     - "9000"
   environment:
     - "dependency:container==sonar-mysql"
+    - "SONARQUBE_JDBC_USERNAME=${SONAR_MYSQL_USER}"
+    - "SONARQUBE_JDBC_PASSWORD=${SONAR_MYSQL_PASSWORD}"
     - "LDAP_URL=ldap://${LDAP_SERVER}"
     - "LDAP_BIND_DN=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     - "LDAP_BIND_PASSWORD=${LDAP_PWD}"
@@ -209,9 +214,11 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.1.5
+  image: accenture/adop-jenkins:0.2.0
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
+  ports:
+    - "50000/tcp:50000/tcp"
   expose:
     - "8080"
     - "50000"
@@ -251,7 +258,7 @@ jenkins:
     SONAR_RUNNER_VERSION: "2.4"
     ANT_VERSION: "1.9.4"
     MAVEN_VERSION: "3.0.5"
-    NODEJS_VERSION: "0.12.2"
+    NODEJS_VERSION: "6.9.4"
     NODEJS_GLOBAL_PACKAGES: "grunt-cli@~0.1.13 bower@~1.3.12 plato@~1.2.1"
     NODEJS_PACKAGES_REFRESH_HOURS: "72"
     GIT_GLOBAL_CONFIG_NAME: "ADOP Jenkins"
@@ -277,7 +284,7 @@ jenkins-slave:
 selenium-hub:
   container_name: selenium-hub
   restart: always
-  image: selenium/hub:2.46.0
+  image: selenium/hub:2.53.0
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "4444"
@@ -285,27 +292,29 @@ selenium-hub:
 selenium-node-chrome:
   container_name: selenium-node-chrome
   restart: always
-  image: selenium/node-chrome:2.46.0
+  image: selenium/node-chrome:2.53.0
   net: ${CUSTOM_NETWORK_NAME}
   environment:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-chrome.json"
+    REMOTE_HOST: "http://selenium-node-chrome:5555"
     HUB_PORT_4444_TCP_ADDR: "selenium-hub"
     HUB_PORT_4444_TCP_PORT: "4444"
 
 selenium-node-firefox:
   container_name: selenium-node-firefox
   restart: always
-  image: selenium/node-firefox:2.46.0
+  image: selenium/node-firefox:2.53.0
   net: ${CUSTOM_NETWORK_NAME}
   environment:
     SE_OPTS: "-nodeConfig /var/selenium-config/config-firefox.json"
+    REMOTE_HOST: "http://selenium-node-firefox:5555"
     HUB_PORT_4444_TCP_ADDR: "selenium-hub"
     HUB_PORT_4444_TCP_PORT: "4444"
 
 nexus:
   container_name: nexus
   restart: always
-  image:  accenture/adop-nexus:0.1.0
+  image:  accenture/adop-nexus:0.1.3
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "8081"
