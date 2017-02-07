@@ -200,7 +200,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.2.2
+  image: accenture/adop-jenkins:0.2.3
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -252,6 +252,7 @@ jenkins:
     DOCKER_HOST: ${DOCKER_HOST}
     DOCKER_CLIENT_CERT_PATH: ${DOCKER_CLIENT_CERT_PATH}
     DOCKER_NETWORK_NAME: ${CUSTOM_NETWORK_NAME}
+    CARTRIDGE_SOURCES: ${CARTRIDGE_SOURCES}
 
 jenkins-slave:
   container_name: jenkins-slave
