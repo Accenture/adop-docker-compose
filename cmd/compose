@@ -152,7 +152,7 @@ esac
         echo "* Skipping Loading the Platform"
     else
         echo "* Loading the Platform"
-        docker exec jenkins curl -s -X POST jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/job/Load_Platform/buildWithParameters --data token=gAsuE35s
+        docker exec jenkins curl -s -X POST jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/job/Load_Platform/buildWithParameters?GIT_URL=https://github.com/davidevi/adop-platform-management.git
     fi
 
     # Generate and copy the certificates to jenkins slave if TLS is enabled
@@ -183,6 +183,9 @@ esac
     echo "Login using the following credentials:"
     echo "  Username: ${INITIAL_ADMIN_USER}"
     echo "  Password: ${INITIAL_ADMIN_PASSWORD_PLAIN}"
+    echo
+    echo "Or just open:"
+    echo "http://${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN}@${TARGET_HOST}"
 }
 
 create_network() {
