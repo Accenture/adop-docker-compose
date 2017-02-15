@@ -63,6 +63,7 @@ prep_env() {
 
                 export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
                 export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
+                export HOST_IP=$(docker-machine inspect --format='{{.Driver.PrivateIPAddress}}' $MACHINE_NAME)
             fi
         else
             echo "Docker Machine is not available or the default machine does not exist, defaulting to localhost"

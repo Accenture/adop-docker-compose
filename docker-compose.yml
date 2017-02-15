@@ -36,7 +36,8 @@ ldap:
     SLAPD_PASSWORD: ${LDAP_PWD}
     SLAPD_DOMAIN: ${LDAP_DOMAIN}
     SLAPD_FULL_DOMAIN: ${LDAP_FULL_DOMAIN}
-
+  ports:
+    - "389:389"
 gerrit-mysql:
   container_name: gerrit-mysql
   restart: always
@@ -141,16 +142,29 @@ sensu-client:
     JENKINS_PREFIX: jenkins
     CLIENT_SUBSCRIPTIONS: "proxy,gerrit,jenkins,nexus,sonarqube,sensu,kibana"
 
+sensu-client-envs:
+  container_name: sensu-client-envs
+  restart: always
+  image: accenture/adop-sensu:0.1.0
+  net: ${CUSTOM_NETWORK_NAME}
+  command: client
+  environment:
+    CLIENT_NAME: environment-checks
+    RABBITMQ_HOST: sensu-rabbitmq
+    JENKINS_PREFIX: jenkins
+    CLIENT_SUBSCRIPTIONS: "envs"
+
 sensu-rabbitmq:
   container_name: sensu-rabbitmq
   restart: always
   image: rabbitmq:3.5.7-management
   net: ${CUSTOM_NETWORK_NAME}
   expose:
-    - "5672"
     - "5671"
     - "15672"
     - "15671"
+  ports:
+    - "5672:5672"
 
 sensu-redis:
   container_name: sensu-redis
@@ -315,6 +329,37 @@ nexus:
     LDAP_GROUP_BASE_DN: "${LDAP_GROUP_BASE_DN}"
     LDAP_BIND_PASSWORD: ${LDAP_PWD}
 
+docker-registry:
+  container_name: registry
+  restart: always
+  image:  gogodi91/adop-registry:0.0.3
+  net: ${CUSTOM_NETWORK_NAME}
+  volumes:
+    - /etc/docker:/certs
+  ports:
+    - "5500:5000"
+  environment:
+    REGISTRY_HTTP_TLS_CERTIFICATE: "/registry_certs/registry.crt"
+    REGISTRY_HTTP_TLS_KEY: "/registry_certs/registry.key"
+    BASE_HOST_IP: "${HOST_IP}"
+    #REGISTRY_AUTH: htpasswd
+    #REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+    #REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+    #REGISTRY_IP: ${REGISTRY_HOST}
+    #PASS_ROOT: ADOPROOT
+    #PASS_INTERMEDIATE: ADOPINTER
+    #PASS_REGISTRY: ADOPREG
+    #COUNTRY: GB
+    #STATE: England
+    #LOCALITY: London
+    #ORGANIZATION: Accenture
+    #UNIT: DCSC
+    #ROOT_COMMON_NAME: REGISTRY-ROOT-CA
+    #INTERMEDIATE_COMMON_NAME: REGISTRY-INTER-CA
+    #EMAIL: dcsc@accenture.com
+  entrypoint: /bin/bash
+  command: /bin/startup.sh
+
 ldap-ltb:
   container_name: ldap-ltb
   restart: always
@@ -341,3 +386,4 @@ ldap-phpadmin:
     LDAP_SERVER_PORT: "389"
     LDAP_SERVER_BIND_ID: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
     LDAP_SERVER_BASE_DN: "${LDAP_FULL_DOMAIN}"
+

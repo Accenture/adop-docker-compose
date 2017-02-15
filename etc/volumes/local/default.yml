@@ -25,6 +25,7 @@ sensu-api:
 sensu-server:
   volumes:
     - sensu_server_conf:/etc/sensu/conf.d
+    - sensu_server_checks:/etc/sensu/check.d
 
 sensu-client:
   volumes:
@@ -62,3 +63,8 @@ jenkins:
 nexus:
   volumes:
     - nexus_sonatype_work:/sonatype-work
+
+docker-registry:
+  volumes:
+    - docker-registry:/var/lib/registry
+    - docker-registry-certs:/registry-certs

@@ -30,6 +30,7 @@ Usage:
 	    [-s <AWS_SECRET_ACCESS_KEY>] 
 	    [-u <INITIAL_ADMIN_USER>] 
 	    [-p <INITIAL_ADMIN_PASSWORD>]
+	    [-i AWS_SUBNET_ID]
 
 END_USAGE
 }
@@ -95,7 +96,6 @@ source_aws() {
   fi
   
   sed -i'' -e "s/###AWS_DEFAULT_REGION###/$AWS_DEFAULT_REGION/g" ${AWS_FILE}
-
 }
 
 provision_aws() {
@@ -150,7 +150,7 @@ provision_aws() {
                     --amazonec2-vpc-id ${AWS_VPC_ID} \
                     --amazonec2-zone $VPC_AVAIL_ZONE \
                     --amazonec2-instance-type ${AWS_DOCKER_MACHINE_SIZE} \
-                    --amazonec2-root-size ${AWS_ROOT_SIZE:-32}"
+                    --amazonec2-root-size 100"
 
         if [ -n "${AWS_ACCESS_KEY_ID}" ] && [ -n "${AWS_SECRET_ACCESS_KEY}" ] && [ -n "${AWS_DEFAULT_REGION}" ]; then
             MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
@@ -158,13 +158,13 @@ provision_aws() {
                         --amazonec2-secret-key ${AWS_SECRET_ACCESS_KEY} \
                         --amazonec2-region ${AWS_DEFAULT_REGION}"
         fi
-
+        
         MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} ${MACHINE_NAME}"
         ${MACHINE_CREATE_CMD}
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:" opt; do
+while getopts "t:m:a:s:c:z:r:u:p:i:" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -192,7 +192,10 @@ while getopts "t:m:a:s:c:z:r:u:p:" opt; do
       ;;
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
-      ;;      
+      ;;
+    i)
+      export AWS_SUBNET_ID=${OPTARG}
+      ;;
     *)
       echo "Invalid parameter(s) or option(s)."
       usage
