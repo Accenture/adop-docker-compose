@@ -27,6 +27,11 @@
   - operating/projects
   - operating/cartridges
 
+- title: Tools
+  docs:
+  - tools
+  - tools/docker-registry
+
 - title: Developing
   docs:
   - developing
