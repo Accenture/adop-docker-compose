@@ -210,7 +210,6 @@ jenkins:
     - "50000"
   privileged: true
   environment:
-    ADOP_PLATFORM_MANAGEMENT_VERSION: "0.1.1"
     JENKINS_OPTS: "--prefix=/jenkins"
     ROOT_URL: "${PROTO}://${TARGET_HOST}/jenkins/"
     LDAP_SERVER: "${LDAP_SERVER}"
