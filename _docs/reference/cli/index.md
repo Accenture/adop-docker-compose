@@ -1,7 +1,7 @@
 ---
 layout: docs
 chapter: Reference
-title: Command Line Interface 
+title: Command Line Interface
 permalink: /docs/reference/cli/
 ---
 A quick reference to ADOP CLI commands.
@@ -11,3 +11,4 @@ A quick reference to ADOP CLI commands.
 * [./adop project](/adop-docker-compose/docs/reference/cli/project/)
 * [./adop target](/adop-docker-compose/docs/reference/cli/target/)
 * [./adop workspace](/adop-docker-compose/docs/reference/cli/workspace/)
+* [./adop certbot](/adop-docker-compose/docs/reference/cli/certbot/)
