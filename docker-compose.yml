@@ -200,7 +200,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.2.3
+  image: accenture/adop-jenkins:0.2.4
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -247,6 +247,7 @@ jenkins:
     NODEJS_GLOBAL_PACKAGES: "grunt-cli@~0.1.13 bower@~1.3.12 plato@~1.2.1"
     NODEJS_PACKAGES_REFRESH_HOURS: "72"
     GIT_GLOBAL_CONFIG_NAME: "ADOP Jenkins"
+    GROOVY_VERSION: "2.4.8"
     GIT_GLOBAL_CONFIG_EMAIL: "jenkins@${LDAP_DOMAIN}"
     DOCKER_TLS_VERIFY: ${DOCKER_TLS_VERIFY}
     DOCKER_HOST: ${DOCKER_HOST}
