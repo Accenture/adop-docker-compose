@@ -1,0 +1,14 @@
+{
+	"name": "Test_Cartridge_Collection",
+	"cartridges": [{
+		"folder": {
+			"name": "Skeleton_Cartridge",
+			"display_name": "Skeleton Cartridge",
+			"description": "This is the skeleton cartridge"
+		},
+		"cartridge": {
+			"url": "https://github.com/Accenture/adop-cartridge-skeleton.git",
+			"desc": "Skeleton Cartridge"
+		}
+	}]
+}
