@@ -117,6 +117,7 @@ load() {
   export PARAMETERS="CARTRIDGE_CLONE_URL=${CARTRIDGE_CLONE_URL}&CARTRIDGE_FOLDER=${CARTRIDGE_FOLDER}&FOLDER_DISPLAY_NAME=${FOLDER_DISPLAY_NAME}&FOLDER_DESCRIPTION=${FOLDER_DESCRIPTION}&ENABLE_CODE_REVIEW=${ENABLE_CODE_REVIEW}"
   echo "Loading the cartridge ..."
   set +e
+  curl -I --max-time 60 -s -X GET -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/build?delay=0sec 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
   curl -I --max-time 60 -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
   CMD_RC=$?
   set -e
@@ -165,9 +166,11 @@ load_collection() {
   # Validate if the ADOP_CLI_URL is a valid url
   load_credentials
   export JOB_URL="${TARGET_HOST}/jenkins/job/${WORKSPACE_NAME}/job/${PROJECT_NAME}/job/Cartridge_Management/job/Load_Cartridge_Collection"
+  export CARTRIDGE_JOB_URL="${TARGET_HOST}/jenkins/job/${WORKSPACE_NAME}/job/${PROJECT_NAME}/job/Cartridge_Management/job/Load_Cartridge"
   export PARAMETERS="COLLECTION_URL=${CARTRIDGE_COLLECTION_URL}"
   echo "Loading the cartridge collection ..."
   set +e
+  curl -I --max-time 60 -s -X GET -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${CARTRIDGE_JOB_URL}/build?delay=0sec 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
   curl -I --max-time 60 -s -X POST -u ${ADOP_CLI_USER}:${ADOP_CLI_PASSWORD} ${JOB_URL}/buildWithParameters?${PARAMETERS} 2>/dev/null | head -1 | cut -d$' ' -f2 | grep 201 >/dev/null
   CMD_RC=$?
   set -e
@@ -218,7 +221,7 @@ create() {
       create_help
       exit 1
   fi
-  
+
   echo ${PROJECT_NAME} ${WORKSPACE_NAME}
   # Validate if the ADOP_CLI_URL is a valid url
   load_credentials
@@ -273,4 +276,3 @@ case ${SUBCOMMAND_OPT} in
         exit 1
         ;;
 esac
-
