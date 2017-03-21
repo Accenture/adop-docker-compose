@@ -142,8 +142,8 @@ init() {
 
   # Attempt to customise the cartridge template
   if [ ! -d ".git" ]; then
-    echo "WARNING: it doesn't appear that your are running this from the root directory of a git repository.  Therefore unable to pre-populate src/urls.txt in your cartridge.  Please do this manually. See http://accenture.github.io/adop-docker-compose/docs/developing/cartridges/#developing-cartridge-content"
-  else 
+    echo "WARNING: it doesn't appear that your are running this from the root directory of a git repository.  Therefore unable to pre-populate src/urls.txt in your cartridge.  Please do this manually. See https://accenture.github.io/adop-docker-compose/docs/developing/cartridges/#developing-cartridge-content"
+  else
     THIS_URL=`git remote -v | grep push | awk '{print $2}'`
     if [ ! -z "$THIS_URL" ]; then
       # pre-populate the urls.txt with this repo
@@ -165,7 +165,7 @@ init() {
       done
 
     else
-      echo "WARNING: your git repository doesn't have any remotes.  Therefore unable to pre-populate src/urls.txt in your cartridge.  Please do this manually. See http://accenture.github.io/adop-docker-compose/docs/developing/cartridges/#developing-cartridge-content"
+      echo "WARNING: your git repository doesn't have any remotes.  Therefore unable to pre-populate src/urls.txt in your cartridge.  Please do this manually. See https://accenture.github.io/adop-docker-compose/docs/developing/cartridges/#developing-cartridge-content"
     fi
   fi
 
@@ -173,7 +173,7 @@ init() {
   # We don't want the cartridge dir to be it's own git repo
   rm -rf ${SUBDIR}/.git
 
-  printf "\nCartridge skeleton successfully created.\n\nYou can now load it into an ADOP instance: http://accenture.github.io/adop-docker-compose/docs/developing/cartridges/#testing-the-cartridge\n"
+  printf "\nCartridge skeleton successfully created.\n\nYou can now load it into an ADOP instance: https://accenture.github.io/adop-docker-compose/docs/developing/cartridges/#testing-the-cartridge\n"
 
 }
 
