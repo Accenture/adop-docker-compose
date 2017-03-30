@@ -60,6 +60,7 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
         - N.B. If you see an error saying that docker-machine cannot find an associated subnet in a zone, go back to the VPC Dashboard on AWS and check the availablity zone for the subnet you've created. Then rerun the startup script and use the -z option to specify the zone for your subnet, e.g. for a zone of eu-west-1c the above command becomes:
 
             ```./quickstart.sh -t aws -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword -z c```
+	- While the quickstart.sh script is executing, it will create a	security group called ```docker-machine```. This group contains ports open inbound for 22 and 2376. The start script will not be able to complete without opening port 80 for stack service checks. [Add a rule](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html#adding-security-group-rule) into the security group to allow port 80, protocol HTTP. You may want to restrict this port to My IP or a custom IP range.
 1. If all goes well you will see the following output and you can view the DevOps Platform in your browser
     ```
     ##########################################################
