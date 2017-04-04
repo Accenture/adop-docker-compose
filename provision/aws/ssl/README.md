@@ -1,4 +1,4 @@
-# ADOP AWS Swarm SSL setup 
+# ADOP AWS SSL setup 
 
 Scripts in this directory provides a way to generate the self signed certificate and upload it .
 
@@ -12,7 +12,7 @@ Scripts in this directory provides a way to generate the self signed certificate
  * Run export AWS_ACCESS_KEY_ID=\<aws secret key\>
  * Run export AWS_SECRET_ACCESS_KEY=\<aws access key\> 
  * Run upload_certs.sh script. 
-* Upload script generates ARN to which can be used to access the uploaded self signed certificate. This ARN is passed as a input parameter for swarm cluster cloudformation. 
+* Upload script generates ARN to which can be used to access the uploaded self signed certificate. This ARN is passed as a input parameter to ELBs performing SSL termination. 
 
 ## Using the scripts for trusted certificates.
 TODO
