@@ -123,8 +123,6 @@ eval $(docker-machine env <YOUR_MACHINE_NAME>)
 
 Create a Docker Swarm that has a publicly accessible Engine with the label "tier=public" to bind Nginx and Logstash to that node
 
-- Instruction to create a docker swarm cluster on AWS are [`here`](https://github.com/Accenture/adop-docker-compose/blob/master/provision/aws/swarm/README.md)
-
 ## Launching
 
 - Run: export TARGET\_HOST=\<IP\_OF\_PUBLIC\_HOST\>
