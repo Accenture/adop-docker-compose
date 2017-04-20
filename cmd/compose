@@ -252,7 +252,18 @@ gen_certs() {
     openssl x509 -req -days 365 -sha256 -in ${TEMP_CERT_PATH}/client.csr -CA ${HOME}/.docker/machine/certs/ca.pem -CAkey ${HOME}/.docker/machine/certs/ca-key.pem -CAcreateserial -CAserial temp.seq -out ${TEMP_CERT_PATH}/cert.pem -extfile ${TEMP_CERT_PATH}/extfile.cnf &> /dev/null
     set -e
     cp ${HOME}/.docker/machine/certs/ca.pem ${TEMP_CERT_PATH}/ca.pem
-    docker --tlsverify --tlscacert=${HOME}/.docker/machine/certs/ca.pem --tlscert=${TEMP_CERT_PATH}/cert.pem --tlskey=${TEMP_CERT_PATH}/key.pem -H=${DOCKER_HOST} version &> /dev/null
+    attemps=3
+    while [ $attemps -gt 0 ]; do
+        if ! docker --tlsverify --tlscacert=${HOME}/.docker/machine/certs/ca.pem --tlscert=${TEMP_CERT_PATH}/cert.pem --tlskey=${TEMP_CERT_PATH}/key.pem -H=${DOCKER_HOST} version &> /dev/null; then
+            pretty_sleep 3 DockerTLSVerify
+            : $((attemps--))
+            if [ $attemps -eq 0 ]; then
+                echo "####### After 3 attempts, Docker tlsverify is not working. Platform run up will continue but you should verify Dev Environment created by Load Platform is running properly."
+            fi
+        else
+            attemps=0
+        fi
+    done
 
     ####
     # * Check if certificates were generated successfully
