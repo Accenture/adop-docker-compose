@@ -164,9 +164,9 @@ Create ssl certificate for jenkins to allow connectivity with docker engine.
 * RUN : ./adop compose gen-certs ${DOCKER\_CLIENT\_CERT\_PATH}
 
 Note : For Windows run this command from a terminal (Git Bash) as administrator.
-
+making changes
 ###### Load Platform
-
+ADCDCcdddddddddddddddddddddddddddddddddddd
 * Access the target host url `http://<TARGET_HOST>` with the your username and password
  * This page presents the links to all the tools.
 * Click: Jenkins link.
@@ -195,7 +195,7 @@ Kibana 4 does not provide a configuration property that allow to define the defa
 
 # User Feedback
 
-## Documentation
+# Change Documentation
 Documentation can be found [on our GitHub Pages site](http://accenture.github.io/adop-docker-compose).
 
 ## Issues
