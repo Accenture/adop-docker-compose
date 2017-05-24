@@ -21,7 +21,7 @@ Once you have explored this the next step is to create your own Workspace and Pr
 
 # Quickstart Instructions
 
-These instructions will spin up an instance in a single server in AWS (for evaluation purposes).  Please check the [prerequisites](http://accenture.github.io/adop-docker-compose/docs/prerequisites/).
+These instructions will spin up an instance in a single server in AWS (for evaluation purposes).  Please check the [prerequisites](https://accenture.github.io/adop-docker-compose/docs/prerequisites/).
 
 NB. the instructions will also work in anywhere supported by [Docker Machine](https://docs.docker.com/machine/), just follow the relevant Docker Machine instructions for your target platform and then start at step 3 below and (you can set the AWS_VPC_ID to NA).
 
@@ -196,13 +196,13 @@ Kibana 4 does not provide a configuration property that allow to define the defa
 # User Feedback
 
 ## Documentation
-Documentation can be found [on our GitHub Pages site](http://accenture.github.io/adop-docker-compose).
+Documentation can be found [on our GitHub Pages site](https://accenture.github.io/adop-docker-compose).
 
 ## Issues
 If you have any problems with or questions about this project, please contact us through [Gitter](https://gitter.im/Accenture/ADOP) or a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues).
 
 ## Contribute
-You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can. You can find more information in our [documentation](http://accenture.github.io/adop-docker-compose/docs/contributing/).
+You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can. You can find more information in our [documentation](https://accenture.github.io/adop-docker-compose/docs/contributing/).
 
 Before you start to code, we recommend discussing your plans through a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues), especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.
 
