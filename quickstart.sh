@@ -1,35 +1,40 @@
 #!/bin/bash -e
 
-echo ' 
-      ###    ########   #######  ########  
-     ## ##   ##     ## ##     ## ##     ## 
-    ##   ##  ##     ## ##     ## ##     ## 
-   ##     ## ##     ## ##     ## ########  
-   ######### ##     ## ##     ## ##        
-   ##     ## ##     ## ##     ## ##        
-   ##     ## ########   #######  ##        
-'
+    echo ' 
+       ##        ########   #######  ######## 
+       ##        ##     ## ##     ## ##     ## 
+       ##        ##     ## ##     ## ##     ## 
+       ##        ##     ## ##     ## ########  
+       ##        ##     ## ##     ## ##        
+       ##        ##     ## ##     ## ##        
+       ######### ########   #######  ##        
+    '
 
 usage(){
    cat <<END_USAGE
 
 Usage:
         ./quickstart.sh 
-	    -t local 
-	    [-m <MACHINE_NAME>] 
-	    [-u <INITIAL_ADMIN_USER>] 
-	    [-p <INITIAL_ADMIN_PASSWORD>]
+            -t local 
+            [-m <MACHINE_NAME>] 
+            [-u <INITIAL_ADMIN_USER>] 
+            [-p <INITIAL_ADMIN_PASSWORD>]
 
         ./quickstart.sh 
-	    -t aws 
-	    -m <MACHINE_NAME> 
-	    -c <AWS_VPC_ID> 
-	    -r <AWS_DEFAULT_REGION> 
-	    [-z <AVAILABILITY_ZONE_LETTER>] 
-	    [-a <AWS_ACCESS_KEY>] 
-	    [-s <AWS_SECRET_ACCESS_KEY>] 
-	    [-u <INITIAL_ADMIN_USER>] 
-	    [-p <INITIAL_ADMIN_PASSWORD>]
+            -t localhost 
+            [-u <INITIAL_ADMIN_USER>] 
+            [-p <INITIAL_ADMIN_PASSWORD>]
+
+        ./quickstart.sh 
+            -t aws 
+            -m <MACHINE_NAME> 
+            -c <AWS_VPC_ID> 
+            -r <AWS_DEFAULT_REGION> 
+            [-z <AVAILABILITY_ZONE_LETTER>] 
+            [-a <AWS_ACCESS_KEY>] 
+            [-s <AWS_SECRET_ACCESS_KEY>] 
+            [-u <INITIAL_ADMIN_USER>] 
+            [-p <INITIAL_ADMIN_PASSWORD>]
 
 END_USAGE
 }
@@ -213,6 +218,9 @@ CLI_COMPOSE_OPTS=""
 case ${MACHINE_TYPE} in
     "local")
         provision_local
+        ;;
+    "localhost")
+        ./adop compose ${CLI_COMPOSE_OPTS} init
         ;;
     "aws")
         provision_aws
