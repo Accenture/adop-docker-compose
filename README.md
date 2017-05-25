@@ -7,6 +7,8 @@ The DevOps Platform is a tools environment for continuously testing, releasing a
 
 The platform runs on a [docker container cluster](https://docs.docker.com/swarm/) so it can be stood up for evaluation purposes on just one server using local storage, or stood up in a multi-data centre cluster with distributed network storage.  It will also run anywhere that [docker runs](https://docs.docker.com/engine/installation/binaries/).
 
+The Liatrio DevOps Platform for Enterprises (LDOPE) is Liatrio's adaptation of this platform for use with our enterprise customers.
+
 Here is the front page:
 
 ![HomePage](https://raw.githubusercontent.com/accenture/adop-docker-compose/master/img/home.png)
