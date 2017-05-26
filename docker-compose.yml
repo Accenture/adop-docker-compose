@@ -13,8 +13,6 @@ services:
     container_name: elasticsearch
     restart: always
     image: elasticsearch:2.1.1
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     command: elasticsearch -Des.network.host=0.0.0.0
     ports:
       - "9200:9200"
@@ -22,9 +20,7 @@ services:
   logstash:
     container_name: logstash
     restart: always
-    image: accenture/adop-logstash:0.1.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: liatrio/ldop-logstash:0.1.0
     environment:
       - "constraint:tier==public"
       - LS_HEAP_SIZE=1024m
@@ -37,8 +33,6 @@ services:
     container_name: kibana
     restart: always
     image: kibana:4.3.1
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     environment:
     command: kibana
     environment:
@@ -49,9 +43,7 @@ services:
   proxy:
     container_name: proxy
     restart: always
-    image: accenture/adop-nginx:0.3.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: liatrio/ldop-nginx:0.1.1
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -72,9 +64,7 @@ services:
   ldap:
     container_name: ldap
     restart: always
-    image: accenture/adop-ldap:0.1.3
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: liatrio/ldop-ldap:0.1.4
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -96,8 +86,6 @@ services:
     container_name: gerrit-mysql
     restart: always
     image: mysql:5.6.25
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -113,10 +101,8 @@ services:
   gerrit:
     container_name: gerrit
     restart: always
-    image: accenture/adop-gerrit:0.1.3
+    image: liatrio/ldop-gerrit:0.1.0
     privileged: true
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -159,8 +145,6 @@ services:
     container_name: sensu-uchiwa
     restart: always
     image: sstarcher/uchiwa:0.15.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -174,9 +158,7 @@ services:
   sensu-api:
     container_name: sensu-api
     restart: always
-    image: accenture/adop-sensu:0.2.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: liatrio/ldop-sensu:0.1.0
     command: api
     depends_on:
       - "elasticsearch"
@@ -192,9 +174,7 @@ services:
   sensu-server:
     container_name: sensu-server
     restart: always
-    image: accenture/adop-sensu:0.2.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: liatrio/ldop-sensu:0.1.0
     command: server
     depends_on:
       - "elasticsearch"
@@ -209,9 +189,7 @@ services:
   sensu-client:
     container_name: sensu-client
     restart: always
-    image: accenture/adop-sensu:0.2.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: liatrio/ldop-sensu:0.1.0
     command: client
     depends_on:
       - "elasticsearch"
@@ -229,8 +207,6 @@ services:
     container_name: sensu-rabbitmq
     restart: always
     image: rabbitmq:3.5.7-management
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -245,8 +221,6 @@ services:
     container_name: sensu-redis
     restart: always
     image: redis:3.0.7
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -258,8 +232,6 @@ services:
     container_name: sonar-mysql
     restart: always
     image: mysql:5.6.25
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -275,9 +247,7 @@ services:
   sonar:
     container_name: sonar
     restart: always
-    image: accenture/adop-sonar:0.2.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: liatrio/ldop-sonar:0.1.0
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -303,9 +273,7 @@ services:
   jenkins:
     container_name: jenkins
     restart: always
-    image: "accenture/adop-jenkins:0.2.6"
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: "liatrio/ldop-jenkins:0.1.0"
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -365,9 +333,7 @@ services:
   jenkins-slave:
     container_name: jenkins-slave
     restart: always
-    image: accenture/adop-jenkins-slave:0.1.4
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: liatrio/ldop-jenkins-slave:0.1.0
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -384,8 +350,6 @@ services:
     container_name: selenium-hub
     restart: always
     image: selenium/hub:2.53.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -397,8 +361,6 @@ services:
     container_name: selenium-node-chrome
     restart: always
     image: selenium/node-chrome:2.53.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -413,8 +375,6 @@ services:
     container_name: selenium-node-firefox
     restart: always
     image: selenium/node-firefox:2.53.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -428,9 +388,7 @@ services:
   nexus:
     container_name: nexus
     restart: always
-    image:  accenture/adop-nexus:0.1.3
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image:  liatrio/ldop-nexus:0.1.0
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -451,9 +409,7 @@ services:
   ldap-ltb:
     container_name: ldap-ltb
     restart: always
-    image: accenture/adop-ldap-ltb:0.1.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: liatrio/ldop-ldap-ltb:0.1.0
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -469,9 +425,7 @@ services:
   ldap-phpadmin:
     container_name: ldap-phpadmin
     restart: always
-    image: accenture/adop-ldap-phpadmin:0.1.0
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
+    image: liatrio/ldop-ldap-phpadmin:0.1.0
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -489,8 +443,6 @@ services:
     container_name: registry
     restart: always
     image: registry:2.5.1
-    #networks: 
-    #  - ${CUSTOM_NETWORK_NAME}
     depends_on:
       - "elasticsearch"
       - "logstash"
