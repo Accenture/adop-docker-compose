@@ -88,7 +88,18 @@ prep_env() {
         echo "Using ${CONF_DIR}/env.override.sh to override default values for environment variable."
         source ${CONF_DIR}/env.override.sh
     fi
+    
+    # Setting Compose File Lists
+    if [ "${LOGS}" = "NO" ]; then
+        export ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml"
+        echo "* Logs being send to stdout, specified logging driver not being used..."
+    else
+        export ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
+    fi
+
+    # export ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
 }
+
 
 init() {
 
@@ -134,17 +145,6 @@ done
     create_network
 
     # Run the Docker compose commands
-
-    
-    # Setting Compose File Lists
-    if [ "${LOGS}" = "NO" ]; then
-        ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml"
-        echo "* Logs being send to stdout, specified logging driver not being used..."
-    else
-        ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
-    fi
-
-    ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
 
     if [ "${PULL}" = "NO" ]; then
         echo "* Skipping Pulling Docker Images"
@@ -302,8 +302,8 @@ run_compose() {
     if [ ! -z "${TOTAL_OVERRIDES}"   ]; then
         docker-compose ${TOTAL_OVERRIDES} ${compose_cmd} "$@"
     else
-        docker-compose ${ELKFILEOPTS} ${compose_cmd} "$@"
-        echo
+        # docker-compose ${ELKFILEOPTS} ${compose_cmd} "$@"
+        # echo
         docker-compose ${ADOPFILEOPTS} ${OVERRIDES} ${compose_cmd} "$@"
     fi
 }
