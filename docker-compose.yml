@@ -21,6 +21,7 @@ services:
     container_name: logstash
     restart: always
     image: liatrio/ldop-logstash:0.1.0
+    build: submodules/ldop-logstash
     environment:
       - "constraint:tier==public"
       - LS_HEAP_SIZE=1024m
@@ -44,6 +45,7 @@ services:
     container_name: proxy
     restart: always
     image: liatrio/ldop-nginx:0.1.1
+    build: submodules/ldop-nginx
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -65,6 +67,7 @@ services:
     container_name: ldap
     restart: always
     image: liatrio/ldop-ldap:0.1.4
+    build: submodules/ldop-ldap
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -102,6 +105,7 @@ services:
     container_name: gerrit
     restart: always
     image: liatrio/ldop-gerrit:0.1.0
+    build: submodules/ldop-gerrit
     privileged: true
     depends_on:
       - "elasticsearch"
@@ -159,6 +163,7 @@ services:
     container_name: sensu-api
     restart: always
     image: liatrio/ldop-sensu:0.1.0
+    build: submodules/ldop-sensu
     command: api
     depends_on:
       - "elasticsearch"
@@ -175,6 +180,7 @@ services:
     container_name: sensu-server
     restart: always
     image: liatrio/ldop-sensu:0.1.0
+    build: submodules/ldop-sensu
     command: server
     depends_on:
       - "elasticsearch"
@@ -190,6 +196,7 @@ services:
     container_name: sensu-client
     restart: always
     image: liatrio/ldop-sensu:0.1.0
+    build: submodules/ldop-sensu
     command: client
     depends_on:
       - "elasticsearch"
@@ -248,6 +255,7 @@ services:
     container_name: sonar
     restart: always
     image: liatrio/ldop-sonar:0.1.0
+    build: submodules/ldop-sonar
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -274,6 +282,7 @@ services:
     container_name: jenkins
     restart: always
     image: "liatrio/ldop-jenkins:0.1.0"
+    build: submodules/ldop-jenkins
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -334,6 +343,7 @@ services:
     container_name: jenkins-slave
     restart: always
     image: liatrio/ldop-jenkins-slave:0.1.0
+    build: submodules/ldop-jenkins-slave
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -389,6 +399,7 @@ services:
     container_name: nexus
     restart: always
     image:  liatrio/ldop-nexus:0.1.0
+    build:  submodules/ldop-nexus
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -410,6 +421,7 @@ services:
     container_name: ldap-ltb
     restart: always
     image: liatrio/ldop-ldap-ltb:0.1.0
+    build: submodules/ldop-ldap-ltb
     depends_on:
       - "elasticsearch"
       - "logstash"
@@ -426,6 +438,7 @@ services:
     container_name: ldap-phpadmin
     restart: always
     image: liatrio/ldop-ldap-phpadmin:0.1.0
+    build: submodules/ldop-ldap-phpadmin
     depends_on:
       - "elasticsearch"
       - "logstash"
