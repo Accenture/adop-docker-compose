@@ -1,69 +1,125 @@
-proxy:
-  volumes:
-    - nginx_config:/etc/nginx
-    - nginx_releasenote:/usr/share/nginx/html
+version: '3'
 
-ldap:
-  volumes:
-      - ldap_db:/var/lib/ldap
-      - ldap_static:/etc/ldap
+volumes: 
+  elasticsearch_data:
+    external: true
+  nginx_config:
+    external: true
+  nginx_releasenote:
+    external: true
+  ldap_db:
+    external: true
+  ldap_static:
+    external: true
+  gerrit_mysql_data:
+    external: true
+  git_repos:
+    external: true
+  gerrit_review_site:
+    external: true
+  sensu_api_conf:
+    external: true
+  sensu_server_conf:
+    external: true
+  sensu_client_conf:
+    external: true
+  sensu_rabbitmq_data:
+    external: true
+  sensu_redis_data:
+    external: true
+  sonar_mysql_data:
+    external: true
+  sonar_data:
+    external: true
+  sonar_extensions:
+    external: true
+  sonar_logs:
+    external: true
+  jenkins_slave_home:
+    external: true
+  jenkins_home:
+    external: true
+  jenkins_home:
+    external: true
+  nexus_sonatype_work:
+    external: true
+  registry_certs:
+    external: true
+  registry_data:
+    external: true
 
-gerrit-mysql:
-  volumes:
-    - gerrit_mysql_data:/var/lib/mysql
+services:
+  elasticsearch:
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
 
-gerrit:
-  user: root
-  volumes:
-    - git_repos:/var/git/repos 
-    - gerrit_review_site:/var/gerrit/review_site 
+  proxy:
+    volumes:
+      - nginx_config:/etc/nginx
+      - nginx_releasenote:/usr/share/nginx/html
 
-sensu-api:
-  volumes:
-    - sensu_api_conf:/etc/sensu/conf.d
+  ldap:
+    volumes:
+        - ldap_db:/var/lib/ldap
+        - ldap_static:/etc/ldap
 
-sensu-server:
-  volumes:
-    - sensu_server_conf:/etc/sensu/conf.d
+  gerrit-mysql:
+    volumes:
+      - gerrit_mysql_data:/var/lib/mysql
 
-sensu-client:
-  volumes:
-    - sensu_client_conf:/etc/sensu/conf.d
+  gerrit:
+    user: root
+    volumes:
+      - git_repos:/var/git/repos 
+      - gerrit_review_site:/var/gerrit/review_site 
 
-sensu-rabbitmq:
-  volumes:
-    - sensu_rabbitmq_data:/var/lib/rabbitmq
+  sensu-api:
+    volumes:
+      - sensu_api_conf:/etc/sensu/conf.d
 
-sensu-redis:
-  volumes:
-    - sensu_redis_data:/data
+  sensu-server:
+    volumes:
+      - sensu_server_conf:/etc/sensu/conf.d
 
-sonar-mysql:
-  volumes:
-    - sonar_mysql_data:/var/lib/mysql 
+  sensu-client:
+    volumes:
+      - sensu_client_conf:/etc/sensu/conf.d
 
-sonar:
-  volumes:
-    - sonar_data:/opt/sonarqube/data
-    - sonar_extensions:/opt/sonarqube/extensions 
-    - sonar_logs:/opt/sonarqube/logs
+  sensu-rabbitmq:
+    volumes:
+      - sensu_rabbitmq_data:/var/lib/rabbitmq
 
-jenkins-slave:
-  volumes:
-    - jenkins_slave_home:/workspace
-    - /var/run/docker.sock:/var/run/docker.sock
+  sensu-redis:
+    volumes:
+      - sensu_redis_data:/data
 
-jenkins:
-  user: root 
-  volumes:
-    - jenkins_home:/var/jenkins_home 
-    - /var/run/docker.sock:/var/run/docker.sock
+  sonar-mysql:
+    volumes:
+      - sonar_mysql_data:/var/lib/mysql 
 
-nexus:
-  volumes:
-    - nexus_sonatype_work:/sonatype-work
+  sonar:
+    volumes:
+      - sonar_data:/opt/sonarqube/data
+      - sonar_extensions:/opt/sonarqube/extensions 
+      - sonar_logs:/opt/sonarqube/logs
 
-registry:
-  volumes:
-    - registry_certs:/certs
-    - registry_data:/data
+  jenkins-slave:
+    volumes:
+      - jenkins_slave_home:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  jenkins:
+    user: root 
+    volumes:
+      - jenkins_home:/var/jenkins_home 
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  nexus:
+    volumes:
+      - nexus_sonatype_work:/sonatype-work
+
+  registry:
+    volumes:
+      - registry_certs:/certs
+      - registry_data:/data
+

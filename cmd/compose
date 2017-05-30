@@ -96,8 +96,6 @@ prep_env() {
     else
         export ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
     fi
-
-    export ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
 }
 
 
@@ -302,8 +300,8 @@ run_compose() {
     if [ ! -z "${TOTAL_OVERRIDES}"   ]; then
         docker-compose ${TOTAL_OVERRIDES} ${compose_cmd} "$@"
     else
-        docker-compose ${ELKFILEOPTS} ${compose_cmd} "$@"
-        echo
+        # docker-compose ${ELKFILEOPTS} ${compose_cmd} "$@"
+        # echo
         docker-compose ${ADOPFILEOPTS} ${OVERRIDES} ${compose_cmd} "$@"
     fi
 }
