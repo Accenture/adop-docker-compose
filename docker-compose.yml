@@ -281,8 +281,8 @@ services:
   jenkins:
     container_name: jenkins
     restart: always
-    image: "liatrio/ldop-jenkins:0.1.0"
-    build: submodules/ldop-jenkins
+    image: accenture/adop-jenkins:0.2.6
+    #build: submodules/ldop-jenkins
     depends_on:
       - "elasticsearch"
       - "logstash"

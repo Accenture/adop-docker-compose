@@ -2,51 +2,28 @@ version: '3'
 
 volumes: 
   elasticsearch_data:
-    external: true
   nginx_config:
-    external: true
   nginx_releasenote:
-    external: true
   ldap_db:
-    external: true
   ldap_static:
-    external: true
   gerrit_mysql_data:
-    external: true
   git_repos:
-    external: true
   gerrit_review_site:
-    external: true
   sensu_api_conf:
-    external: true
   sensu_server_conf:
-    external: true
   sensu_client_conf:
-    external: true
   sensu_rabbitmq_data:
-    external: true
   sensu_redis_data:
-    external: true
   sonar_mysql_data:
-    external: true
   sonar_data:
-    external: true
   sonar_extensions:
-    external: true
   sonar_logs:
-    external: true
   jenkins_slave_home:
-    external: true
   jenkins_home:
-    external: true
   jenkins_home:
-    external: true
   nexus_sonatype_work:
-    external: true
   registry_certs:
-    external: true
   registry_data:
-    external: true
 
 services:
   elasticsearch:
