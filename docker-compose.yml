@@ -1,358 +1,468 @@
 # set TARGET_HOST to dns/ip of proxy
 # set LOGSTASH_HOST to dns/ip of logstash host
 
-proxy:
-  container_name: proxy
-  restart: always
-  image: accenture/adop-nginx:0.3.0
-  #build: ../images/docker-nginx/
-  net: ${CUSTOM_NETWORK_NAME}
-  ports:
-    - "80:80"
-    - "443:443"
-  environment:
-    - "constraint:tier==public"
-    - "LDAP_SERVER=${LDAP_SERVER}"
-    - "LDAP_USERNAME=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-    - "LDAP_PASSWORD=${LDAP_PWD}"
-    - "LDAP_USER_BASE_DN=${LDAP_USER_BASE_DN},${LDAP_FULL_DOMAIN}"
-    - "LDAP_GROUP_ATTRIBUTE=member"
-    - "LDAP_USER_ID_ATTRIBUTE=cn"
-    - "LDAP_USER_OBJECT_CLASS=inetOrgPerson"
+version: '3'
 
-ldap:
-  container_name: ldap
-  restart: always
-  #build: ../images/docker-ldap/
-  image: accenture/adop-ldap:0.1.3
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "389"
-  ports:
-    - "389/tcp:389/tcp"
-  environment:
-    INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
-    INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
-    JENKINS_PASSWORD: ${JENKINS_PWD}
-    GERRIT_PASSWORD: ${GERRIT_PWD}
-    SLAPD_PASSWORD: ${LDAP_PWD}
-    SLAPD_DOMAIN: ${LDAP_DOMAIN}
-    SLAPD_FULL_DOMAIN: ${LDAP_FULL_DOMAIN}
+networks:
+  default:
+    external: 
+      name: ${CUSTOM_NETWORK_NAME}
 
-gerrit-mysql:
-  container_name: gerrit-mysql
-  restart: always
-  image: mysql:5.6.25
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "3306"
-  environment:
-    MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
-    MYSQL_USER: ${GERRIT_MYSQL_USER}
-    MYSQL_PASSWORD: ${GERRIT_MYSQL_PASSWORD}
-    MYSQL_DATABASE: ${GERRIT_MYSQL_DATABASE}
+services: 
+  elasticsearch:
+    container_name: elasticsearch
+    restart: always
+    image: elasticsearch:2.1.1
+    command: elasticsearch -Des.network.host=0.0.0.0
+    ports:
+      - "9200:9200"
 
-gerrit:
-  container_name: gerrit
-  restart: always
-  #build: ../images/docker-gerrit/
-  image: accenture/adop-gerrit:0.1.3
-  privileged: true
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "8080"
-    - "29418"
-  environment:
-    - "dependency:container==gerrit-mysql"
-    - "REPO_PATH=/var/git/repos"
-    - "WEBURL=${PROTO}://${TARGET_HOST}/gerrit/"
-    - "DATABASE_TYPE=mysql"
-    - "DB_HOSTNAME=gerrit-mysql"
-    - "DB_PORT=3306"
-    - "DB_NAME=${GERRIT_MYSQL_DATABASE}"
-    - "DB_USER=${GERRIT_MYSQL_USER}"
-    - "DB_PASSWORD=${GERRIT_MYSQL_PASSWORD}"
-    - "AUTH_LOGOUTURL=${PROTO}://${TARGET_HOST}/gerrit/"
-    - "AUTH_TYPE=LDAP"
-    - "GERRIT_PASSWORD=${PASSWORD_GERRIT}"
-    - "JENKINS_PASSWORD=${PASSWORD_JENKINS}"
-    - "INITIAL_ADMIN_USER=${INITIAL_ADMIN_USER}"
-    - "INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD_PLAIN}"
-    - "LDAP_SERVER=${LDAP_SERVER}"
-    - "LDAP_ACCOUNTBASE=${LDAP_FULL_DOMAIN}"
-    - "LDAP_ACCOUNTPATTERN=${LDAP_ACCOUNTPATTERN}"
-    - "LDAP_ACCOUNTFULLNAME=${LDAP_ACCOUNTFULLNAME}"
-    - "LDAP_ACCOUNTEMAILADDRESS=mail"
-    - "LDAP_USERNAME=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-    - "LDAP_PASSWORD=${LDAP_PWD}"
-    - "LDAP_GROUPBASE=${LDAP_GROUP_BASE_DN},${LDAP_FULL_DOMAIN}"
-    - "LDAP_GROUPPATTERN=${LDAP_GROUPPATTERN}"
-    - "LDAP_GROUPMEMBERPATTERN=${LDAP_GROUPMEMBERPATTERN}"
-    - "HTTPD_LISTENURL=proxy-${PROTO}://0.0.0.0:8080/gerrit"
-    - "USER_NAME=${GERRIT_USER_NAME}"
-    - "USER_EMAIL=${GERRIT_USER_EMAIL}"
-    - "DOWNLOAD_SCHEME=http"
+  logstash:
+    container_name: logstash
+    restart: always
+    image: liatrio/ldop-logstash:0.1.0
+    build: submodules/ldop-logstash
+    environment:
+      - "constraint:tier==public"
+      - LS_HEAP_SIZE=1024m
+    ports:
+      - "12201:12201/udp"
+      - "25826:25826/udp"
+      - "5000:5000/tcp"
 
-sensu-uchiwa:
-  container_name: sensu-uchiwa
-  restart: always
-  image: sstarcher/uchiwa:0.15.0
-  net: ${CUSTOM_NETWORK_NAME}
-  environment:
-    SENSU_HOSTNAME: sensu-api
-    SENSU_DC_NAME: Sensu
-  expose:
-    - "3000"
+  kibana:
+    container_name: kibana
+    restart: always
+    image: kibana:4.3.1
+    environment:
+    command: kibana
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
 
-sensu-api:
-  container_name: sensu-api
-  restart: always
-  image: accenture/adop-sensu:0.2.0
-  net: ${CUSTOM_NETWORK_NAME}
-  command: api
-  expose:
-    - "4567"
-  environment:
-    TRANSPORT_NAME: rabbitmq
-    RABBITMQ_HOST: sensu-rabbitmq
-    REDIS_HOST: sensu-redis
+  proxy:
+    container_name: proxy
+    restart: always
+    image: liatrio/ldop-nginx:0.1.1
+    build: submodules/ldop-nginx
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - "constraint:tier==public"
+      - "LDAP_SERVER=${LDAP_SERVER}"
+      - "LDAP_USERNAME=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+      - "LDAP_PASSWORD=${LDAP_PWD}"
+      - "LDAP_USER_BASE_DN=${LDAP_USER_BASE_DN},${LDAP_FULL_DOMAIN}"
+      - "LDAP_GROUP_ATTRIBUTE=member"
+      - "LDAP_USER_ID_ATTRIBUTE=cn"
+      - "LDAP_USER_OBJECT_CLASS=inetOrgPerson"
 
-sensu-server:
-  container_name: sensu-server
-  restart: always
-  image: accenture/adop-sensu:0.2.0
-  net: ${CUSTOM_NETWORK_NAME}
-  command: server
-  environment:
-    API_HOST: sensu-api
-    RABBITMQ_HOST: sensu-rabbitmq
-    REDIS_HOST: sensu-redis
-    TRANSPORT_NAME: rabbitmq
+  ldap:
+    container_name: ldap
+    restart: always
+    image: liatrio/ldop-ldap:0.1.4
+    build: submodules/ldop-ldap
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "389"
+    ports:
+      - "389/tcp:389/tcp"
+    environment:
+      INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+      JENKINS_PASSWORD: ${JENKINS_PWD}
+      GERRIT_PASSWORD: ${GERRIT_PWD}
+      SLAPD_PASSWORD: ${LDAP_PWD}
+      SLAPD_DOMAIN: ${LDAP_DOMAIN}
+      SLAPD_FULL_DOMAIN: ${LDAP_FULL_DOMAIN}
 
-sensu-client:
-  container_name: sensu-client
-  restart: always
-  image: accenture/adop-sensu:0.2.0
-  net: ${CUSTOM_NETWORK_NAME}
-  command: client
-  environment:
-    TRANSPORT_NAME: rabbitmq
-    CLIENT_NAME: core
-    CLIENT_ADDRESS: 127.0.0.1
-    RABBITMQ_HOST: sensu-rabbitmq
-    JENKINS_PREFIX: jenkins
-    CLIENT_SUBSCRIPTIONS: "proxy,gerrit,jenkins,nexus,sonarqube,sensu,kibana"
+  gerrit-mysql:
+    container_name: gerrit-mysql
+    restart: always
+    image: mysql:5.6.25
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
+      MYSQL_USER: ${GERRIT_MYSQL_USER}
+      MYSQL_PASSWORD: ${GERRIT_MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${GERRIT_MYSQL_DATABASE}
 
-sensu-rabbitmq:
-  container_name: sensu-rabbitmq
-  restart: always
-  image: rabbitmq:3.5.7-management
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "5672"
-    - "5671"
-    - "15672"
-    - "15671"
+  gerrit:
+    container_name: gerrit
+    restart: always
+    image: liatrio/ldop-gerrit:0.1.0
+    build: submodules/ldop-gerrit
+    privileged: true
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "8080"
+      - "29418"
+    environment:
+      - "dependency:container==gerrit-mysql"
+      - "REPO_PATH=/var/git/repos"
+      - "WEBURL=${PROTO}://${TARGET_HOST}/gerrit/"
+      - "DATABASE_TYPE=mysql"
+      - "DB_HOSTNAME=gerrit-mysql"
+      - "DB_PORT=3306"
+      - "DB_NAME=${GERRIT_MYSQL_DATABASE}"
+      - "DB_USER=${GERRIT_MYSQL_USER}"
+      - "DB_PASSWORD=${GERRIT_MYSQL_PASSWORD}"
+      - "AUTH_LOGOUTURL=${PROTO}://${TARGET_HOST}/gerrit/"
+      - "AUTH_TYPE=LDAP"
+      - "GERRIT_PASSWORD=${PASSWORD_GERRIT}"
+      - "JENKINS_PASSWORD=${PASSWORD_JENKINS}"
+      - "INITIAL_ADMIN_USER=${INITIAL_ADMIN_USER}"
+      - "INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD_PLAIN}"
+      - "LDAP_SERVER=${LDAP_SERVER}"
+      - "LDAP_ACCOUNTBASE=${LDAP_FULL_DOMAIN}"
+      - "LDAP_ACCOUNTPATTERN=${LDAP_ACCOUNTPATTERN}"
+      - "LDAP_ACCOUNTFULLNAME=${LDAP_ACCOUNTFULLNAME}"
+      - "LDAP_ACCOUNTEMAILADDRESS=mail"
+      - "LDAP_USERNAME=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+      - "LDAP_PASSWORD=${LDAP_PWD}"
+      - "LDAP_GROUPBASE=${LDAP_GROUP_BASE_DN},${LDAP_FULL_DOMAIN}"
+      - "LDAP_GROUPPATTERN=${LDAP_GROUPPATTERN}"
+      - "LDAP_GROUPMEMBERPATTERN=${LDAP_GROUPMEMBERPATTERN}"
+      - "HTTPD_LISTENURL=proxy-${PROTO}://0.0.0.0:8080/gerrit"
+      - "USER_NAME=${GERRIT_USER_NAME}"
+      - "USER_EMAIL=${GERRIT_USER_EMAIL}"
+      - "DOWNLOAD_SCHEME=http"
 
-sensu-redis:
-  container_name: sensu-redis
-  restart: always
-  image: redis:3.0.7
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "6379"
+  sensu-uchiwa:
+    container_name: sensu-uchiwa
+    restart: always
+    image: sstarcher/uchiwa:0.15.0
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    environment:
+      SENSU_HOSTNAME: sensu-api
+      SENSU_DC_NAME: Sensu
+    expose:
+      - "3000"
 
-sonar-mysql:
-  container_name: sonar-mysql
-  restart: always
-  image: mysql:5.6.25
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "3306"
-  environment:
-    MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
-    MYSQL_USER: ${SONAR_MYSQL_USER}
-    MYSQL_PASSWORD: ${SONAR_MYSQL_PASSWORD}
-    MYSQL_DATABASE: ${SONAR_MYSQL_DATABASE}
+  sensu-api:
+    container_name: sensu-api
+    restart: always
+    image: liatrio/ldop-sensu:0.1.0
+    build: submodules/ldop-sensu
+    command: api
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "4567"
+    environment:
+      TRANSPORT_NAME: rabbitmq
+      RABBITMQ_HOST: sensu-rabbitmq
+      REDIS_HOST: sensu-redis
 
-sonar:
-  container_name: sonar
-  restart: always
-  image: accenture/adop-sonar:0.2.0
-  #build: ../images/docker-sonar/
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "9000"
-  environment:
-    - "dependency:container==sonar-mysql"
-    - "SONARQUBE_JDBC_USERNAME=${SONAR_MYSQL_USER}"
-    - "SONARQUBE_JDBC_PASSWORD=${SONAR_MYSQL_PASSWORD}"
-    - "LDAP_URL=ldap://${LDAP_SERVER}"
-    - "LDAP_BIND_DN=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-    - "LDAP_BIND_PASSWORD=${LDAP_PWD}"
-    - "LDAP_USER_BASE_DN=${LDAP_USER_BASE_DN},${LDAP_FULL_DOMAIN}"
-    - "LDAP_USER_REQUEST=(&(objectClass=inetOrgPerson)(uid={login}))"
-    - "LDAP_USER_REAL_NAME_ATTRIBUTE=displayName"
-    - "LDAP_USER_EMAIL_ATTRIBUTE=mail"
-    - "LDAP_GROUP_BASE_DN=${LDAP_GROUP_BASE_DN},${LDAP_FULL_DOMAIN}"
-    - "LDAP_GROUP_REQUEST=(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))"
-    - "LDAP_GROUP_ID_ATTRIBUTE=cn"
-    - "SONARQUBE_JDBC_URL=jdbc:mysql://sonar-mysql:3306/${SONAR_MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
+  sensu-server:
+    container_name: sensu-server
+    restart: always
+    image: liatrio/ldop-sensu:0.1.0
+    build: submodules/ldop-sensu
+    command: server
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    environment:
+      API_HOST: sensu-api
+      RABBITMQ_HOST: sensu-rabbitmq
+      REDIS_HOST: sensu-redis
+      TRANSPORT_NAME: rabbitmq
 
-jenkins:
-  container_name: jenkins
-  restart: always
-  image: accenture/adop-jenkins:0.2.6
-  #build: ../images/docker-jenkins/
-  net: ${CUSTOM_NETWORK_NAME}
-  ports:
-    - "50000/tcp:50000/tcp"
-  expose:
-    - "8080"
-    - "50000"
-  privileged: true
-  environment:
-    JENKINS_OPTS: "--prefix=/jenkins"
-    ROOT_URL: "${PROTO}://${TARGET_HOST}/jenkins/"
-    LDAP_SERVER: "${LDAP_SERVER}"
-    LDAP_ROOTDN: "${LDAP_FULL_DOMAIN}"
-    LDAP_USER_SEARCH_BASE: "${LDAP_USER_BASE_DN}"
-    LDAP_USER_SEARCH: "${LDAP_USER_SEARCH}"
-    LDAP_GROUP_SEARCH_BASE: "${LDAP_GROUP_BASE_DN}"
-    LDAP_GROUP_SEARCH_FILTER: ""
-    LDAP_GROUP_MEMBERSHIP_FILTER: ""
-    LDAP_MANAGER_DN: "${LDAP_MANAGER_DN}"
-    LDAP_MANAGER_PASSWORD: ${LDAP_PWD}
-    LDAP_INHIBIT_INFER_ROOTDN: "false"
-    LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"
-    LDAP_DISPLAY_NAME_ATTRIBUTE_NAME: "displayName"
-    LDAP_MAIL_ADDRESS_ATTRIBUTE_NAME: "mail"
-    LDAP_GROUP_NAME_ADMIN: "${LDAP_GROUP_NAME_ADMIN}"
-    INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
-    INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD_PLAIN}
-    GERRIT_HOST_NAME: "gerrit"
-    GERRIT_FRONT_END_URL: "http://gerrit:8080/gerrit"
-    GERRIT_JENKINS_USERNAME: "${GERRIT_JENKINS_USERNAME}"
-    GERRIT_JENKINS_PASSWORD: ${PASSWORD_JENKINS}
-    SONAR_SERVER_URL: "http://sonar:9000/sonar/"
-    SONAR_ACCOUNT_LOGIN: ${SONAR_ACCOUNT_LOGIN}
-    SONAR_ACCOUNT_PASSWORD: ${PASSWORD_JENKINS}
-    SONAR_DB_URL: "jdbc:mysql://sonar-mysql:3306/sonar?useUnicode=true&amp;characterEncoding=utf8"
-    SONAR_DB_LOGIN: ${SONAR_DB_LOGIN}
-    SONAR_DB_PASSWORD: ${SONAR_DB_PASSWORD}
-    SONAR_PLUGIN_VERSION: ""
-    SONAR_ADDITIONAL_PROPS: ""
-    SONAR_RUNNER_VERSION: "2.4"
-    ANT_VERSION: "1.9.4"
-    MAVEN_VERSION: "3.0.5"
-    NODEJS_VERSION: "6.9.4"
-    NODEJS_GLOBAL_PACKAGES: "grunt-cli@~0.1.13 bower@~1.3.12 plato@~1.2.1"
-    NODEJS_PACKAGES_REFRESH_HOURS: "72"
-    GIT_GLOBAL_CONFIG_NAME: "ADOP Jenkins"
-    GROOVY_VERSION: "2.4.8"
-    GIT_GLOBAL_CONFIG_EMAIL: "jenkins@${LDAP_DOMAIN}"
-    DOCKER_TLS_VERIFY: ${DOCKER_TLS_VERIFY}
-    DOCKER_HOST: ${DOCKER_HOST}
-    DOCKER_CLIENT_CERT_PATH: ${DOCKER_CLIENT_CERT_PATH}
-    DOCKER_NETWORK_NAME: ${CUSTOM_NETWORK_NAME}
-    CARTRIDGE_SOURCES: ${CARTRIDGE_SOURCES}
+  sensu-client:
+    container_name: sensu-client
+    restart: always
+    image: liatrio/ldop-sensu:0.1.0
+    build: submodules/ldop-sensu
+    command: client
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    environment:
+      TRANSPORT_NAME: rabbitmq
+      CLIENT_NAME: core
+      CLIENT_ADDRESS: 127.0.0.1
+      RABBITMQ_HOST: sensu-rabbitmq
+      JENKINS_PREFIX: jenkins
+      CLIENT_SUBSCRIPTIONS: "proxy,gerrit,jenkins,nexus,sonarqube,sensu,kibana"
 
-jenkins-slave:
-  container_name: jenkins-slave
-  restart: always
-  image: accenture/adop-jenkins-slave:0.1.4
-  net: ${CUSTOM_NETWORK_NAME}
-  privileged: true
-  environment:
-    SLAVE_LABELS: "aws ldap java8 docker"
-    SWARM_PASSWORD: ${PASSWORD_JENKINS}
-    SLAVE_EXECUTORS: ${SLAVE_EXECUTORS}
-    INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
-    INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD_PLAIN}
+  sensu-rabbitmq:
+    container_name: sensu-rabbitmq
+    restart: always
+    image: rabbitmq:3.5.7-management
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "5672"
+      - "5671"
+      - "15672"
+      - "15671"
 
-selenium-hub:
-  container_name: selenium-hub
-  restart: always
-  image: selenium/hub:2.53.0
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "4444"
+  sensu-redis:
+    container_name: sensu-redis
+    restart: always
+    image: redis:3.0.7
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "6379"
 
-selenium-node-chrome:
-  container_name: selenium-node-chrome
-  restart: always
-  image: selenium/node-chrome:2.53.0
-  net: ${CUSTOM_NETWORK_NAME}
-  environment:
-    SE_OPTS: "-nodeConfig /var/selenium-config/config-chrome.json"
-    REMOTE_HOST: "http://selenium-node-chrome:5555"
-    HUB_PORT_4444_TCP_ADDR: "selenium-hub"
-    HUB_PORT_4444_TCP_PORT: "4444"
+  sonar-mysql:
+    container_name: sonar-mysql
+    restart: always
+    image: mysql:5.6.25
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
+      MYSQL_USER: ${SONAR_MYSQL_USER}
+      MYSQL_PASSWORD: ${SONAR_MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${SONAR_MYSQL_DATABASE}
 
-selenium-node-firefox:
-  container_name: selenium-node-firefox
-  restart: always
-  image: selenium/node-firefox:2.53.0
-  net: ${CUSTOM_NETWORK_NAME}
-  environment:
-    SE_OPTS: "-nodeConfig /var/selenium-config/config-firefox.json"
-    REMOTE_HOST: "http://selenium-node-firefox:5555"
-    HUB_PORT_4444_TCP_ADDR: "selenium-hub"
-    HUB_PORT_4444_TCP_PORT: "4444"
+  sonar:
+    container_name: sonar
+    restart: always
+    image: liatrio/ldop-sonar:0.1.0
+    build: submodules/ldop-sonar
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "9000"
+    environment:
+      - "dependency:container==sonar-mysql"
+      - "SONARQUBE_JDBC_USERNAME=${SONAR_MYSQL_USER}"
+      - "SONARQUBE_JDBC_PASSWORD=${SONAR_MYSQL_PASSWORD}"
+      - "LDAP_URL=ldap://${LDAP_SERVER}"
+      - "LDAP_BIND_DN=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+      - "LDAP_BIND_PASSWORD=${LDAP_PWD}"
+      - "LDAP_USER_BASE_DN=${LDAP_USER_BASE_DN},${LDAP_FULL_DOMAIN}"
+      - "LDAP_USER_REQUEST=(&(objectClass=inetOrgPerson)(uid={login}))"
+      - "LDAP_USER_REAL_NAME_ATTRIBUTE=displayName"
+      - "LDAP_USER_EMAIL_ATTRIBUTE=mail"
+      - "LDAP_GROUP_BASE_DN=${LDAP_GROUP_BASE_DN},${LDAP_FULL_DOMAIN}"
+      - "LDAP_GROUP_REQUEST=(&(objectClass=groupOfUniqueNames)(uniqueMember={dn}))"
+      - "LDAP_GROUP_ID_ATTRIBUTE=cn"
+      - "SONARQUBE_JDBC_URL=jdbc:mysql://sonar-mysql:3306/${SONAR_MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true"
 
-nexus:
-  container_name: nexus
-  restart: always
-  image:  accenture/adop-nexus:0.1.3
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "8081"
-  environment:
-    NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
-    LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
-    LDAP_ENABLED: "true"
-    LDAP_URL: "ldap"
-    LDAP_BIND_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-    LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
-    LDAP_USER_BASE_DN: "${LDAP_USER_BASE_DN}"
-    LDAP_GROUP_BASE_DN: "${LDAP_GROUP_BASE_DN}"
-    LDAP_BIND_PASSWORD: ${LDAP_PWD}
+  jenkins:
+    container_name: jenkins
+    restart: always
+    image: accenture/adop-jenkins:0.2.6
+    #build: submodules/ldop-jenkins
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    ports:
+      - "50000/tcp:50000/tcp"
+    expose:
+      - "8080"
+      - "50000"
+    privileged: true
+    environment:
+      JENKINS_OPTS: "--prefix=/jenkins"
+      ROOT_URL: "${PROTO}://${TARGET_HOST}/jenkins/"
+      LDAP_SERVER: "${LDAP_SERVER}"
+      LDAP_ROOTDN: "${LDAP_FULL_DOMAIN}"
+      LDAP_USER_SEARCH_BASE: "${LDAP_USER_BASE_DN}"
+      LDAP_USER_SEARCH: "${LDAP_USER_SEARCH}"
+      LDAP_GROUP_SEARCH_BASE: "${LDAP_GROUP_BASE_DN}"
+      LDAP_GROUP_SEARCH_FILTER: ""
+      LDAP_GROUP_MEMBERSHIP_FILTER: ""
+      LDAP_MANAGER_DN: "${LDAP_MANAGER_DN}"
+      LDAP_MANAGER_PASSWORD: ${LDAP_PWD}
+      LDAP_INHIBIT_INFER_ROOTDN: "false"
+      LDAP_DISABLE_MAIL_ADDRESS_RESOLVER: "false"
+      LDAP_DISPLAY_NAME_ATTRIBUTE_NAME: "displayName"
+      LDAP_MAIL_ADDRESS_ATTRIBUTE_NAME: "mail"
+      LDAP_GROUP_NAME_ADMIN: "${LDAP_GROUP_NAME_ADMIN}"
+      INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD_PLAIN}
+      GERRIT_HOST_NAME: "gerrit"
+      GERRIT_FRONT_END_URL: "http://gerrit:8080/gerrit"
+      GERRIT_JENKINS_USERNAME: "${GERRIT_JENKINS_USERNAME}"
+      GERRIT_JENKINS_PASSWORD: ${PASSWORD_JENKINS}
+      SONAR_SERVER_URL: "http://sonar:9000/sonar/"
+      SONAR_ACCOUNT_LOGIN: ${SONAR_ACCOUNT_LOGIN}
+      SONAR_ACCOUNT_PASSWORD: ${PASSWORD_JENKINS}
+      SONAR_DB_URL: "jdbc:mysql://sonar-mysql:3306/sonar?useUnicode=true&amp;characterEncoding=utf8"
+      SONAR_DB_LOGIN: ${SONAR_DB_LOGIN}
+      SONAR_DB_PASSWORD: ${SONAR_DB_PASSWORD}
+      SONAR_PLUGIN_VERSION: ""
+      SONAR_ADDITIONAL_PROPS: ""
+      SONAR_RUNNER_VERSION: "2.4"
+      ANT_VERSION: "1.9.4"
+      MAVEN_VERSION: "3.0.5"
+      NODEJS_VERSION: "6.9.4"
+      NODEJS_GLOBAL_PACKAGES: "grunt-cli@~0.1.13 bower@~1.3.12 plato@~1.2.1"
+      NODEJS_PACKAGES_REFRESH_HOURS: "72"
+      GIT_GLOBAL_CONFIG_NAME: "ADOP Jenkins"
+      GROOVY_VERSION: "2.4.8"
+      GIT_GLOBAL_CONFIG_EMAIL: "jenkins@${LDAP_DOMAIN}"
+      DOCKER_TLS_VERIFY: ${DOCKER_TLS_VERIFY}
+      DOCKER_HOST: ${DOCKER_HOST}
+      DOCKER_CLIENT_CERT_PATH: ${DOCKER_CLIENT_CERT_PATH}
+      DOCKER_NETWORK_NAME: ${CUSTOM_NETWORK_NAME}
+      CARTRIDGE_SOURCES: ${CARTRIDGE_SOURCES}
 
-ldap-ltb:
-  container_name: ldap-ltb
-  restart: always
-  image: accenture/adop-ldap-ltb:0.1.0
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "80"
-  environment:
-    LDAP_LTB_URL: "ldap://${LDAP_SERVER}"
-    LDAP_LTB_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-    LDAP_LTB_PWD: "${LDAP_PWD}"
-    LDAP_LTB_BS: "${LDAP_FULL_DOMAIN}"
+  jenkins-slave:
+    container_name: jenkins-slave
+    restart: always
+    image: liatrio/ldop-jenkins-slave:0.1.0
+    build: submodules/ldop-jenkins-slave
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    privileged: true
+    environment:
+      SLAVE_LABELS: "aws ldap java8 docker"
+      SWARM_PASSWORD: ${PASSWORD_JENKINS}
+      SLAVE_EXECUTORS: ${SLAVE_EXECUTORS}
+      INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD_PLAIN}
 
-ldap-phpadmin:
-  container_name: ldap-phpadmin
-  restart: always
-  image: accenture/adop-ldap-phpadmin:0.1.0
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "80"
-  environment:
-    LDAP_SERVER_NAME: "LDAP"
-    LDAP_SERVER_HOST: "ldap"
-    LDAP_SERVER_PORT: "389"
-    LDAP_SERVER_BIND_ID: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-    LDAP_SERVER_BASE_DN: "${LDAP_FULL_DOMAIN}"
+  selenium-hub:
+    container_name: selenium-hub
+    restart: always
+    image: selenium/hub:2.53.0
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "4444"
 
-registry:
-  container_name: registry
-  restart: always
-  image: registry:2.5.1
-  net: ${CUSTOM_NETWORK_NAME}
-  expose:
-    - "5000"
-  environment:
-    REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
-    REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry/fullchain.pem
-    REGISTRY_HTTP_TLS_KEY: /certs/registry/privkey.pem
+  selenium-node-chrome:
+    container_name: selenium-node-chrome
+    restart: always
+    image: selenium/node-chrome:2.53.0
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    environment:
+      SE_OPTS: "-nodeConfig /var/selenium-config/config-chrome.json"
+      REMOTE_HOST: "http://selenium-node-chrome:5555"
+      HUB_PORT_4444_TCP_ADDR: "selenium-hub"
+      HUB_PORT_4444_TCP_PORT: "4444"
+
+  selenium-node-firefox:
+    container_name: selenium-node-firefox
+    restart: always
+    image: selenium/node-firefox:2.53.0
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    environment:
+      SE_OPTS: "-nodeConfig /var/selenium-config/config-firefox.json"
+      REMOTE_HOST: "http://selenium-node-firefox:5555"
+      HUB_PORT_4444_TCP_ADDR: "selenium-hub"
+      HUB_PORT_4444_TCP_PORT: "4444"
+
+  nexus:
+    container_name: nexus
+    restart: always
+    image:  liatrio/ldop-nexus:0.1.0
+    build:  submodules/ldop-nexus
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "8081"
+    environment:
+      NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
+      LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
+      LDAP_ENABLED: "true"
+      LDAP_URL: "ldap"
+      LDAP_BIND_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+      LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
+      LDAP_USER_BASE_DN: "${LDAP_USER_BASE_DN}"
+      LDAP_GROUP_BASE_DN: "${LDAP_GROUP_BASE_DN}"
+      LDAP_BIND_PASSWORD: ${LDAP_PWD}
+
+  ldap-ltb:
+    container_name: ldap-ltb
+    restart: always
+    image: liatrio/ldop-ldap-ltb:0.1.0
+    build: submodules/ldop-ldap-ltb
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "80"
+    environment:
+      LDAP_LTB_URL: "ldap://${LDAP_SERVER}"
+      LDAP_LTB_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+      LDAP_LTB_PWD: "${LDAP_PWD}"
+      LDAP_LTB_BS: "${LDAP_FULL_DOMAIN}"
+
+  ldap-phpadmin:
+    container_name: ldap-phpadmin
+    restart: always
+    image: liatrio/ldop-ldap-phpadmin:0.1.0
+    build: submodules/ldop-ldap-phpadmin
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "80"
+    environment:
+      LDAP_SERVER_NAME: "LDAP"
+      LDAP_SERVER_HOST: "ldap"
+      LDAP_SERVER_PORT: "389"
+      LDAP_SERVER_BIND_ID: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+      LDAP_SERVER_BASE_DN: "${LDAP_FULL_DOMAIN}"
+
+  registry:
+    container_name: registry
+    restart: always
+    image: registry:2.5.1
+    depends_on:
+      - "elasticsearch"
+      - "logstash"
+      - "kibana"
+    expose:
+      - "5000"
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry/fullchain.pem
+      REGISTRY_HTTP_TLS_KEY: /certs/registry/privkey.pem

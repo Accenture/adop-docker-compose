@@ -1,87 +1,90 @@
-proxy:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/nginx_config:/etc/nginx
-    - ${NFS_HOST}/nfs/nginx_releasenote:/usr/share/nginx/html
+version: '1'
 
-ldap:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/ldap_db:/var/lib/ldap
-    - ${NFS_HOST}/nfs/ldap_static:/etc/ldap
+services:
+  proxy:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/nginx_config:/etc/nginx
+      - ${NFS_HOST}/nfs/nginx_releasenote:/usr/share/nginx/html
 
-gerrit-mysql:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/gerrit_mysql_data:/var/lib/mysql
+  ldap:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/ldap_db:/var/lib/ldap
+      - ${NFS_HOST}/nfs/ldap_static:/etc/ldap
 
-gerrit:
-  user: root
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/git_repos:/var/git/repos 
-    - ${NFS_HOST}/nfs/gerrit_review_site:/var/gerrit/review_site 
+  gerrit-mysql:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/gerrit_mysql_data:/var/lib/mysql
 
-sensu-api:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sensu_api_conf:/etc/sensu/conf.d
+  gerrit:
+    user: root
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/git_repos:/var/git/repos 
+      - ${NFS_HOST}/nfs/gerrit_review_site:/var/gerrit/review_site 
 
-sensu-server:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sensu_server_conf:/etc/sensu/conf.d
+  sensu-api:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/sensu_api_conf:/etc/sensu/conf.d
 
-sensu-client:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sensu_client_conf:/etc/sensu/conf.d
+  sensu-server:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/sensu_server_conf:/etc/sensu/conf.d
 
-sensu-rabbitmq:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sensu_rabbitmq_data:/var/lib/rabbitmq
+  sensu-client:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/sensu_client_conf:/etc/sensu/conf.d
 
-sensu-redis:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sensu_redis_data:/data
+  sensu-rabbitmq:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/sensu_rabbitmq_data:/var/lib/rabbitmq
 
-sonar-mysql:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sonar_mysql_data:/var/lib/mysql 
+  sensu-redis:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/sensu_redis_data:/data
 
-sonar:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/sonar_data:/opt/sonarqube/data
-    - ${NFS_HOST}/nfs/sonar_extensions:/opt/sonarqube/extensions
-    - ${NFS_HOST}/nfs/sonar_logs:/opt/sonarqube/logs
+  sonar-mysql:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/sonar_mysql_data:/var/lib/mysql 
 
-jenkins:
-  user: root 
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/jenkins_home:/var/jenkins_home 
+  sonar:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/sonar_data:/opt/sonarqube/data
+      - ${NFS_HOST}/nfs/sonar_extensions:/opt/sonarqube/extensions
+      - ${NFS_HOST}/nfs/sonar_logs:/opt/sonarqube/logs
 
-selenium-node-chrome:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/selenium_config:/var/selenium-config
+  jenkins:
+    user: root 
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/jenkins_home:/var/jenkins_home 
 
-selenium-node-firefox:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/selenium_config:/var/selenium-config
+  selenium-node-chrome:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/selenium_config:/var/selenium-config
 
-nexus:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/nexus_sonatype_work:/sonatype-work
+  selenium-node-firefox:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/selenium_config:/var/selenium-config
 
-registry:
-  volume_driver: nfs
-  volumes:
-    - ${NFS_HOST}/nfs/registry_certs:/certs
-    - ${NFS_HOST}/nfs/registry_data:/data
+  nexus:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/nexus_sonatype_work:/sonatype-work
+
+  registry:
+    volume_driver: nfs
+    volumes:
+      - ${NFS_HOST}/nfs/registry_certs:/certs
+      - ${NFS_HOST}/nfs/registry_data:/data

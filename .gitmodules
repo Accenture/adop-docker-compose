@@ -1,0 +1,33 @@
+[submodule "submodules/ldop-sensu"]
+	path = submodules/ldop-sensu
+	url = https://github.com/liatrio/ldop-sensu
+[submodule "submodules/ldop-jenkins"]
+	path = submodules/ldop-jenkins
+	url = https://github.com/liatrio/ldop-jenkins
+[submodule "submodules/ldop-ldap-phpadmin"]
+	path = submodules/ldop-ldap-phpadmin
+	url = https://github.com/liatrio/ldop-ldap-phpadmin
+[submodule "submodules/ldop-nginx"]
+	path = submodules/ldop-nginx
+	url = https://github.com/liatrio/ldop-nginx
+[submodule "submodules/ldop-ldap-ltb"]
+	path = submodules/ldop-ldap-ltb
+	url = https://github.com/liatrio/ldop-ldap-ltb
+[submodule "submodules/ldop-nexus"]
+	path = submodules/ldop-nexus
+	url = https://github.com/liatrio/ldop-nexus
+[submodule "submodules/ldop-jenkins-slave"]
+	path = submodules/ldop-jenkins-slave
+	url = https://github.com/liatrio/ldop-jenkins-slave
+[submodule "submodules/ldop-gerrit"]
+	path = submodules/ldop-gerrit
+	url = https://github.com/liatrio/ldop-gerrit
+[submodule "submodules/ldop-sonar"]
+	path = submodules/ldop-sonar
+	url = https://github.com/liatrio/ldop-sonar
+[submodule "submodules/ldop-ldap"]
+	path = submodules/ldop-ldap
+	url = https://github.com/liatrio/ldop-ldap
+[submodule "submodules/ldop-logstash"]
+	path = submodules/ldop-logstash
+	url = https://github.com/liatrio/ldop-logstash

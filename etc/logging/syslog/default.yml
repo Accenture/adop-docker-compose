@@ -1,115 +1,137 @@
 # set LOGSTASH_HOST to dns/ip of logstash host
 
-proxy:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "proxy"
+version: '3'
 
-ldap:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "ldap"
+services:
+  proxy:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "proxy"
 
-gerrit-mysql:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "gerrit-mysql"
+  ldap:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "ldap"
 
-gerrit:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "gerrit"
+  gerrit-mysql:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "gerrit-mysql"
 
-sensu-uchiwa:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "sensu-uchiwa"
+  gerrit:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "gerrit"
 
-sensu-api:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "sensu-api"
+  sensu-uchiwa:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "sensu-uchiwa"
 
-sensu-server:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "sensu-server"
+  sensu-api:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "sensu-api"
 
-sensu-client:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "sensu-client"
+  sensu-server:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "sensu-server"
 
-sensu-rabbitmq:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "sensu-rabbitmq"
+  sensu-client:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "sensu-client"
 
-sensu-redis:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "sensu-redis"
+  sensu-rabbitmq:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "sensu-rabbitmq"
 
-sonar-mysql:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "sonar-mysql"
+  sensu-redis:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "sensu-redis"
 
-sonar:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "sonar"
+  sonar-mysql:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "sonar-mysql"
 
-jenkins:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "jenkins"
+  sonar:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "sonar"
 
-jenkins-slave:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "jenkins-slave"
+  jenkins:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "jenkins"
 
-selenium-hub:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "selenium-hub"
+  jenkins-slave:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "jenkins-slave"
 
-selenium-node-chrome:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "selenium-node-chrome"
+  selenium-hub:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "selenium-hub"
 
-selenium-node-firefox:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "selenium-node-firefox"
+  selenium-node-chrome:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "selenium-node-chrome"
 
-nexus:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "nexus"
+  selenium-node-firefox:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "selenium-node-firefox"
 
-registry:
-  log_driver: "syslog"
-  log_opt:
-    syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "registry"
+  nexus:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "nexus"
+
+  registry:
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:25826"
+        tag: "registry"

@@ -46,33 +46,39 @@ pretty_sleep() {
 
 
 prep_env() {
-    # If the proxy IP has not been set work out the TARGET_HOST
-    # Else just use it
-    if [ -z "${PROXY_IP}" ]; then
-        # If MACHINE_NAME is not the default or it is and it exists
-        # Else fall back to localhost
-        if [ "${MACHINE_NAME}" != "${DEFAULT_MACHINE_NAME}" ] || ([ "${MACHINE_NAME}" = "${DEFAULT_MACHINE_NAME}" ] && $(docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1) ); then
-            # Check the machine exists first
-            if ! $(docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1) ; then
-               echo "The specified Docker Machine does not exist: ${MACHINE_NAME}"
-               echo "HINT: Either specify one with 'adop compose -m <name>', or use 'eval \$(docker-machine env ${MACHINE_NAME})'"
-               exit 1
-            else
-                # Set the machine
-                eval $(docker-machine env $MACHINE_NAME --shell bash)
+    # No longer assume docker-machine is used.
+    if [ -n "$MACHINE_NAME" ]; then
+        # If the proxy IP has not been set work out the TARGET_HOST
+        # Else just use it
+        if [ -z "${PROXY_IP}" ]; then
+            # If MACHINE_NAME is not the default or it is and it exists
+            # Else fall back to localhost
+            if [ "${MACHINE_NAME}" != "${DEFAULT_MACHINE_NAME}" ] || ([ "${MACHINE_NAME}" = "${DEFAULT_MACHINE_NAME}" ] && $(docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1) ); then
+                # Check the machine exists first
+                if ! $(docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1) ; then
+                   echo "The specified Docker Machine does not exist: ${MACHINE_NAME}"
+                   echo "HINT: Either specify one with 'adop compose -m <name>', or use 'eval \$(docker-machine env ${MACHINE_NAME})'"
+                   exit 1
+                else
+                    # Set the machine
+                    eval $(docker-machine env $MACHINE_NAME --shell bash)
 
-                export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
-                export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
+                    export TARGET_HOST=$(docker-machine ip $MACHINE_NAME)
+                    export LOGSTASH_HOST=$(docker-machine ip $MACHINE_NAME)
+                fi
+            else
+                echo "Docker Machine is not available or the default machine does not exist, defaulting to localhost"
+                echo "HINT: Either specify one with 'adop compose -m <name>', or use 'eval \$(docker-machine env ${MACHINE_NAME})'"
+                export TARGET_HOST=$( host $( hostname -f ) | sed -n '/has address/s/.*address //p' )
+                export LOGSTASH_HOST=$TARGET_HOST
             fi
         else
-            echo "Docker Machine is not available or the default machine does not exist, defaulting to localhost"
-            echo "HINT: Either specify one with 'adop compose -m <name>', or use 'eval \$(docker-machine env ${MACHINE_NAME})'"
-            export TARGET_HOST=localhost
-            export LOGSTASH_HOST=localhost
+            export TARGET_HOST=${PROXY_IP}
+            export LOGSTASH_HOST=${PROXY_IP}
         fi
     else
-        export TARGET_HOST=${PROXY_IP}
-        export LOGSTASH_HOST=${PROXY_IP}
+        export TARGET_HOST=localhost
+        export LOGSTASH_HOST=localhost
     fi
 
     source ${CONF_DIR}/conf/env.provider.sh
@@ -82,7 +88,16 @@ prep_env() {
         echo "Using ${CONF_DIR}/env.override.sh to override default values for environment variable."
         source ${CONF_DIR}/env.override.sh
     fi
+    
+    # Setting Compose File Lists
+    if [ "${LOGS}" = "NO" ]; then
+        export ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml"
+        echo "* Logs being send to stdout, specified logging driver not being used..."
+    else
+        export ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
+    fi
 }
+
 
 init() {
 
@@ -109,13 +124,13 @@ while [[ $1 ]]; do
 done
 
     echo ' 
-          ###    ########   #######  ########  
-         ## ##   ##     ## ##     ## ##     ## 
-        ##   ##  ##     ## ##     ## ##     ## 
-       ##     ## ##     ## ##     ## ########  
-       ######### ##     ## ##     ## ##        
-       ##     ## ##     ## ##     ## ##        
-       ##     ## ########   #######  ##        
+       ##        ########   #######  ########  
+       ##        ##     ## ##     ## ##     ## 
+       ##        ##     ## ##     ## ##     ## 
+       ##        ##     ## ##     ## ########  
+       ##        ##     ## ##     ## ##        
+       ##        ##     ## ##     ## ##        
+       ######### ########   #######  ##        
     '
 
     echo "* Initialising ADOP"
@@ -128,17 +143,6 @@ done
     create_network
 
     # Run the Docker compose commands
-
-    
-    # Setting Compose File Lists
-    if [ "${LOGS}" = "NO" ]; then
-        ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml"
-        echo "* Logs being send to stdout, specified logging driver not being used..."
-    else
-        ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
-    fi
-
-    ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
 
     if [ "${PULL}" = "NO" ]; then
         echo "* Skipping Pulling Docker Images"
@@ -296,8 +300,8 @@ run_compose() {
     if [ ! -z "${TOTAL_OVERRIDES}"   ]; then
         docker-compose ${TOTAL_OVERRIDES} ${compose_cmd} "$@"
     else
-        docker-compose ${ELKFILEOPTS} ${compose_cmd} "$@"
-        echo
+        # docker-compose ${ELKFILEOPTS} ${compose_cmd} "$@"
+        # echo
         docker-compose ${ADOPFILEOPTS} ${OVERRIDES} ${compose_cmd} "$@"
     fi
 }
@@ -312,6 +316,7 @@ export CUSTOM_NETWORK_NAME=local_network
 export OVERRIDES=""
 export TOTAL_OVERRIDES=""
 export PULL="YES"
+export MACHINE_NAME=""
 
 # Parameters
 while getopts "m:f:F:v:l:n:i:" opt; do
