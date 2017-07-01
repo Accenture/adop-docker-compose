@@ -29,7 +29,7 @@ ldap:
   expose:
     - "389"
   ports:
-    - "389/tcp:389/tcp"
+    - "389:389/tcp"
   environment:
     INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
     INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
@@ -206,7 +206,7 @@ jenkins:
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
-    - "50000/tcp:50000/tcp"
+    - "50000:50000/tcp"
   expose:
     - "8080"
     - "50000"
