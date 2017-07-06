@@ -7,8 +7,8 @@ The DevOps Platform is a tools environment for continuously testing, releasing a
 
 The platform runs on a [docker container cluster](https://docs.docker.com/swarm/) so it can be stood up for evaluation purposes on just one server using local storage, or stood up in a multi-data centre cluster with distributed network storage.  It will also run anywhere that [docker runs](https://docs.docker.com/engine/installation/binaries/).
 
-Here is the front page:
-
+Here is adop-docker-composethe front page:
+dop-docker-compose
 ![HomePage](https://raw.githubusercontent.com/accenture/adop-docker-compose/master/img/home.png)
 
 Once you have a stack up and running, you can log in with the username and password created upon start-up.
