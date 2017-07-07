@@ -13,11 +13,13 @@ When submitting pull requests we have a few guidelines that we'd like people to 
 
 * The heading and description should clearly explain what the pull request is seeking to achieve
 * If the pull request has dependencies on other PRs, please specify them and the order in which they should be applied if applicable
+    * This is especially useful when there are dependencies on new image releases and adop-platform-management changes
 * Commits should be tidy and squashed into logical chunks
     * Multiple commits is fine if they are clear and concise - for example a PR containing fixes for multiple defects could have a commit for each
 * Where applicable, Travis must be happy for a PR to be accepted
 * When contributing to any of the documentation, either the site or .md files, the changes must render correctly in their target viewer
     * For GitHub Pages this means you will need to publish your changes and either provide a link or a screenshot of them functioning
+* Please include steps that demonstrate how to test your contribution, and in the case of fixes how to reproduce the problem if not already captured in a referenced issue
 
 [Maintainers](https://github.com/Accenture/adop-docker-compose/wiki/Project-Roster#project-maintainers) will follow these rules when reviewing and accepting Pull Requests:
 
