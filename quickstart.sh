@@ -10,6 +10,20 @@ echo '
    ##     ## ########   #######  ##        
 '
 
+echo '
+*****************************************************
+*                  EVALUATION MODE                  *
+*****************************************************
+* Quickstart is designed to get you up and running  *
+* with the DevOps Platform as quickly as possible.  *
+* As such it is not a "production" ready deployment *
+* and therefore we brand it as "evaluation mode".   *
+* In using quickstart you are acknowledging this,   *
+* along with the lack of proper security, backups,  *
+* patching, and other operational considerations.   *
+*****************************************************
+'
+
 usage(){
    cat <<END_USAGE
 
