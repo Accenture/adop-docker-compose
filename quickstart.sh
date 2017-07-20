@@ -164,7 +164,7 @@ provision_aws() {
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:" opt; do
+while getopts "t:m:a:s:c:z:r:u:p:h" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -193,6 +193,10 @@ while getopts "t:m:a:s:c:z:r:u:p:" opt; do
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
       ;;      
+    h)
+      usage
+      exit
+      ;;
     *)
       echo "Invalid parameter(s) or option(s)."
       usage
