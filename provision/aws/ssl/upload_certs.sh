@@ -75,7 +75,7 @@ else
 				--output text --query 'ServerCertificateMetadata.Arn')
 fi
 
-echo "Certificate has been uploaded successfully. Use below ARN with Swarm cloudformation to enable SSL."
+echo "Certificate has been uploaded successfully. Use below ARN with an ELB to enable SSL."
 echo "=================================="
 echo "=========    ARN      ============"
 echo "${CERT_ARN}"

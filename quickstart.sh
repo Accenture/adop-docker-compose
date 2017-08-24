@@ -10,6 +10,20 @@ echo '
    ##     ## ########   #######  ##        
 '
 
+echo '
+*****************************************************
+*                  EVALUATION MODE                  *
+*****************************************************
+* Quickstart is designed to get you up and running  *
+* with the DevOps Platform as quickly as possible.  *
+* As such it is not a "production" ready deployment *
+* and therefore we brand it as "evaluation mode".   *
+* In using quickstart you are acknowledging this,   *
+* along with the lack of proper security, backups,  *
+* patching, and other operational considerations.   *
+*****************************************************
+'
+
 usage(){
    cat <<END_USAGE
 
@@ -164,7 +178,7 @@ provision_aws() {
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:" opt; do
+while getopts "t:m:a:s:c:z:r:u:p:h" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -193,6 +207,10 @@ while getopts "t:m:a:s:c:z:r:u:p:" opt; do
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
       ;;      
+    h)
+      usage
+      exit
+      ;;
     *)
       echo "Invalid parameter(s) or option(s)."
       usage
