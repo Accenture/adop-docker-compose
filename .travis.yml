@@ -7,7 +7,7 @@ services:
 env:
   global:
     - DOCKER_ENGINE_VERSION=1.10.3
-    - DOCKER_COMPOSE_VERSION=1.6.2
+    - DOCKER_COMPOSE_VERSION=1.9.0
     - INITIAL_ADMIN_USER=admin.user
     - INITIAL_ADMIN_PASSWORD_PLAIN=admin123
     - COMPOSE_FILES="-f site/docker-compose.yml"
