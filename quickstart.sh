@@ -94,8 +94,8 @@ provision_esxi() {
     if [ $? -eq 0 ]; then
         echo "Docker machine '$MACHINE_NAME' already exists"
     else
-	# To run adop stack locally atleast 6144 MB is required.
-        docker-machine create --driver vmwarevsphere --vmwarevsphere-username=${ESXI_USER} --vmwarevsphere-password=${ESXI_PASS} --vmwarevsphere-vcenter=${ESXI_IPADDR} --vmwarevsphere-network=${ESXI_NET} --vmwarevsphere-memory-size 6144 --vmwarevsphere-boot2docker-url=${BOOT2DOCKER_URL} ${MACHINE_NAME}
+	# To run adop stack locally atleast 10240 MB is required.
+        docker-machine create --driver vmwarevsphere --vmwarevsphere-username=${ESXI_USER} --vmwarevsphere-password=${ESXI_PASS} --vmwarevsphere-vcenter=${ESXI_IPADDR} --vmwarevsphere-network=${ESXI_NET} --vmwarevsphere-memory-size 10240 --vmwarevsphere-boot2docker-url=${BOOT2DOCKER_URL} ${MACHINE_NAME}
     fi
 
     # Reenable errexit
