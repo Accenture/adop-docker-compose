@@ -35,6 +35,16 @@ Usage:
 	    [-p <INITIAL_ADMIN_PASSWORD>]
 
         ./quickstart.sh 
+	    -t esxi 
+	    -x <ESXI_USER> 
+	    -y <ESXI_PASSWORD>
+	    -i <ESXI_IPADDR>
+	    -n <ESXI_NET>
+	    [-m <MACHINE_NAME>] 
+	    [-u <INITIAL_ADMIN_USER>] 
+	    [-p <INITIAL_ADMIN_PASSWORD>]
+
+        ./quickstart.sh 
 	    -t aws 
 	    -m <MACHINE_NAME> 
 	    -c <AWS_VPC_ID> 
@@ -63,6 +73,29 @@ provision_local() {
     else
 	# To run adop stack locally atleast 6144 MB is required.
         docker-machine create --driver virtualbox --virtualbox-memory 6144 ${MACHINE_NAME}
+    fi
+
+    # Reenable errexit
+    set -e
+
+}
+
+provision_esxi() {
+    BOOT2DOCKER_URL="https://github.com/boot2docker/boot2docker/releases/download/v1.10.3/boot2docker.iso"
+    if [ -z ${MACHINE_NAME} ]; then
+        MACHINE_NAME=adop
+    fi
+
+    # Allow script to continue if error returned by docker-machine command
+    set +e
+
+    # Create Docker machine if one doesn't already exist with the same name
+    docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "Docker machine '$MACHINE_NAME' already exists"
+    else
+	# To run adop stack locally atleast 6144 MB is required.
+        docker-machine create --driver vmwarevsphere --vmwarevsphere-username=${ESXI_USER} --vmwarevsphere-password=${ESXI_PASS} --vmwarevsphere-vcenter=${ESXI_IPADDR} --vmwarevsphere-network=${ESXI_NET} --vmwarevsphere-memory-size 6144 --vmwarevsphere-boot2docker-url=${BOOT2DOCKER_URL} ${MACHINE_NAME}
     fi
 
     # Reenable errexit
@@ -178,13 +211,25 @@ provision_aws() {
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:h" opt; do
+while getopts "t:m:x:y:i:n:a:s:c:z:r:u:p:h" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
       ;;
     m)
       export MACHINE_NAME=${OPTARG}
+      ;;
+    x)
+      export ESXI_USER=${OPTARG}
+      ;;
+    y)
+      export ESXI_PASS=${OPTARG}
+      ;;
+    i)
+      export ESXI_IPADDR=${OPTARG}
+      ;;
+    n)
+      export ESXI_NET=${OPTARG}
       ;;
     a)
       export AWS_ACCESS_KEY_ID=${OPTARG}
@@ -231,6 +276,9 @@ CLI_COMPOSE_OPTS=""
 case ${MACHINE_TYPE} in
     "local")
         provision_local
+        ;;
+    "esxi")
+        provision_esxi
         ;;
     "aws")
         provision_aws
