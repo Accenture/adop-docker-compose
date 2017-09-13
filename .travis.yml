@@ -6,16 +6,25 @@ services:
 
 env:
   global:
-    - DOCKER_COMPOSE_VERSION=1.6.2
+    - DOCKER_ENGINE_VERSION=1.10.3
+    - DOCKER_COMPOSE_VERSION=1.9.0
     - INITIAL_ADMIN_USER=admin.user
     - INITIAL_ADMIN_PASSWORD_PLAIN=admin123
     - COMPOSE_FILES="-f site/docker-compose.yml"
     - JEKYLL_SOURCE="/site"
 
 before_install:
+ - sudo sh -c 'echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list'
+ - sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+ - sudo apt-get update
+ - sudo apt-key update
+ - sudo apt-get install -qqy --force-yes linux-image-extra-$(uname -r) apparmor
+ - sudo apt-get install -qqy --force-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" docker-engine=${DOCKER_ENGINE_VERSION}\*
  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
  - chmod +x docker-compose
  - sudo mv docker-compose /usr/local/bin
+ - docker --version
+ - docker-compose --version
 
 script:
  - ./adop
@@ -28,6 +37,6 @@ script:
  - docker-compose ${COMPOSE_FILES} build
  - docker-compose ${COMPOSE_FILES} -p adopdockercompose up -d
  - count=0; until docker logs adopdockercompose_site_1 | grep "Server running..." &> /dev/null || (( count++ > 12 )); do echo "Waiting $count"; sleep 5; done
- - docker logs adopdockercompose_site_1 
+ - docker logs adopdockercompose_site_1
  - docker logs adopdockercompose_site_1 | grep "Server running..." &> /dev/null
  - curl -sL -w "%{http_code}\\n" "http://localhost/adop-docker-compose/" -o /dev/null | grep "200" &> /dev/null
