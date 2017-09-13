@@ -1,0 +1,295 @@
+#!/bin/bash -e
+
+SUB_CMD_NAME="certbot"
+
+cmd_desc() {
+    echo "For running Certbot (Self-Signed and Let’s Encrypt SSL) related commands"
+}
+
+cmd_usage() {
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} <subcommand>"
+}
+
+help() {
+    cmd_usage
+    echo
+    echo "Available subcommands are:"
+    printf "    %-22s   %s\n" "gen-export-certs" "Generate and Export Self-Signed SSL certificates for Nginx SSL support."
+    printf "    %-22s   %s\n" "gen-letsencrypt-certs" "Generate SSL certificates issued by Let's Encrypt for Nginx SSL support."
+    printf "    %-22s %s\n" "export-letsencrypt-certs" "Export new SSL certificates issued by Let's Encrypt to the ADOP NGINX Proxy container."
+    printf "    %-22s   %s\n" "help" "Prints this help information"
+    echo
+}
+
+gen_export_help() {
+      echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} gen-export-certs [<options>]"
+      printf "    %-2s   %s\n" "" "Options:"
+      printf "    %-3s   %s\n" "" "<DOMAIN_NAME>  : This is the domain name which will be secured by Let’s Encrypt SSL. (Required)"
+      printf "    %-3s   %s\n" "" "<SERVICE_NAME> : Service name will be used for copying fullchain.pem and privkey.pem SSL files from auto generated domain name folder to static one: /certs/<SERVICE_NAME>. (Optional)"
+      printf "    %-3s   %s\n" "" "-h             : Prints this help."
+
+      echo
+      echo "Examples of usage:"
+      printf "    %-30s   %s\n ${CMD_NAME} ${SUB_CMD_NAME} gen-export-certs example.com"
+      printf "    %-30s   %s\n ${CMD_NAME} ${SUB_CMD_NAME} gen-export-certs registry.example.com registry"
+      echo
+}
+
+gen_letsencrypt_help() {
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} gen-letsencrypt-certs [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "<DOMAIN_NAME>  : This is the domain name which will be secured by Let’s Encrypt SSL. (Required)"
+    printf "    %-3s   %s\n" "" "<SERVICE_NAME> : Service name will be used for copying fullchain.pem and privkey.pem SSL files from auto generated domain name folder to static one: /certs/<SERVICE_NAME>. (Optional)"
+    printf "    %-3s   %s\n" "" "-h             : Prints this help."
+
+    echo
+    echo "Examples of usage:"
+    printf "    %-30s   %s\n ${CMD_NAME} ${SUB_CMD_NAME} gen-letsencrypt-certs example.com"
+    printf "    %-30s   %s\n ${CMD_NAME} ${SUB_CMD_NAME} gen-letsencrypt-certs registry.example.com registry"
+    echo
+}
+
+export_letsencrypt_help() {
+    echo "usage: ${CMD_NAME} ${SUB_CMD_NAME} export-letsencrypt-certs [<options>]"
+    printf "    %-2s   %s\n" "" "Options:"
+    printf "    %-3s   %s\n" "" "<DOMAIN_NAME>  : This is the domain name for which we will export certificate files. (Required)"
+    printf "    %-3s   %s\n" "" "<SERVICE_NAME> : Service name will be used for specific NGINX virtual host configuration, you have to upload in ADOP NGINX container virtual host configuration file as /etc/nginx/sites-available/<SERVICE_NAME>.conf."
+    printf "    %-3s   %s\n" "" "                 We will also use <SERVICE_NAME> as a prefix for SSL keys for your service, for instance '/etc/nginx/ssl/<SERVICE_NAME>_fullchain.pem' (Optional)"
+    printf "    %-3s   %s\n" "" "-h             : Prints this help."
+
+    echo
+    echo "Examples of usage:"
+    printf "    %-30s   %s\n ${CMD_NAME} ${SUB_CMD_NAME} export-letsencrypt-certs example.com"
+    printf "    %-30s   %s\n ${CMD_NAME} ${SUB_CMD_NAME} export-letsencrypt-certs registry.example.com registry"
+    echo
+}
+
+gen_export_certs() {
+    # Set Parameters Values
+    export DOMAIN_NAME=$1
+    export SERVICE_NAME=$2
+
+    local OPTIND
+
+    while getopts "h" opt; do
+      case $opt in
+        h)
+          gen_export_help
+          exit 1
+          ;;
+      esac
+    done
+
+    if [ -z ${DOMAIN_NAME} ]; then
+        gen_export_help
+        exit 1
+    fi
+
+    ####
+    # Windows Git bash terminal identifies
+    # /CN=${DOMAIN_NAME} as a path and appends the absolute path
+    # of parent directory to it
+    ####
+    HOST_OS=$(uname)
+    CLIENT_SUBJ="/CN=${DOMAIN_NAME}"
+    if echo "${HOST_OS}" | grep -E "MINGW*" >/dev/null
+    then
+        CLIENT_SUBJ="//CN=${DOMAIN_NAME}"
+    fi
+
+    export GEN_CERTS_LOG="CERTBOT_GEN_EXPORT_CERTS_`date '+%y%m%d-%H%M%S'`.log"
+    export TEMP_CERT_PATH=$(mktemp -d tmp_certbot.XXXXXXXXXX) || { echo "Failed to create temp folder"; exit 1; }
+    export PATH_PRIVATE_KEY_FILE_NAME=privkey.pem
+    export PATH_CERTIFICATE_FILE_NAME=fullchain.pem
+
+    # Change certificates file names with the SERVICE_NAME as prefix
+    if [ -n "${SERVICE_NAME}" ]; then
+        export PATH_PRIVATE_KEY_FILE_NAME="${SERVICE_NAME}_${PATH_PRIVATE_KEY_FILE_NAME}"
+        export PATH_CERTIFICATE_FILE_NAME="${SERVICE_NAME}_${PATH_CERTIFICATE_FILE_NAME}"
+    fi
+
+    echo "Generate new private key and self-signed certificate..."
+    openssl req -subj "${CLIENT_SUBJ}" \
+        -newkey rsa:4096 -nodes -sha256 -keyout ${TEMP_CERT_PATH}/${PATH_PRIVATE_KEY_FILE_NAME} \
+        -x509 -days 365 -out ${TEMP_CERT_PATH}/${PATH_CERTIFICATE_FILE_NAME} >> ${GEN_CERTS_LOG} 2>&1 || { echo "Error generating certificates. Please see " ${GEN_CERTS_LOG} " for more info"; exit 1; }
+
+    if [ -n "${SERVICE_NAME}" ] && [ "${SERVICE_NAME}" == "registry" ]; then
+        # Copy private key and self-signed certificate to the Docker Registry volume
+        echo "Copying certificates to the registry_certs volume..."
+        export CONTAINER_ID=$(docker run -v registry_certs:/certs busybox //bin/sh -c "mkdir -p //certs/registry" && docker ps -l -q)
+        if [ -n "${CONTAINER_ID}" ]; then
+            docker cp ${TEMP_CERT_PATH}/${PATH_CERTIFICATE_FILE_NAME} ${CONTAINER_ID}:/certs/registry/fullchain.pem
+            docker cp ${TEMP_CERT_PATH}/${PATH_PRIVATE_KEY_FILE_NAME} ${CONTAINER_ID}:/certs/registry/privkey.pem
+            docker rm -f ${CONTAINER_ID}
+        fi
+    fi
+
+    # Copy private key and self-signed certificate to the ADOP NGINX (proxy) container SSL folder
+    echo "Copying certificates to the ADOP Proxy container..."
+    docker cp ${TEMP_CERT_PATH}/${PATH_CERTIFICATE_FILE_NAME} proxy:/etc/nginx/ssl/
+    docker cp ${TEMP_CERT_PATH}/${PATH_PRIVATE_KEY_FILE_NAME} proxy:/etc/nginx/ssl/
+
+    # Some versions of Docker also require you to trust the certificate at the OS level
+    echo "Copying self-signed certificate to the trusted location /etc/docker/certs.d/..."
+
+    if [ "${MACHINE_TYPE}" == "aws" ] && [ -n "${MACHINE_NAME}" ]; then
+        echo "Copying via docker-machine to the ${MACHINE_NAME}..."
+        docker-machine scp ${TEMP_CERT_PATH}/${PATH_CERTIFICATE_FILE_NAME} ${MACHINE_NAME}:/tmp
+        docker-machine ssh ${MACHINE_NAME} "sudo mkdir -p /etc/docker/certs.d/${DOMAIN_NAME}"
+        docker-machine ssh ${MACHINE_NAME} "sudo cp /tmp/${PATH_CERTIFICATE_FILE_NAME} /etc/docker/certs.d/${DOMAIN_NAME}/ca.crt"
+    else
+        mkdir -p /etc/docker/certs.d/${DOMAIN_NAME}
+        cp ${TEMP_CERT_PATH}/${PATH_CERTIFICATE_FILE_NAME} /etc/docker/certs.d/${DOMAIN_NAME}/ca.crt
+    fi
+
+    # Enable service NGINX configuration by making symlink from "available" folder
+    if [ -n "${SERVICE_NAME}" ]; then
+        echo "Enable ${SERVICE_NAME} NGINX configuration..."
+        docker exec proxy ln -sf //etc/nginx/sites-available/${SERVICE_NAME}.conf //etc/nginx/sites-enabled/${SERVICE_NAME}.conf
+    fi
+
+    # Restart Docker Registry to make sure we started it again with TLS enabled
+    echo "Restart Docker Registry container with applied certificates..."
+    docker restart registry > /dev/null 2>&1
+
+    # Reload NGINX configuration
+    echo "Restart ADOP Proxy container with updated certificates..."
+    docker exec proxy nginx -s reload
+
+    # Cleaning up all temporary folders and files
+    rm -f temp.seq
+    rm -rf ${TEMP_CERT_PATH}
+    rm -f ${GEN_CERTS_LOG}
+
+    echo "Self-Signed certificates has been generated successfully..."
+}
+
+gen_letsencrypt_certs() {
+    # Set Parameters Values
+    export DOMAIN_NAME=$1
+    export SERVICE_NAME=$2
+
+    local OPTIND
+
+    while getopts "h" opt; do
+      case $opt in
+        h)
+          gen_letsencrypt_help
+          exit 1
+          ;;
+      esac
+    done
+
+    if [ -z ${DOMAIN_NAME} ]; then
+        gen_letsencrypt_help
+        exit 1
+    fi
+
+    echo "INFO: Let's Encrypt SSL certificates will be issued for ${DOMAIN_NAME}."
+
+    export PROXY_CONTAINER_ID=$(docker ps --filter="name=proxy" -q | xargs)
+    export PROXY_CONTAINER_RESTART=false
+    if [ ! -z ${PROXY_CONTAINER_ID} ]; then
+        read -r -p "We found running Proxy (NGINX) container. To issue new SSL certificate we have to stop & start Proxy container, which will be cause of ADOP short outage. Please, confirm restart of Proxy (NGINX) container? [y/n] " response
+        case $response in
+            [yY][eE][sS]|[yY])
+                PROXY_CONTAINER_RESTART=true
+                printf "Stopping Proxy (NGINX) container..."
+                docker stop proxy
+                ;;
+            *)
+                printf "SSL certificate issuing aborted by user."
+                exit 1
+                ;;
+        esac
+    fi
+
+    docker run --rm -i \
+        -p 80:80 \
+        -p 443:443 \
+        -v registry_certs:/etc/letsencrypt \
+        accenture/certbot:0.0.1 \
+        certonly --standalone -d ${DOMAIN_NAME} --text --non-interactive --register-unsafely-without-email --agree-tos
+
+    if [ -n "${SERVICE_NAME}" ]; then
+        export SERVICE_FOLDER="/certs/${SERVICE_NAME}"
+        docker run -i --rm -v registry_certs:/certs busybox sh -c "mkdir -p ${SERVICE_FOLDER} && cp -RL /certs/live/${DOMAIN_NAME}/fullchain.pem /certs/live/${DOMAIN_NAME}/privkey.pem ${SERVICE_FOLDER}"
+    fi
+
+    if [ ${PROXY_CONTAINER_RESTART} = true ]; then
+        printf "Starting Proxy (NGINX) container..."
+        docker start proxy
+    fi
+}
+
+export_letsencrypt_certs() {
+    # Set Parameters Values
+    export DOMAIN_NAME=$1
+    export SERVICE_NAME=$2
+
+    local OPTIND
+
+    while getopts "h" opt; do
+      case $opt in
+        h)
+          export_letsencrypt_help
+          exit 1
+          ;;
+      esac
+    done
+
+    if [ -z ${DOMAIN_NAME} ]; then
+        export_letsencrypt_help
+        exit 1
+    fi
+
+    export DEST_CHAIN_FILE_NAME=fullchain.pem
+    export DEST_PRIVATE_KEY_FILE_NAME=privkey.pem
+
+    if [ -n "${SERVICE_NAME}" ]; then
+        export DEST_CHAIN_FILE_NAME="${SERVICE_NAME}_fullchain.pem"
+        export DEST_PRIVATE_KEY_FILE_NAME="${SERVICE_NAME}_privkey.pem"
+        docker exec proxy ln -sf //etc/nginx/sites-available/${SERVICE_NAME}.conf //etc/nginx/sites-enabled/${SERVICE_NAME}.conf
+    fi
+
+    export CONTAINER_ID=$(docker run -v registry_certs:/certs busybox //bin/sh -c "mkdir -p //tmp/certs; cp -L //certs/live/${DOMAIN_NAME}/fullchain.pem //tmp/certs/fullchain.pem; cp -L //certs/live/${DOMAIN_NAME}/privkey.pem //tmp/certs/privkey.pem" && docker ps -l -q)
+    if [ -n "${CONTAINER_ID}" ]; then
+        docker cp ${CONTAINER_ID}:/tmp/certs/fullchain.pem ${DEST_CHAIN_FILE_NAME}
+        docker cp ${CONTAINER_ID}:/tmp/certs/privkey.pem ${DEST_PRIVATE_KEY_FILE_NAME}
+        docker cp ${DEST_CHAIN_FILE_NAME} proxy:/etc/nginx/ssl/
+        docker cp ${DEST_PRIVATE_KEY_FILE_NAME} proxy:/etc/nginx/ssl/
+
+        rm ${DEST_CHAIN_FILE_NAME} ${DEST_PRIVATE_KEY_FILE_NAME}
+        docker rm -f ${CONTAINER_ID}
+
+        docker exec proxy nginx -s reload
+    fi
+}
+
+shift $(($OPTIND -1))
+SUBCOMMAND_OPT="${1:-help}"
+
+# Only shift if there are other parameters
+if [ $# -ge 1 ]; then
+    shift
+fi
+
+case ${SUBCOMMAND_OPT} in
+    "cmd_desc"|"help")
+        ${SUBCOMMAND_OPT} "$@"
+        ;;
+    "gen-export-certs")
+        gen_export_certs "$@"
+        ;;
+    "gen-letsencrypt-certs")
+        gen_letsencrypt_certs "$@"
+        ;;
+    "export-letsencrypt-certs")
+        export_letsencrypt_certs "$@"
+        ;;
+    *)
+        echo "Invalid parameter(s) or option(s)."
+        help
+        exit 1
+        ;;
+esac

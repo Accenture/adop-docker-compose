@@ -59,14 +59,11 @@ jenkins:
     - jenkins_home:/var/jenkins_home 
     - /var/run/docker.sock:/var/run/docker.sock
 
-selenium-node-chrome:
-  volumes:
-    - ./volumes/selenium-config-vol:/var/selenium-config
-
-selenium-node-firefox:
-  volumes:
-    - ./volumes/selenium-config-vol:/var/selenium-config
-
 nexus:
   volumes:
     - nexus_sonatype_work:/sonatype-work
+
+registry:
+  volumes:
+    - registry_certs:/certs
+    - registry_data:/data

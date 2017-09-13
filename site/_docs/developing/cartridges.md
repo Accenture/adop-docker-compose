@@ -10,8 +10,10 @@ The process for developing a cartridge is:
 * [Spin up ADOP](/adop-docker-compose/docs/quickstart/)
 * Read the [development guidelines](#development-guidelines)
 * Read about the [cartridge architecture](/adop-docker-compose/docs/architecture/cartridges/)
+* Take a look at the [cartridge cookbook](/adop-cartridges-cookbook/)
 * Utilise the [Cartridge Development cartridge](#using-the-cartridge-development-cartridge)
 * [Develop the cartridge content](#developing-cartridge-content)
+* [Add Pluggable SCM to your cartridge](#adding-pluggable-scm)
 * [Test the cartridge against the platform](#testing-the-cartridge)
 * [Publish the cartridge](#publishing-cartridges)
 
@@ -30,8 +32,9 @@ High-level guidelines for writing Jenkins jobs in Job DSL:
     * Do not make any credentials visible anywhere in your job i.e. do not echo passwords in your shell script or store credentials as plain-text build parameters. Ensure you are always using the maskPasswords() and injectPasswords() wrappers in your Job DSL.
         * Credentials can also be added manually to the Jenkins credential store and then referenced in your job.
     * It is highly recommended that the sshAgent() wrapper be used with the Jenkins credentials specified in order to allow Jenkins to clone all local git repositories from Gerrit over SSH.
-* Git SCM
-    * Ensure that all your git clones are over SSH (not HTTPS) using the Jenkins SCM plugin (it is advisable not to do any git clones in your shell script unless specifically required to do so).
+* Pluggable SCM
+    * This is the recommended way!
+    * [Pluggable SCM library](https://accenture.github.io/adop-pluggable-scm/docs/about-pluggable-scm/) allows you to clone repositories over SSH, HTTPS and HTTP protocols, at the moment _Gerrit_ and _BitBucket_ are supported.
     * When cloning from external git repositories, ensure that you only clone from trusted git repositories.
     * When cloning a git repository, it better to clone using a reference rather than a branch specifier. The way to do this is by specifying the variable $GERRIT_NEWREV in the "Branch Specifier" variable. This is useful in the case of jobs that need to be rebuilt, and it is preferred that the code from that specific build be cloned as opposed to the latest code on a specific branch.
 * Miscellaneous
@@ -100,6 +103,10 @@ More advanced pipelines may also include:
 * Security tests
 
 Cartridges can also include jobs for creating and destroying environments, or these stages can be included as part of the main pipeline.
+
+## Adding Pluggable SCM
+
+To use _Gerrit_ or _BitBucket_ SCM provider, you can now add [Pluggable SCM](https://accenture.github.io/adop-pluggable-scm/docs/about-pluggable-scm/) library to your cartridge. More information can be found here - [Add Pluggable SCM to cartridge](https://accenture.github.io/adop-cartridges-cookbook/docs/recipes/adding-a-pluggable-scm/)
 
 ## Testing the Cartridge
 Once a cartridge has been developed it is necessary to test it against the platform in the same way that consuming users would.

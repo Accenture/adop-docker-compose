@@ -10,6 +10,20 @@ echo '
    ##     ## ########   #######  ##        
 '
 
+echo '
+*****************************************************
+*                  EVALUATION MODE                  *
+*****************************************************
+* Quickstart is designed to get you up and running  *
+* with the DevOps Platform as quickly as possible.  *
+* As such it is not a "production" ready deployment *
+* and therefore we brand it as "evaluation mode".   *
+* In using quickstart you are acknowledging this,   *
+* along with the lack of proper security, backups,  *
+* patching, and other operational considerations.   *
+*****************************************************
+'
+
 usage(){
    cat <<END_USAGE
 
@@ -217,7 +231,7 @@ provision_aws() {
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:i:l:g:" opt; do
+while getopts "t:m:a:s:c:z:r:u:p:i:l:g:h" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -255,6 +269,10 @@ while getopts "t:m:a:s:c:z:r:u:p:i:l:g:" opt; do
     g)
       export AZURE_RESOURCE_GROUP=${OPTARG}
       ;;      
+    h)
+      usage
+      exit
+      ;;
     *)
       echo "Invalid parameter(s) or option(s)."
       usage
@@ -291,4 +309,11 @@ case ${MACHINE_TYPE} in
 esac
 
 # Use the ADOP CLI
+eval $(docker-machine env ${MACHINE_NAME})
+
 ./adop compose -m "${MACHINE_NAME}" ${CLI_COMPOSE_OPTS} init
+
+# Generate and export Self-Signed SSL certificate for Docker Registry, applicable only for AWS type
+if [ ${MACHINE_TYPE} == "aws" ]; then
+    ./adop certbot gen-export-certs "registry.$(docker-machine ip ${MACHINE_NAME}).nip.io" registry
+fi

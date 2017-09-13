@@ -3,6 +3,7 @@
   - home
   - prerequisites
   - quickstart
+  - evaluation-mode
   - recommended-reading
 
 - title: Architecture
@@ -26,6 +27,11 @@
   - operating/workspaces
   - operating/projects
   - operating/cartridges
+
+- title: Tools
+  docs:
+  - tools
+  - tools/docker-registry
 
 - title: Developing
   docs:

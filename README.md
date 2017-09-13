@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/Accenture/adop-docker-compose.svg?branch=master)](https://travis-ci.org/Accenture/adop-docker-compose)
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/Accenture/ADOP)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Accenture/ADOP)
 
 # The DevOps Platform: Overview
 
@@ -21,7 +21,7 @@ Once you have explored this the next step is to create your own Workspace and Pr
 
 # Quickstart Instructions
 
-These instructions will spin up an instance in a single server in AWS (for evaluation purposes).  Please check the [prerequisites](http://accenture.github.io/adop-docker-compose/docs/prerequisites/).
+These instructions will spin up an instance in a single server in AWS ([for **_evaluation_** purposes](https://accenture.github.io/adop-docker-compose/docs/evaluation-mode)).  Please check the [prerequisites](https://accenture.github.io/adop-docker-compose/docs/prerequisites/).
 
 NB. the instructions will also work in anywhere supported by [Docker Machine](https://docs.docker.com/machine/), just follow the relevant Docker Machine instructions for your target platform and then start at step 3 below and (you can set the AWS_VPC_ID to NA).
 
@@ -83,7 +83,7 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
 <INITIAL_ADMIN_USER> / <INITIAL_ADMIN_PASSWORD>
     ```
 
-1. Update the docker-machine security group in the AWS console to permit inbound http traffic on port 80 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32.
+1. Update the docker-machine security group in the AWS console to permit inbound http traffic on ports 80 and 443 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32.
 
 # General Getting Started Instructions
 
@@ -122,8 +122,6 @@ eval $(docker-machine env <YOUR_MACHINE_NAME>)
 ### To run with Docker Swarm
 
 Create a Docker Swarm that has a publicly accessible Engine with the label "tier=public" to bind Nginx and Logstash to that node
-
-- Instruction to create a docker swarm cluster on AWS are [`here`](https://github.com/Accenture/adop-docker-compose/blob/master/provision/aws/swarm/README.md)
 
 ## Launching
 
@@ -191,19 +189,23 @@ Note : For Windows run this command from a terminal (Git Bash) as administrator.
 Kibana 4 does not provide a configuration property that allow to define the default index pattern so the following manual procedure should be adopted in order to define an index pattern:
 
 - Navidate to Settings > Indices using Kibana dashboard
-- Set index name or pattern as "logstash-*"
+- Set index name or pattern as "logstash-\*"
 - For the below drop-down select @timestamp for the Time-field name
 - Click on create button
 
 # User Feedback
 
 ## Documentation
-Documentation can be found [on our GitHub Pages site](http://accenture.github.io/adop-docker-compose).
+Documentation can be found [on our GitHub Pages site](https://accenture.github.io/adop-docker-compose).
 
 ## Issues
 If you have any problems with or questions about this project, please contact us through [Gitter](https://gitter.im/Accenture/ADOP) or a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues).
 
 ## Contribute
-You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can. You can find more information in our [documentation](http://accenture.github.io/adop-docker-compose/docs/contributing/).
+You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can. You can find more information in our [documentation](https://accenture.github.io/adop-docker-compose/docs/contributing/).
 
 Before you start to code, we recommend discussing your plans through a [GitHub issue](https://github.com/Accenture/adop-docker-compose/issues), especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.
+
+## Roadmap
+We use this working [Roadmap](https://github.com/Accenture/adop-docker-compose/wiki/Roadmap) to evolve and summarise plans for future features and the merge of existing PRs.
+

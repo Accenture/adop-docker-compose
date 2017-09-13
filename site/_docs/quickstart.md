@@ -4,7 +4,7 @@ title: Quickstart
 permalink: /docs/quickstart/
 ---
 
-These instructions will spin up an instance in a single server in AWS (for evaluation purposes). Please check the [prerequisites](/adop-docker-compose/docs/prerequisites/).
+These instructions will spin up an instance in a single server in AWS ([for **_evaluation_** purposes](/adop-docker-compose/docs/evaluation-mode)). Please check the [prerequisites](/adop-docker-compose/docs/prerequisites/).
 
 NB. the instructions will also work in anywhere supported by [Docker Machine](https://docs.docker.com/machine/), just follow the relevant Docker Machine instructions for your target platform and then start at step 3 below and (you can set the VPC_ID to NA).
 
@@ -53,4 +53,4 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
 1. Log in using the username and password you specified in the quickstart script.
     - These can also be found in your "platform.secrets.sh" file
 
-1. Update the docker-machine security group in the AWS console to permit inbound http traffic on port 80 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32.
+1. Update the docker-machine security group in the AWS console to permit inbound http traffic on ports 80 and 443 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32.

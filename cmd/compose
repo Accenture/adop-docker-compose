@@ -25,6 +25,7 @@ help() {
     printf "    %-22s   %s\n" "init" "Initialises ADOP"
     printf "    %-22s   %s\n" "init <--without-load>" "Initialises ADOP without loading the platform"
     printf "    %-22s   %s\n" "init <--without-pull>" "Initialises ADOP without pulling images"
+    printf "    %-22s   %s\n" "init <--with-stdout>" "Initialises ADOP with logs being sent to stdout as opposed to specified logging driver"
     printf "    %-22s   %s\n" "up" "docker-compose up for ADOP"
     printf "    %-22s   %s\n" "gen-certs <path>" "Generate client certificates for TLS-enabled Machine and copy to <path> in Jenkins Slave"
     printf "    %-22s   %s\n" "<command>" "Runs 'docker-compose <command>' for ADOP, where <command> is not listed above"
@@ -78,22 +79,34 @@ prep_env() {
     source ${CONF_DIR}/credentials.generate.sh
     source ${CONF_DIR}/env.config.sh
     if [ -f "${CONF_DIR}/env.override.sh" ]; then
-	echo "Using ${CONF_DIR}/env.override.sh to override default values for environment variable."
-	source ${CONF_DIR}/env.override.sh
+        echo "Using ${CONF_DIR}/env.override.sh to override default values for environment variable."
+        source ${CONF_DIR}/env.override.sh
     fi
 }
 
 init() {
 
-case "$1" in
-    --without-pull)
-        export PULL="NO"
-        ;;
-    --without-load)
-        export LOAD="NO"
-        ;;
-    *)
-esac
+while [[ $1 ]]; do
+    case "$1" in
+        --without-pull)
+            export PULL="NO"
+            shift
+            ;;
+        --without-load)
+            export LOAD="NO"
+            shift
+            ;;
+        --with-stdout)
+            export LOGS="NO"
+            shift
+            ;;
+        *)
+            echo "Unrecognized option: $1"
+            help
+            exit 1
+            ;;
+    esac
+done
 
     echo ' 
           ###    ########   #######  ########  
@@ -115,6 +128,17 @@ esac
     create_network
 
     # Run the Docker compose commands
+
+    
+    # Setting Compose File Lists
+    if [ "${LOGS}" = "NO" ]; then
+        ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml"
+        echo "* Logs being send to stdout, specified logging driver not being used..."
+    else
+        ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
+    fi
+
+    ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
 
     if [ "${PULL}" = "NO" ]; then
         echo "* Skipping Pulling Docker Images"
@@ -149,7 +173,7 @@ esac
     
     # Wait for Nginx to come up before proceeding
     echo "* Waiting for Nginx to become available"
-    until [[ $(curl -I -s -u ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN} http://${TARGET_HOST}/|head -n 1|cut -d$' ' -f2) == 200 ]]; do echo "Nginx unavailable, sleeping for 5s"; sleep 5; done
+    until [[ $(curl -k -I -s -u ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN} ${PROTO}://${TARGET_HOST}/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep 5 Nginx; done
     
     # Tell the user something useful
     echo
@@ -329,9 +353,6 @@ if [ $# -ge 1 ]; then
     shift
 fi
 
-# Setting Compose File Lists
-ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
-ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
 
 case ${SUBCOMMAND_OPT} in
     "cmd_desc"|"help"|"init")
