@@ -3,7 +3,7 @@
 elasticsearch:
   container_name: elasticsearch
   restart: always
-  image: elasticsearch:2.1.1
+  image: elasticsearch:2.3.5
   net: ${CUSTOM_NETWORK_NAME}
   command: elasticsearch -Des.network.host=0.0.0.0
   ports:
@@ -27,10 +27,11 @@ logstash:
 kibana:
   container_name: kibana
   restart: always
-  image: kibana:4.3.1
+  image: accenture/adop-kibana:0.0.1
   net: ${CUSTOM_NETWORK_NAME}
   command: kibana
   environment:
     - ELASTICSEARCH_URL=http://elasticsearch:9200
+    - KIBANA_SERVER_PATH=/kibana
   ports:
     - "5601:5601"
