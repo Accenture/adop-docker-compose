@@ -94,6 +94,12 @@ else
 	PASSWORD_LDAP=$(createPassword)
 	sed -i'' -e "s/###LDAP_PWD###/$PASSWORD_LDAP/g" platform.secrets.sh
 
+	PASSWORD_GERRIT_MYSQL=$(createPassword)
+	sed -i'' -e "s/###PASSWORD_GERRIT_MYSQL_PLAIN###/$PASSWORD_GERRIT_MYSQL/g" platform.secrets.sh
+
+	PASSWORD_SONAR_MYSQL=$(createPassword)
+	sed -i'' -e "s/###PASSWORD_SONAR_MYSQL_PLAIN###/$PASSWORD_SONAR_MYSQL/g" platform.secrets.sh
+
 fi
 
 # Source all the variables that were written to the secrets file
@@ -115,7 +121,10 @@ if  [ $INITIAL_ADMIN_PASSWORD_PLAIN == "###INITIAL_ADMIN_PASSWORD_PLAIN###" ] ||
 	[ $PASSWORD_JENKINS == "###PASSWORD_JENKINS_PLAIN###" ] || \
 	[ $PASSWORD_GERRIT == "###PASSWORD_GERRIT_PLAIN###" ] || \
 	[ $PASSWORD_SQL == "###PASSWORD_SQL_PLAIN###" ] || \
-	[ $LDAP_PWD == "###LDAP_PWD###" ]; then
+	[ $LDAP_PWD == "###LDAP_PWD###" ] || \
+	[ $GERRIT_MYSQL_PASSWORD == "###PASSWORD_GERRIT_MYSQL_PLAIN###"] || \
+	[ $SONAR_MYSQL_PASSWORD == "###PASSWORD_SONAR_MYSQL_PLAIN###" ] || \
+	[ $SONAR_DB_PASSWORD == "###PASSWORD_SONAR_MYSQL_PLAIN###" ] ; then
 	echo "Your passwords are set to the default tokens provided in the example secrets file, this is not allowed."
 	echo "Delete the platform.secrets.sh file or edit it and then, re-run the credentials.generate.sh script"
 	exit

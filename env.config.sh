@@ -20,7 +20,6 @@ export LDAP_GROUP_NAME_ADMIN="administrators"
 # Gerrit MySQL
 
 export GERRIT_MYSQL_USER="gerrit"
-export GERRIT_MYSQL_PASSWORD="gerrit"
 export GERRIT_MYSQL_DATABASE="gerrit"
 
 # Gerrit
@@ -34,14 +33,12 @@ export GERRIT_JENKINS_USERNAME="jenkins"
 # Sonar MySQL
 
 export SONAR_MYSQL_USER="sonar"
-export SONAR_MYSQL_PASSWORD="sonar"
 export SONAR_MYSQL_DATABASE="sonar"
 
 # Jenkins
 
 export SONAR_ACCOUNT_LOGIN="jenkins"
 export SONAR_DB_LOGIN=${SONAR_MYSQL_USER}
-export SONAR_DB_PASSWORD=${SONAR_MYSQL_PASSWORD}
 export CARTRIDGE_SOURCES="https://raw.githubusercontent.com/Accenture/adop-cartridges/master/cartridges.yml"
 
 # Jenkins Slave
