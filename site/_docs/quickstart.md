@@ -6,6 +6,8 @@ permalink: /docs/quickstart/
 
 These instructions will spin up an instance in a single server in AWS ([for **_evaluation_** purposes](/adop-docker-compose/docs/evaluation-mode)). Please check the [prerequisites](/adop-docker-compose/docs/prerequisites/).
 
+# Using Docker-Machine
+
 NB. the instructions will also work in anywhere supported by [Docker Machine](https://docs.docker.com/machine/), just follow the relevant Docker Machine instructions for your target platform and then start at step 3 below and (you can set the VPC_ID to NA).
 
 1. Create a VPC using the [VPC wizard](http://docs.aws.amazon.com/AmazonVPC/latest/GettingStartedGuide/getting-started-create-vpc.html) in the AWS console by selecting the first option with 1 public subnet.
@@ -54,3 +56,17 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
     - These can also be found in your "platform.secrets.sh" file
 
 1. Update the docker-machine security group in the AWS console to permit inbound http traffic on ports 80 and 443 (from the machine(s) from which you want to have access only), also UDP on 25826 and 12201 from 127.0.0.1/32.
+
+
+# Using Docker directly, without Docker-Machine
+
+If you wish do install ADOP directly in an environment, where Docker is available, like
+* a Linux machine with docker.io installed
+* a Linux VM with docker.io installed, running on Windows
+
+You can install ADOP directly, via the command line interface, by doing
+```
+ $ ./adop compose init
+```
+For details read [Architecture - Command Line Interface](https://accenture.github.io/adop-docker-compose/docs/architecture/cli/)
+
