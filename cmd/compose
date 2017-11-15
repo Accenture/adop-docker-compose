@@ -153,7 +153,7 @@ done
     # Wait for Jenkins and Gerrit to come up before proceeding
     echo "* Waiting for the Platform to become available - this can take a few minutes"
     TOOL_SLEEP_TIME=30
-    until [[ $(docker exec jenkins curl -I -s jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Jenkins; done
+    until [[ $(docker exec jenkins curl -I -s ${USERNAME_JENKINS}:${PASSWORD_JENKINS}@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Jenkins; done
     until [[ $(docker exec gerrit curl -I -s gerrit:${PASSWORD_GERRIT}@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Gerrit; done
     
     # Trigger Load_Platform in Jenkins
@@ -161,7 +161,7 @@ done
         echo "* Skipping Loading the Platform"
     else
         echo "* Loading the Platform"
-        docker exec jenkins curl -s -X POST jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/job/Load_Platform/buildWithParameters --data token=gAsuE35s
+        docker exec jenkins curl -s -X POST ${USERNAME_JENKINS}:${PASSWORD_JENKINS}@localhost:8080/jenkins/job/Load_Platform/buildWithParameters --data token=gAsuE35s
     fi
 
     # Generate and copy the certificates to jenkins slave if TLS is enabled
