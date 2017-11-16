@@ -29,6 +29,9 @@ export GERRIT_USER_NAME="Gerrit Code Review"
 export GERRIT_USER_EMAIL="gerrit@adop"
 
 # Gerrit and Jenkins
+
+export JENKINS_PLATFORM_USERNAME="jenkins"
+export GERRIT_PLATFORM_USERNAME="gerrit"
 export GERRIT_JENKINS_USERNAME="jenkins"
 
 # Sonar MySQL
