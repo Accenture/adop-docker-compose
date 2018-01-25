@@ -12,7 +12,7 @@ cmd_usage() {
     printf "    %-12s   %s\n" "-m <name>" "The name of the Docker Machine to target"
     printf "    %-12s   %s\n" "-f <path>" "Additional override file for Docker Compose, can be specified more than once"
     printf "    %-12s   %s\n" "-F <path>" "File to use for Docker Compose (in place of default), can be specified more than once"
-    printf "    %-12s   %s\n" "-l <driver>" "The logging driver to use"
+    printf "    %-12s   %s\n" "-l <driver>" "The logging driver to use, specify stdout to prevent the use of one"
     printf "    %-12s   %s\n" "-v <driver>" "The volume driver to use"
     printf "    %-12s   %s\n" "-n <name>" "The custom network to create (if not present) and use"
     printf "    %-12s   %s\n" "-i <ip>" "The public IP that the proxy will be accessed from (only required when not using Docker Machine)"
@@ -25,7 +25,7 @@ help() {
     printf "    %-22s   %s\n" "init" "Initialises ADOP"
     printf "    %-22s   %s\n" "init <--without-load>" "Initialises ADOP without loading the platform"
     printf "    %-22s   %s\n" "init <--without-pull>" "Initialises ADOP without pulling images"
-    printf "    %-22s   %s\n" "init <--with-stdout>" "Initialises ADOP with logs being sent to stdout as opposed to specified logging driver"
+    printf "    %-22s   %s\n" "init <--with-stdout>" "Initialises ADOP with logs being sent to stdout, overriding any specified logging driver"
     printf "    %-22s   %s\n" "up" "docker-compose up for ADOP"
     printf "    %-22s   %s\n" "gen-certs <path>" "Generate client certificates for TLS-enabled Machine and copy to <path> in Jenkins Slave"
     printf "    %-22s   %s\n" "<command>" "Runs 'docker-compose <command>' for ADOP, where <command> is not listed above"
@@ -97,7 +97,7 @@ while [[ $1 ]]; do
             shift
             ;;
         --with-stdout)
-            export LOGS="NO"
+            export LOGGING_DRIVER="stdout"
             shift
             ;;
         *)
@@ -128,18 +128,6 @@ done
     create_network
 
     # Run the Docker compose commands
-
-    
-    # Setting Compose File Lists
-    if [ "${LOGS}" = "NO" ]; then
-        ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml"
-        echo "* Logs being send to stdout, specified logging driver not being used..."
-    else
-        ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
-    fi
-
-    ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
-
     if [ "${PULL}" = "NO" ]; then
         echo "* Skipping Pulling Docker Images"
     else
@@ -153,15 +141,15 @@ done
     # Wait for Jenkins and Gerrit to come up before proceeding
     echo "* Waiting for the Platform to become available - this can take a few minutes"
     TOOL_SLEEP_TIME=30
-    until [[ $(docker exec jenkins curl -I -s jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Jenkins; done
-    until [[ $(docker exec gerrit curl -I -s gerrit:${PASSWORD_GERRIT}@localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Gerrit; done
+    until [[ $(docker exec jenkins curl -I -s -u "${JENKINS_PLATFORM_USERNAME}":"${PASSWORD_JENKINS}" localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Jenkins; done
+    until [[ $(docker exec gerrit curl -I -s -u "${GERRIT_PLATFORM_USERNAME}":"${PASSWORD_GERRIT}" localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Gerrit; done
     
     # Trigger Load_Platform in Jenkins
     if [ "${LOAD}" = "NO" ]; then
         echo "* Skipping Loading the Platform"
     else
         echo "* Loading the Platform"
-        docker exec jenkins curl -s -X POST jenkins:${PASSWORD_JENKINS}@localhost:8080/jenkins/job/Load_Platform/buildWithParameters --data token=gAsuE35s
+        docker exec jenkins curl -s -X POST -u "${JENKINS_PLATFORM_USERNAME}":"${PASSWORD_JENKINS}" localhost:8080/jenkins/job/Load_Platform/buildWithParameters --data token=gAsuE35s
     fi
 
     # Generate and copy the certificates to jenkins slave if TLS is enabled
@@ -291,12 +279,28 @@ run_compose() {
     compose_cmd=$1
     shift
 
+    # Setting Compose File Lists
+    if [ "${LOGGING_DRIVER}" = "stdout" ]; then
+        ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml"
+        echo "* Sending Docker container logs to stdout..."
+    else
+        ADOPFILEOPTS="-f ${CLI_DIR}/docker-compose.yml -f ${CLI_DIR}/etc/volumes/${VOLUME_DRIVER}/default.yml -f ${CLI_DIR}/etc/logging/${LOGGING_DRIVER}/default.yml"
+    fi
+
+    ELKFILEOPTS="-f ${CLI_DIR}/compose/elk.yml"
+
     # If total overrides have been provided then just use them
     # Else use "our" file list
     if [ ! -z "${TOTAL_OVERRIDES}"   ]; then
         docker-compose ${TOTAL_OVERRIDES} ${compose_cmd} "$@"
     else
-        docker-compose ${ELKFILEOPTS} ${compose_cmd} "$@"
+        # Handle up vs up -d so that we can launch the main Compose file
+        if [ "${compose_cmd}" = "up" ] && [[ $@ != *"-d"* ]]; then
+          echo "* Starting ELK with 'up -d' instead of just the requested 'up'"
+          docker-compose ${ELKFILEOPTS} ${compose_cmd} "$@" -d
+        else
+          docker-compose ${ELKFILEOPTS} ${compose_cmd} "$@"
+        fi;
         echo
         docker-compose ${ADOPFILEOPTS} ${OVERRIDES} ${compose_cmd} "$@"
     fi
