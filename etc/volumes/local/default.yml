@@ -1,69 +1,45 @@
-proxy:
-  volumes:
-    - nginx_config:/etc/nginx
-    - nginx_releasenote:/usr/share/nginx/html
+version: "3"
 
-ldap:
-  volumes:
-      - ldap_db:/var/lib/ldap
-      - ldap_static:/etc/ldap
-
-gerrit-mysql:
-  volumes:
-    - gerrit_mysql_data:/var/lib/mysql
-
-gerrit:
-  user: root
-  volumes:
-    - git_repos:/var/git/repos 
-    - gerrit_review_site:/var/gerrit/review_site 
-
-sensu-api:
-  volumes:
-    - sensu_api_conf:/etc/sensu/conf.d
-
-sensu-server:
-  volumes:
-    - sensu_server_conf:/etc/sensu/conf.d
-
-sensu-client:
-  volumes:
-    - sensu_client_conf:/etc/sensu/conf.d
-
-sensu-rabbitmq:
-  volumes:
-    - sensu_rabbitmq_data:/var/lib/rabbitmq
-
-sensu-redis:
-  volumes:
-    - sensu_redis_data:/data
-
-sonar-mysql:
-  volumes:
-    - sonar_mysql_data:/var/lib/mysql 
-
-sonar:
-  volumes:
-    - sonar_data:/opt/sonarqube/data
-    - sonar_extensions:/opt/sonarqube/extensions 
-    - sonar_logs:/opt/sonarqube/logs
-
-jenkins-slave:
-  volumes:
-    - jenkins_slave_home:/workspace
-    - /var/run/docker.sock:/var/run/docker.sock
-
-jenkins:
-  user: root 
-  volumes:
-    - jenkins_home:/var/jenkins_home 
-    - /var/run/docker.sock:/var/run/docker.sock
-
-nexus:
-  volumes:
-    - nexus_sonatype_work:/sonatype-work
-
-registry:
-  volumes:
-    - registry_certs:/certs
-    - registry_data:/data
+volumes:
+  nginx_config:
+    driver: local
+  nginx_releasenote:
+    driver: local
+  ldap_db:
+    driver: local
+  ldap_static:
+    driver: local
+  gerrit_mysql_data:
+    driver: local
+  git_repos:
+    driver: local
+  gerrit_review_site:
+    driver: local
+  sensu_api_conf:
+    driver: local
+  sensu_server_conf:
+    driver: local
+  sensu_client_conf:
+    driver: local
+  sensu_rabbitmq_data:
+    driver: local
+  sensu_redis_data:
+    driver: local
+  sonar_mysql_data:
+    driver: local
+  sonar_data:
+    driver: local
+  sonar_extensions:
+    driver: local
+  sonar_logs:
+    driver: local
+  jenkins_home:
+    driver: local
+  jenkins_slave_home:
+    driver: local
+  nexus_sonatype_work:
+    driver: local
+  registry_certs:
+    driver: local
+  registry_data:
+    driver: local
