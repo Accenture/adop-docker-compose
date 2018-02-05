@@ -209,3 +209,5 @@ Before you start to code, we recommend discussing your plans through a [GitHub i
 ## Roadmap
 We use this working [Roadmap](https://github.com/Accenture/adop-docker-compose/wiki/Roadmap) to evolve and summarise plans for future features and the merge of existing PRs.
 
+## Others
+For testing purposes
