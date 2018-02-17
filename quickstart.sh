@@ -45,6 +45,13 @@ Usage:
 	    [-u <INITIAL_ADMIN_USER>] 
 	    [-p <INITIAL_ADMIN_PASSWORD>]
 
+        ./quickstart.sh 
+	    -t google
+	    -i <google-project-id>
+	    [-m <MACHINE_NAME>]
+	    [-l <google-disk-size>]
+
+
 END_USAGE
 }
 
@@ -64,6 +71,38 @@ provision_local() {
 	# To run adop stack locally atleast 6144 MB is required.
         docker-machine create --driver virtualbox --virtualbox-memory 6144 ${MACHINE_NAME}
     fi
+
+    # Reenable errexit
+    set -e
+
+}
+
+provision_google() {
+    if [ -z ${GOOGLE_PROJECT_ID} ]; then
+        echo "ERROR: Mandatory parameters missing!"
+        usage
+        exit 1
+    fi
+
+    if [ -z ${MACHINE_NAME} ]; then
+        echo "No machine name specified - using default [adop]."
+        MACHINE_NAME=adop
+    fi
+
+    if [ -z ${GOOGLE_DISK_SIZE} ]; then
+        echo "No Image Disk Size specified - using default [10]."
+        google-disk-size=10
+    fi 
+    
+    # Allow script to continue if error returned by docker-machine command
+    set e
+
+    # Create Docker machine if one doesn't already exist with the same name
+    #docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
+   
+
+    docker-machine create --driver google --google-project "${GOOGLE_PROJECT_ID}"   --google-disk-size "${GOOGLE_DISK_SIZE}"   ${MACHINE_NAME}
+    echo ${GOOGLE_PROJECT_ID}
 
     # Reenable errexit
     set -e
@@ -178,7 +217,7 @@ provision_aws() {
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:h" opt; do
+while getopts "t:m:a:s:c:z:r:u:p:i:l:h" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -190,7 +229,7 @@ while getopts "t:m:a:s:c:z:r:u:p:h" opt; do
       export AWS_ACCESS_KEY_ID=${OPTARG}
       ;;
     s)
-      export AWS_SECRET_ACCESS_KEY=${OPTARG}
+       export AWS_SECRET_ACCESS_KEY=${OPTARG}
       ;;
     c)
       export AWS_VPC_ID=${OPTARG}
@@ -206,7 +245,13 @@ while getopts "t:m:a:s:c:z:r:u:p:h" opt; do
       ;;
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
-      ;;      
+      ;;
+    i)
+      export GOOGLE_PROJECT_ID=${OPTARG}
+     ;;
+    l)
+      export GOOGLE_DISK_SIZE=${OPTARG}
+      ;; 
     h)
       usage
       exit
@@ -228,6 +273,7 @@ fi
 CLI_COMPOSE_OPTS=""
 
 # Switch based on the machine type
+
 case ${MACHINE_TYPE} in
     "local")
         provision_local
@@ -235,6 +281,9 @@ case ${MACHINE_TYPE} in
     "aws")
         provision_aws
         CLI_COMPOSE_OPTS="-f etc/aws/default.yml"
+        ;;
+     "google")
+        provision_google
         ;;
     *)
         echo "Invalid parameter(s) or option(s)."
