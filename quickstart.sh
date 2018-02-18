@@ -46,10 +46,10 @@ Usage:
 	    [-p <INITIAL_ADMIN_PASSWORD>]
 
         ./quickstart.sh 
-	    -t google
-	    -i <google-project-id>
+	    -t gcp
+	    -i <GOOGLE_PROJECT_ID>
 	    [-m <MACHINE_NAME>]
-	    [-l <google-disk-size>]
+	    [-l <GOOGLE_DISK_SIZE>]
 
 
 END_USAGE
@@ -91,7 +91,7 @@ provision_google() {
 
     if [ -z ${GOOGLE_DISK_SIZE} ]; then
         echo "No Image Disk Size specified - using default [10]."
-        google-disk-size=10
+        GOOGLE_DISK_SIZE=10
     fi 
     
     # Allow script to continue if error returned by docker-machine command
@@ -229,7 +229,7 @@ while getopts "t:m:a:s:c:z:r:u:p:i:l:h" opt; do
       export AWS_ACCESS_KEY_ID=${OPTARG}
       ;;
     s)
-       export AWS_SECRET_ACCESS_KEY=${OPTARG}
+      export AWS_SECRET_ACCESS_KEY=${OPTARG}
       ;;
     c)
       export AWS_VPC_ID=${OPTARG}
@@ -282,7 +282,7 @@ case ${MACHINE_TYPE} in
         provision_aws
         CLI_COMPOSE_OPTS="-f etc/aws/default.yml"
         ;;
-     "google")
+     "gcp")
         provision_google
         ;;
     *)
