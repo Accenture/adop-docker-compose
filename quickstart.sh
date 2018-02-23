@@ -75,7 +75,7 @@ provision_local() {
 
 }
 
-provision_google() {
+provision_gcp() {
     if [ -z ${GOOGLE_PROJECT_ID} ]; then
         echo "ERROR: Mandatory parameters missing!"
         usage
@@ -221,7 +221,7 @@ provision_aws() {
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:h" opt; do
+while getopts "t:m:a:s:c:z:r:u:p:i:h" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -281,6 +281,9 @@ case ${MACHINE_TYPE} in
     "aws")
         provision_aws
         CLI_COMPOSE_OPTS="-f etc/aws/default.yml"
+        ;;
+    "gcp")
+        provision_gcp
         ;;
     *)
         echo "Invalid parameter(s) or option(s)."
