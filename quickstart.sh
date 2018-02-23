@@ -35,6 +35,14 @@ Usage:
 	    [-p <INITIAL_ADMIN_PASSWORD>]
 
         ./quickstart.sh 
+	    -t hyperv
+	    [-v <VIRTUAL_SWITCH>] 
+	    [-m <MACHINE_NAME>] 
+	    [-u <INITIAL_ADMIN_USER>] 
+	    [-p <INITIAL_ADMIN_PASSWORD>]
+
+
+        ./quickstart.sh 
 	    -t aws 
 	    -m <MACHINE_NAME> 
 	    -c <AWS_VPC_ID> 
@@ -63,6 +71,34 @@ provision_local() {
     else
 	# To run adop stack locally atleast 6144 MB is required.
         docker-machine create --driver virtualbox --virtualbox-memory 6144 ${MACHINE_NAME}
+    fi
+
+    # Reenable errexit
+    set -e
+
+}
+
+provision_hyperv() {
+    echo ${VIRTUAL_SWITCH}
+    if [ -z ${MACHINE_NAME} ]; then
+        MACHINE_NAME=adop
+    fi
+
+    if [ -z ${VIRTUAL_SWITCH} ]; then
+        VIRTUAL_SWITCH=DockerNAT
+    fi
+
+    echo ${VIRTUAL_SWITCH}
+    # Allow script to continue if error returned by docker-machine command
+    set +e
+
+    # Create Docker machine if one doesn't already exist with the same name
+    docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "Docker machine '$MACHINE_NAME' already exists"
+    else
+	# To run adop stack locally atleast 6144 MB is required.
+        docker-machine create --driver hyperv --hyperv-memory 6144 --hyperv-virtual-switch ${VIRTUAL_SWITCH} ${MACHINE_NAME}
     fi
 
     # Reenable errexit
@@ -178,7 +214,7 @@ provision_aws() {
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:h" opt; do
+while getopts "t:m:a:s:c:z:r:u:p:v:h" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -206,6 +242,9 @@ while getopts "t:m:a:s:c:z:r:u:p:h" opt; do
       ;;
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
+      ;;      
+    v)
+      export VIRTUAL_SWITCH=${OPTARG}
       ;;      
     h)
       usage
@@ -235,6 +274,9 @@ case ${MACHINE_TYPE} in
     "aws")
         provision_aws
         CLI_COMPOSE_OPTS="-f etc/aws/default.yml"
+        ;;
+    "hiperv")
+        provision_hyperv
         ;;
     *)
         echo "Invalid parameter(s) or option(s)."
