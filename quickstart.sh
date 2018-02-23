@@ -45,6 +45,11 @@ Usage:
 	    [-u <INITIAL_ADMIN_USER>] 
 	    [-p <INITIAL_ADMIN_PASSWORD>]
 
+        ./quickstart.sh 
+	    -t gcp
+	    -i <GOOGLE_PROJECT_ID>
+	    [-m <MACHINE_NAME>]
+
 END_USAGE
 }
 
@@ -67,6 +72,44 @@ provision_local() {
 
     # Reenable errexit
     set -e
+
+}
+
+provision_google() {
+    if [ -z ${GOOGLE_PROJECT_ID} ]; then
+        echo "ERROR: Mandatory parameters missing!"
+        usage
+        exit 1
+    fi
+
+    if [ -z ${MACHINE_NAME} ]; then
+        echo "No machine name specified - using default [adop]."
+        MACHINE_NAME=adop
+    fi
+
+    if [ -z ${GOOGLE_MACHINE_TYPE} ]; then
+         GOOGLE_MACHINE_TYPE=n1-standard-4
+    fi
+    
+    # Allow script to continue if error returned by docker-machine command
+    set +e
+
+    # Create Docker machine if one doesn't already exist with the same name
+    docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
+    rc=$? 
+
+    # Reenable errexit
+    set -e
+
+    if [ ${rc} -eq 0 ]; then
+        echo "Docker machine '$MACHINE_NAME' already exists"
+    else
+        docker-machine create --driver google \
+                              --google-project "${GOOGLE_PROJECT_ID}" \
+                              --google-disk-size "${GOOGLE_DISK_SIZE:-32}" \
+                              --google-machine-type ${GOOGLE_MACHINE_TYPE} \
+                              ${MACHINE_NAME}
+    fi
 
 }
     
@@ -206,7 +249,10 @@ while getopts "t:m:a:s:c:z:r:u:p:h" opt; do
       ;;
     p)
       export INITIAL_ADMIN_PASSWORD_PLAIN=${OPTARG}
-      ;;      
+      ;;
+    i)
+      export GOOGLE_PROJECT_ID=${OPTARG}
+     ;;
     h)
       usage
       exit
@@ -249,6 +295,6 @@ eval $(docker-machine env ${MACHINE_NAME})
 ./adop compose -m "${MACHINE_NAME}" ${CLI_COMPOSE_OPTS} init
 
 # Generate and export Self-Signed SSL certificate for Docker Registry, applicable only for AWS type
-if [ ${MACHINE_TYPE} == "aws" ]; then
+if [ ${MACHINE_TYPE} != "local" ]; then
     ./adop certbot gen-export-certs "registry.$(docker-machine ip ${MACHINE_NAME}).nip.io" registry
 fi
