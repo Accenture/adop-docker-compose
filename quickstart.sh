@@ -49,8 +49,6 @@ Usage:
 	    -t gcp
 	    -i <GOOGLE_PROJECT_ID>
 	    [-m <MACHINE_NAME>]
-	    [-l <GOOGLE_DISK_SIZE>]
-
 
 END_USAGE
 }
@@ -77,7 +75,7 @@ provision_local() {
 
 }
 
-provision_google() {
+provision_gcp() {
     if [ -z ${GOOGLE_PROJECT_ID} ]; then
         echo "ERROR: Mandatory parameters missing!"
         usage
@@ -89,23 +87,29 @@ provision_google() {
         MACHINE_NAME=adop
     fi
 
-    if [ -z ${GOOGLE_DISK_SIZE} ]; then
-        echo "No Image Disk Size specified - using default [10]."
-        GOOGLE_DISK_SIZE=10
-    fi 
+    if [ -z ${GOOGLE_MACHINE_TYPE} ]; then
+         GOOGLE_MACHINE_TYPE=n1-standard-4
+    fi
     
     # Allow script to continue if error returned by docker-machine command
-    set e
+    set +e
 
     # Create Docker machine if one doesn't already exist with the same name
-    #docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
-   
-
-    docker-machine create --driver google --google-project "${GOOGLE_PROJECT_ID}"   --google-disk-size "${GOOGLE_DISK_SIZE}"   ${MACHINE_NAME}
-    echo ${GOOGLE_PROJECT_ID}
+    docker-machine ip ${MACHINE_NAME} > /dev/null 2>&1
+    rc=$? 
 
     # Reenable errexit
     set -e
+
+    if [ ${rc} -eq 0 ]; then
+        echo "Docker machine '$MACHINE_NAME' already exists"
+    else
+        docker-machine create --driver google \
+                              --google-project "${GOOGLE_PROJECT_ID}" \
+                              --google-disk-size "${GOOGLE_DISK_SIZE:-32}" \
+                              --google-machine-type ${GOOGLE_MACHINE_TYPE} \
+                              ${MACHINE_NAME}
+    fi
 
 }
     
@@ -217,7 +221,7 @@ provision_aws() {
     fi
 }
 
-while getopts "t:m:a:s:c:z:r:u:p:i:l:h" opt; do
+while getopts "t:m:a:s:c:z:r:u:p:i:h" opt; do
   case ${opt} in
     t)
       export MACHINE_TYPE=${OPTARG}
@@ -249,9 +253,6 @@ while getopts "t:m:a:s:c:z:r:u:p:i:l:h" opt; do
     i)
       export GOOGLE_PROJECT_ID=${OPTARG}
      ;;
-    l)
-      export GOOGLE_DISK_SIZE=${OPTARG}
-      ;; 
     h)
       usage
       exit
@@ -273,7 +274,6 @@ fi
 CLI_COMPOSE_OPTS=""
 
 # Switch based on the machine type
-
 case ${MACHINE_TYPE} in
     "local")
         provision_local
@@ -282,8 +282,8 @@ case ${MACHINE_TYPE} in
         provision_aws
         CLI_COMPOSE_OPTS="-f etc/aws/default.yml"
         ;;
-     "gcp")
-        provision_google
+    "gcp")
+        provision_gcp
         ;;
     *)
         echo "Invalid parameter(s) or option(s)."
@@ -298,6 +298,7 @@ eval $(docker-machine env ${MACHINE_NAME})
 ./adop compose -m "${MACHINE_NAME}" ${CLI_COMPOSE_OPTS} init
 
 # Generate and export Self-Signed SSL certificate for Docker Registry, applicable only for AWS type
-if [ ${MACHINE_TYPE} == "aws" ]; then
+if [ ${MACHINE_TYPE} != "local" ]; then
     ./adop certbot gen-export-certs "registry.$(docker-machine ip ${MACHINE_NAME}).nip.io" registry
 fi
+

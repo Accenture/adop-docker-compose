@@ -132,7 +132,7 @@ gen_export_certs() {
     # Some versions of Docker also require you to trust the certificate at the OS level
     echo "Copying self-signed certificate to the trusted location /etc/docker/certs.d/..."
 
-    if [ "${MACHINE_TYPE}" == "aws" ] && [ -n "${MACHINE_NAME}" ]; then
+    if [ "${MACHINE_TYPE}" != "local" ] && [ -n "${MACHINE_NAME}" ]; then
         echo "Copying via docker-machine to the ${MACHINE_NAME}..."
         docker-machine scp ${TEMP_CERT_PATH}/${PATH_CERTIFICATE_FILE_NAME} ${MACHINE_NAME}:/tmp
         docker-machine ssh ${MACHINE_NAME} "sudo mkdir -p /etc/docker/certs.d/${DOMAIN_NAME}"
