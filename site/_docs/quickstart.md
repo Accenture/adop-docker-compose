@@ -46,6 +46,12 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
 
             ```./quickstart.sh -t aws -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword -z c```
 
+        -N.B. If you see a recurrent message saying "Nginx is unavailable..." check the Security Group Settings on your VPC to confirm that it has port 80 open.    
+        - Go to your VPC settings in AWS and navigate to Security Groups using the left menu bar
+        - If there is more than one Security Group setup, highlight the one with group name "docker-machine"
+        - beneath this, open the "inbound rules" tab and if there is not one already, create a new entry for port 80 with source = "0.0.0.0/0", and hit save. 
+
+
 1. If all goes well you will see the following output and you can view the DevOps Platform in your browser using the link that accompanies this output:
 
     ```SUCCESS, your new ADOP instance is ready!```
