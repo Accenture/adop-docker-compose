@@ -42,9 +42,17 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
 
         ```./quickstart.sh -t aws -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword```
 
-        - N.B. If you see an error saying that docker-machine cannot find an associated subnet in a zone, go back to the VPC Dashboard on AWS and check the availablity zone for the subnet you've created. Then rerun the startup script and use the -z option to specify the zone for your subnet, e.g. for a zone of eu-west-1c the above command becomes:
+
+        - Possible issues:
+          - If you see an error saying that docker-machine cannot find an associated subnet in a zone, go back to the VPC Dashboard on AWS and check the availablity zone for the subnet you've created. Then rerun the startup script and use the -z option to specify the zone for your subnet, e.g. for a zone of eu-west-1c the above command becomes:
 
             ```./quickstart.sh -t aws -m adop1 -a AAA -s BBB -c vpc-123abc -r eu-west-1 -u user.name -p userPassword -z c```
+
+          - If you see the message "Nginx is unavailable..." more than 10 times, check you have network access on port 80 to the VM created by docker-machine.  For example in AWS check the Security Group Settings:   
+            - Go to your VPC settings in AWS and navigate to Security Groups using the left menu bar
+            - Look for the security group named "docker-machine"
+            - beneath this, open the "inbound rules" tab and if there is not one already, create a new entry for port 80 with source = "0.0.0.0/0", and hit save. 
+
 
 1. If all goes well you will see the following output and you can view the DevOps Platform in your browser using the link that accompanies this output:
 
