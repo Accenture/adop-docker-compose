@@ -4,7 +4,7 @@
 proxy:
   container_name: proxy
   restart: always
-  image: accenture/adop-nginx:0.3.0
+  image: accenture/adop-nginx:0.3.2
   #build: ../images/docker-nginx/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -33,7 +33,9 @@ ldap:
   environment:
     INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
     INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+    JENKINS_PLATFORM_USERNAME: ${JENKINS_PLATFORM_USERNAME}
     JENKINS_PASSWORD: ${JENKINS_PWD}
+    GERRIT_PLATFORM_USERNAME: ${GERRIT_PLATFORM_USERNAME}
     GERRIT_PASSWORD: ${GERRIT_PWD}
     SLAPD_PASSWORD: ${LDAP_PWD}
     SLAPD_DOMAIN: ${LDAP_DOMAIN}
@@ -178,7 +180,7 @@ sonar-mysql:
 sonar:
   container_name: sonar
   restart: always
-  image: accenture/adop-sonar:0.2.0
+  image: accenture/adop-sonar:0.3.5
   #build: ../images/docker-sonar/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -303,7 +305,7 @@ selenium-node-firefox:
 nexus:
   container_name: nexus
   restart: always
-  image:  accenture/adop-nexus:0.1.3
+  image:  accenture/adop-nexus:0.1.4
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "8081"
