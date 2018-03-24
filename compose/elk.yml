@@ -1,36 +1,43 @@
 # set CUSTOM_NETWORK_NAME to the name of the custom Docker network
+version: "3"
 
-elasticsearch:
-  container_name: elasticsearch
-  restart: always
-  image: elasticsearch:2.1.1
-  net: ${CUSTOM_NETWORK_NAME}
-  command: elasticsearch -Des.network.host=0.0.0.0
-  ports:
-    - "9200:9200"
-  volumes:
-    - elasticsearch_data:/usr/share/elasticsearch/data
+services:
+  elasticsearch:
+    container_name: elasticsearch
+    restart: always
+    image: elasticsearch:2.1.1
+    command: elasticsearch -Des.network.host=0.0.0.0
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
 
-logstash:
-  container_name: logstash
-  restart: always
-  image: accenture/adop-logstash:0.1.0
-  net: ${CUSTOM_NETWORK_NAME}
-  environment:
-    - "constraint:tier==public"
-    - LS_HEAP_SIZE=1024m
-  ports:
-    - "12201:12201/udp"
-    - "25826:25826/udp"
-    - "5000:5000/tcp"
+  logstash:
+    container_name: logstash
+    restart: always
+    image: accenture/adop-logstash:0.1.0
+    environment:
+      - "constraint:tier==public"
+      - LS_HEAP_SIZE=1024m
+    ports:
+      - "12201:12201/udp"
+      - "25826:25826/udp"
+      - "5000:5000/tcp"
 
-kibana:
-  container_name: kibana
-  restart: always
-  image: kibana:4.3.1
-  net: ${CUSTOM_NETWORK_NAME}
-  command: kibana
-  environment:
-    - ELASTICSEARCH_URL=http://elasticsearch:9200
-  ports:
-    - "5601:5601"
+  kibana:
+    container_name: kibana
+    restart: always
+    image: kibana:4.3.1
+    command: kibana
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+
+volumes:
+  elasticsearch_data:
+
+networks:
+  default:
+    external:
+      name: ${CUSTOM_NETWORK_NAME}

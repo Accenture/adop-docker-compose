@@ -108,14 +108,14 @@ while [[ $1 ]]; do
     esac
 done
 
-    echo ' 
-          ###    ########   #######  ########  
-         ## ##   ##     ## ##     ## ##     ## 
-        ##   ##  ##     ## ##     ## ##     ## 
-       ##     ## ##     ## ##     ## ########  
-       ######### ##     ## ##     ## ##        
-       ##     ## ##     ## ##     ## ##        
-       ##     ## ########   #######  ##        
+    echo '
+          ###    ########   #######  ########
+         ## ##   ##     ## ##     ## ##     ##
+        ##   ##  ##     ## ##     ## ##     ##
+       ##     ## ##     ## ##     ## ########
+       ######### ##     ## ##     ## ##
+       ##     ## ##     ## ##     ## ##
+       ##     ## ########   #######  ##
     '
 
     echo "* Initialising ADOP"
@@ -143,7 +143,7 @@ done
     TOOL_SLEEP_TIME=30
     until [[ $(docker exec jenkins curl -I -s -u "${JENKINS_PLATFORM_USERNAME}":"${PASSWORD_JENKINS}" localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Jenkins; done
     until [[ $(docker exec gerrit curl -I -s -u "${GERRIT_PLATFORM_USERNAME}":"${PASSWORD_GERRIT}" localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Gerrit; done
-    
+
     # Trigger Load_Platform in Jenkins
     if [ "${LOAD}" = "NO" ]; then
         echo "* Skipping Loading the Platform"
@@ -158,11 +158,11 @@ done
     else
         echo "DOCKER_TLS_VERIFY not set to 1, skipping certificate generation"
     fi
-    
+
     # Wait for Nginx to come up before proceeding
     echo "* Waiting for Nginx to become available"
     until [[ $(curl -k -I -s -u ${INITIAL_ADMIN_USER}:${INITIAL_ADMIN_PASSWORD_PLAIN} ${PROTO}://${TARGET_HOST}/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep 5 Nginx; done
-    
+
     # Tell the user something useful
     echo
     echo '##########################################################'
@@ -195,23 +195,23 @@ gen_certs() {
     CERT_PATH=$1
     if [ -z ${CERT_PATH} ]; then
         echo "
-          Usage : 
+          Usage :
             gen-certs <docker_client_certificate_path>
-          
-          <docker_client_certificate_path>: 
+
+          <docker_client_certificate_path>:
             This is the path of the certificate on jenkins slave container
             to be able to run docker commands against docker swarm.
             Note - absolute path is required.
-              
-          Example: 
+
+          Example:
             gen-certs /root/.docker
         "
         exit 1
     fi
 
     ####
-    # Windows Git bash terminal identifies 
-    # /CN=client as a path and appends the absolute path 
+    # Windows Git bash terminal identifies
+    # /CN=client as a path and appends the absolute path
     # of parent directory to it
     ####
     HOST_OS=$(uname)
@@ -223,7 +223,7 @@ gen_certs() {
 
     ####
     # Fresh start
-    #### 
+    ####
     TEMP_CERT_PATH="${HOME}/docker_certs"
     rm -rf ${TEMP_CERT_PATH}
     mkdir -p ${TEMP_CERT_PATH}
@@ -262,7 +262,7 @@ gen_certs() {
 
     ####
     # * Remove unnecessary files
-    # * Copy the certificates to slave 
+    # * Copy the certificates to slave
     ####
     echo "Uploading certificates to Jenkins Slave at: ${CERT_PATH}"
     rm -f ${TEMP_CERT_PATH}/extfile.cnf ${TEMP_CERT_PATH}/client.csr

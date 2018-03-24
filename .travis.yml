@@ -6,20 +6,20 @@ services:
 
 env:
   global:
-    - DOCKER_ENGINE_VERSION=1.10.3
-    - DOCKER_COMPOSE_VERSION=1.9.0
+    - DOCKER_VERSION=17.12.0-ce
+    - DOCKER_COMPOSE_VERSION=1.18.0
     - INITIAL_ADMIN_USER=admin.user
     - INITIAL_ADMIN_PASSWORD_PLAIN=admin123
     - COMPOSE_FILES="-f site/docker-compose.yml"
     - JEKYLL_SOURCE="/site"
 
 before_install:
- - sudo sh -c 'echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" > /etc/apt/sources.list.d/docker.list'
- - sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+ - sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+ - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+ - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
  - sudo apt-get update
  - sudo apt-key update
- - sudo apt-get install -qqy --force-yes linux-image-extra-$(uname -r) apparmor
- - sudo apt-get install -qqy --force-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" docker-engine=${DOCKER_ENGINE_VERSION}\*
+ - sudo apt-get install docker-ce
  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
  - chmod +x docker-compose
  - sudo mv docker-compose /usr/local/bin
