@@ -305,20 +305,21 @@ selenium-node-firefox:
 nexus:
   container_name: nexus
   restart: always
-  image:  accenture/adop-nexus:0.1.4
+  image:  accenture/adop-nexus:0.2.0
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "8081"
   environment:
-    NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
-    LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
-    LDAP_ENABLED: "true"
-    LDAP_URL: "ldap"
-    LDAP_BIND_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-    LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
-    LDAP_USER_BASE_DN: "${LDAP_USER_BASE_DN}"
-    LDAP_GROUP_BASE_DN: "${LDAP_GROUP_BASE_DN}"
-    LDAP_BIND_PASSWORD: ${LDAP_PWD}
+     NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
+     NEXUS_ADMIN_PASSWORD: "${INITIAL_ADMIN_PASSWORD_PLAIN}"
+     LDAP_NAME: "ldap"
+     LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
+     LDAP_URL: "ldap"
+     LDAP_AUTH_SCHEME: ???
+     LDAP_BIND_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+     LDAP_BIND_PASSWORD: "${LDAP_PWD}"
+     LDAP_USER_BASE_DN: "${LDAP_USER_BASE_DN}"
+     LDAP_GROUP_BASE_DN: "${LDAP_GROUP_BASE_DN}"
 
 ldap-ltb:
   container_name: ldap-ltb
