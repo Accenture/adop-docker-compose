@@ -164,7 +164,8 @@ provision_aws() {
                     --amazonec2-vpc-id ${AWS_VPC_ID} \
                     --amazonec2-zone $VPC_AVAIL_ZONE \
                     --amazonec2-instance-type ${AWS_DOCKER_MACHINE_SIZE} \
-                    --amazonec2-root-size ${AWS_ROOT_SIZE:-32}"
+                    --amazonec2-root-size ${AWS_ROOT_SIZE:-32} \
+                    --engine-install-url=https://web.archive.org/web/20170623081500/https://get.docker.com"
 
         if [ -n "${AWS_ACCESS_KEY_ID}" ] && [ -n "${AWS_SECRET_ACCESS_KEY}" ] && [ -n "${AWS_DEFAULT_REGION}" ]; then
             MACHINE_CREATE_CMD="${MACHINE_CREATE_CMD} \
