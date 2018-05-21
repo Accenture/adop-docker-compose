@@ -61,7 +61,7 @@ jenkins:
 
 nexus:
   volumes:
-    - nexus_sonatype_work:/sonatype-work
+    - nexus_data:/nexus-data
 
 registry:
   volumes:
