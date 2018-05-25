@@ -204,7 +204,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.2.6
+  image: accenture/adop-jenkins:0.2.7
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -305,21 +305,20 @@ selenium-node-firefox:
 nexus:
   container_name: nexus
   restart: always
-  image:  accenture/adop-nexus:0.2.0
+  image:  accenture/adop-nexus:0.1.4
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "8081"
   environment:
-     NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
-     NEXUS_ADMIN_PASSWORD: "${INITIAL_ADMIN_PASSWORD_PLAIN}"
-     LDAP_NAME: "ldap"
-     LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
-     LDAP_URL: "ldap"
-     LDAP_AUTH_SCHEME: ???
-     LDAP_BIND_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-     LDAP_BIND_PASSWORD: "${LDAP_PWD}"
-     LDAP_USER_BASE_DN: "${LDAP_USER_BASE_DN}"
-     LDAP_GROUP_BASE_DN: "${LDAP_GROUP_BASE_DN}"
+    NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
+    LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
+    LDAP_ENABLED: "true"
+    LDAP_URL: "ldap"
+    LDAP_BIND_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+    LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
+    LDAP_USER_BASE_DN: "${LDAP_USER_BASE_DN}"
+    LDAP_GROUP_BASE_DN: "${LDAP_GROUP_BASE_DN}"
+    LDAP_BIND_PASSWORD: ${LDAP_PWD}
 
 ldap-ltb:
   container_name: ldap-ltb
@@ -359,3 +358,13 @@ registry:
     REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
     REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry/fullchain.pem
     REGISTRY_HTTP_TLS_KEY: /certs/registry/privkey.pem
+
+gitlab:
+    container_name: gitlab
+    restart: always
+    image: asivayoganathan/adop-gitlab:master
+    net: ${CUSTOM_NETWORK_NAME}
+    expose:
+      - "80"
+    environment:
+      ROOT_URL: "${PROTO}://${TARGET_HOST}/gitlab/"
