@@ -67,3 +67,9 @@ registry:
   volumes:
     - registry_certs:/certs
     - registry_data:/data
+
+gitlab: 
+  volumes: 
+    - gitlab_config:/etc/gitlab 
+    - gitlab_logs:/var/log/gitlab 
+    - gitlab_data:/var/opt/gitlab 
