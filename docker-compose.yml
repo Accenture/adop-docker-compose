@@ -4,7 +4,7 @@
 proxy:
   container_name: proxy
   restart: always
-  image: accenture/adop-nginx:0.3.2
+  image: asivayoganathan/adop-nginx
   #build: ../images/docker-nginx/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -362,7 +362,7 @@ registry:
 gitlab:
     container_name: gitlab
     restart: always
-    image: asivayoganathan/adop-gitlab:master
+    image: asivayoganathan/adop-gitlab
     net: ${CUSTOM_NETWORK_NAME}
     expose:
       - "80"
