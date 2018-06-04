@@ -78,7 +78,7 @@ selenium-node-firefox:
 nexus:
   volume_driver: nfs
   volumes:
-    - ${NFS_HOST}/nfs/nexus_sonatype_work:/sonatype-work
+    - ${NFS_HOST}/nfs/nexus_sonatype_work:/nexus-data
 
 registry:
   volume_driver: nfs
