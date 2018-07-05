@@ -204,7 +204,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.3.1
+  image: accenture/adop-jenkins:0.3.2
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -244,7 +244,7 @@ jenkins:
     SONAR_DB_PASSWORD: ${SONAR_DB_PASSWORD}
     SONAR_PLUGIN_VERSION: ""
     SONAR_ADDITIONAL_PROPS: ""
-    SONAR_RUNNER_VERSION: "2.4"
+    SONAR_RUNNER_VERSION: "2.9.0.670"
     ANT_VERSION: "1.9.4"
     MAVEN_VERSION: "3.0.5"
     NODEJS_VERSION: "6.9.4"
@@ -258,7 +258,7 @@ jenkins:
     DOCKER_CLIENT_CERT_PATH: ${DOCKER_CLIENT_CERT_PATH}
     DOCKER_NETWORK_NAME: ${CUSTOM_NETWORK_NAME}
     CARTRIDGE_SOURCES: ${CARTRIDGE_SOURCES}
-    ADOP_PLATFORM_MANAGEMENT_VERSION: "272ffe0babffcf5fbd188a199cc67f12f1c7ae28"
+    ADOP_PLATFORM_MANAGEMENT_VERSION: "1c2aac27a926796490cf5a1b97f7064af31c44fe"
 
 jenkins-slave:
   container_name: jenkins-slave
