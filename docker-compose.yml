@@ -180,7 +180,7 @@ sonar-mysql:
 sonar:
   container_name: sonar
   restart: always
-  image: accenture/adop-sonar:0.3.5
+  image: accenture/adop-sonar:0.4.1
   #build: ../images/docker-sonar/
   net: ${CUSTOM_NETWORK_NAME}
   expose:
@@ -204,7 +204,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.2.6
+  image: accenture/adop-jenkins:0.3.2
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -244,7 +244,7 @@ jenkins:
     SONAR_DB_PASSWORD: ${SONAR_DB_PASSWORD}
     SONAR_PLUGIN_VERSION: ""
     SONAR_ADDITIONAL_PROPS: ""
-    SONAR_RUNNER_VERSION: "2.4"
+    SONAR_RUNNER_VERSION: "2.9.0.670"
     ANT_VERSION: "1.9.4"
     MAVEN_VERSION: "3.0.5"
     NODEJS_VERSION: "6.9.4"
@@ -258,6 +258,7 @@ jenkins:
     DOCKER_CLIENT_CERT_PATH: ${DOCKER_CLIENT_CERT_PATH}
     DOCKER_NETWORK_NAME: ${CUSTOM_NETWORK_NAME}
     CARTRIDGE_SOURCES: ${CARTRIDGE_SOURCES}
+    ADOP_PLATFORM_MANAGEMENT_VERSION: "1c2aac27a926796490cf5a1b97f7064af31c44fe"
 
 jenkins-slave:
   container_name: jenkins-slave
@@ -305,20 +306,22 @@ selenium-node-firefox:
 nexus:
   container_name: nexus
   restart: always
-  image:  accenture/adop-nexus:0.1.4
+  image:  accenture/adop-nexus:0.2.2
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "8081"
   environment:
     NEXUS_BASE_URL: "${PROTO}://${TARGET_HOST}/nexus"
+    NEXUS_CONTEXT: "nexus"
+    NEXUS_ADMIN_PASSWORD: "${INITIAL_ADMIN_PASSWORD_PLAIN}"
     LDAP_SEARCH_BASE: "${LDAP_FULL_DOMAIN}"
     LDAP_ENABLED: "true"
     LDAP_URL: "ldap"
     LDAP_BIND_DN: "${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
+    LDAP_BIND_PASSWORD: "${LDAP_PWD}"
     LDAP_USER_PASSWORD_ATTRIBUTE: "userPassword"
     LDAP_USER_BASE_DN: "${LDAP_USER_BASE_DN}"
     LDAP_GROUP_BASE_DN: "${LDAP_GROUP_BASE_DN}"
-    LDAP_BIND_PASSWORD: ${LDAP_PWD}
 
 ldap-ltb:
   container_name: ldap-ltb
