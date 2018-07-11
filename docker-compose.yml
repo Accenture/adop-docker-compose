@@ -204,7 +204,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.3.2
+  image: accenture/adop-jenkins:0.3.3
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -244,7 +244,7 @@ jenkins:
     SONAR_DB_PASSWORD: ${SONAR_DB_PASSWORD}
     SONAR_PLUGIN_VERSION: ""
     SONAR_ADDITIONAL_PROPS: ""
-    SONAR_RUNNER_VERSION: "2.9.0.670"
+    SONAR_RUNNER_VERSION: "2.4"
     ANT_VERSION: "1.9.4"
     MAVEN_VERSION: "3.0.5"
     NODEJS_VERSION: "6.9.4"
