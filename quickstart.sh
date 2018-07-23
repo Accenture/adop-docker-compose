@@ -109,6 +109,20 @@ provision_gcp() {
                               --google-disk-size "${GOOGLE_DISK_SIZE:-32}" \
                               --google-machine-type ${GOOGLE_MACHINE_TYPE} \
                               ${MACHINE_NAME}
+	
+        # Attenpt to open firewall for http on port 80
+        # Allow script to continue if error returned by docker-machine command
+        set +e
+        echo Attempting to open firewall for http on port 80 using gcloud cli
+        gcloud compute instances add-tags ${MACHINE_NAME} --tags http-server
+        rc=$?
+        if [ ${rc} -ne  0 ]; then
+          echo "Unable to open firewall for http on port 80 on your new VM.  Perhaps the gcloud cli utility isn't set up.  Please open this port manually otherwise ADOP provisioning will hang trying to access nginx."
+        fi
+
+        # Reenable errexit
+       	set -e
+
     fi
 
 }
