@@ -5,7 +5,7 @@
 
 The DevOps Platform is a tools environment for continuously testing, releasing and maintaining applications. Reference code, delivery pipelines, automated testing and environments can be loaded in via the concept of [Cartridges](https://github.com/Accenture/adop-cartridge-skeleton).
 
-The platform runs on a [docker container cluster](https://docs.docker.com/swarm/) so it can be stood up for evaluation purposes on just one server using local storage, or stood up in a multi-data centre cluster with distributed network storage.  It will also run anywhere that [docker runs](https://docs.docker.com/engine/installation/binaries/).
+The platform runs on a [docker container cluster](https://docs.docker.com/swarm/) so it can be stood up for evaluation purposes on just one server using local storage, or stood up in a multi-data centre cluster with distributed network storage. It will also run anywhere that [docker runs](https://docs.docker.com/engine/installation/binaries/).
 
 Here is the front page:
 
@@ -17,11 +17,11 @@ If you provisioned your stack using the start-up CLI, an example workspace conta
 
 ![HomePage](https://raw.githubusercontent.com/Accenture/adop-docker-compose/master/img/exampleproj.png)
 
-Once you have explored this the next step is to create your own Workspace and Project and then load another cartridge using a 'Load Cartridge' job in the 'Cartridge Management' folder (that automatically gets created in any Project).  The cartridge [development cartridge](https://github.com/accenture/adop-cartridge-cartridge-dev/) also helps create your own cartridges.
+Once you have explored this, the next step is to create your own Workspace and Project and then load another cartridge using a 'Load Cartridge' job in the 'Cartridge Management' folder (that automatically gets created in any Project). The cartridge [development cartridge](https://github.com/accenture/adop-cartridge-cartridge-dev/) also helps create your own cartridges.
 
 # Quickstart Instructions
 
-These instructions will spin up an instance in a single server in AWS ([for **_evaluation_** purposes](https://accenture.github.io/adop-docker-compose/docs/evaluation-mode)).  Please check the [prerequisites](https://accenture.github.io/adop-docker-compose/docs/prerequisites/).
+These instructions will spin up an instance in a single server in AWS ([for **_evaluation_** purposes](https://accenture.github.io/adop-docker-compose/docs/evaluation-mode)). Please check the [prerequisites](https://accenture.github.io/adop-docker-compose/docs/prerequisites/).
 
 NB. the instructions will also work in anywhere supported by [Docker Machine](https://docs.docker.com/machine/), just follow the relevant Docker Machine instructions for your target platform and then start at step 3 below and (you can set the AWS_VPC_ID to NA).
 
@@ -45,12 +45,12 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
                                -p <INITIAL_ADMIN_PASSWORD>(optional) ...
         ```
         - You will need to supply:
-            - the type of machine to create (aws, in this example)
-            - a machine name (anything you want)
-            - the target VPC
+            - the type of machine to create (AWS, in this example);
+            - a machine name (anything you want);
+            - the target VPC;
             - If you don't have your AWS credentials and default region [stored locally in ~/.aws](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) you will also need to supply:
-                - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using aws configure 
-                - the AWS region id in this format: eu-west-1
+                - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using AWS configure; 
+                - the AWS region id in this format: eu-west-1;
             - a username and password (optional) to act as credentials for the initial admin user (you will be prompted to re-enter your password if it is considered weak)
                 - The initial admin username cannot be set to 'admin' to avoid duplicate entries in LDAP.
             - AWS parameters i.e. a subnet ID, the name of a keypair and an EC2 instance type (these parameters are useful if you would like to extend the platform with additional AWS EC2 services)
@@ -154,9 +154,9 @@ Create a Docker Swarm that has a publicly accessible Engine with the label "tier
 
 # Using the platform 
 
-###### Generate ssl certificate
+###### Generate SSL certificate
 
-Create ssl certificate for jenkins to allow connectivity with docker engine.
+Create SSL certificate for Jenkins to allow connectivity with docker engine.
 
 * RUN : source ./conf/env.provider.sh
 * RUN : source credentials.generate.sh
@@ -172,7 +172,7 @@ Note : For Windows run this command from a terminal (Git Bash) as administrator.
 * Click: Jenkins link.
 * Run: Load\_Platform job
  * Once the Load\_Platform job and other downstream jobs are finished your platform is ready to be used.
- * This job generates a example workspace folder, example project folder and jenkins jobs/pipelines for java reference application.
+ * This job generates a example workspace folder, example project folder and Jenkins jobs/pipelines for java reference application.
 * Create environment to deploy the reference application
  * Navigate to `http://<TARGET_HOST>/jenkins/job/ExampleWorkspace/job/ExampleProject/job/Create_Environment`
  * Build with Parameters keeping the default value.

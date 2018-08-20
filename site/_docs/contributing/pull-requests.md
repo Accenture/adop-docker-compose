@@ -9,7 +9,7 @@ You are invited to contribute new features, fixes, or updates, large or small; w
 
 Before you start to code (especially for the Core), we recommend discussing your plans through a GitHub issue, especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.
 
-When submitting pull requests we have a few guidelines that we'd like people to follow to make it easier to review and accept contributions:
+When submitting pull requests, we have a few guidelines that we'd like people to follow to make it easier to review and accept contributions:
 
 * The heading and description should clearly explain what the pull request is seeking to achieve
 * If the pull request has dependencies on other PRs, please specify them and the order in which they should be applied if applicable

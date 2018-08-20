@@ -6,7 +6,7 @@ permalink: /docs/home/
 
 This is the home of all ADOP documentation.
 
-If you are new to the platform then the recommended reading is:
+If you are new to the platform then we recommended you read this:
 
 - [Prerequisites](/adop-docker-compose/docs/prerequisites/)
 - [Quickstart](/adop-docker-compose/docs/quickstart/)

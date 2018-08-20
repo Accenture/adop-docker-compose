@@ -21,7 +21,7 @@ The process for developing a cartridge is:
 When developing a cartridge, it is advisable to follow the guidelines below in order to develop stable, secure and standardized cartridges.
 
 ### Jenkins Pipeline
-When developing a cartridge, it is recommended that Job DSL be used in favor of XML to write your Jenkins jobs. If your cartridge only uses Job DSL a cartridge can be loaded multiple times without having to create a new project. However, if your cartridge loads XML then the jobs will need to be removed in order to reload the cartridge.
+When developing a cartridge, it is recommended that Job DSL be used in favor of XML to write your Jenkins jobs. If your cartridge only uses Job DSL, a cartridge can be loaded multiple times without having to create a new project. However, if your cartridge loads XML then the jobs will need to be removed in order to reload the cartridge.
 
 There are a number of resources available for developing Job DSL that can be found on the [Job DSL plugin wiki](https://github.com/jenkinsci/job-dsl-plugin/wiki).
 

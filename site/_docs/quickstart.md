@@ -30,11 +30,11 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
         ```
 
         - You will need to supply:
-            - the type of machine to create (aws, in this example)
+            - the type of machine to create (AWS, in this example)
             - a machine name (anything you want)
             - the target VPC
             - If you don't have your AWS credentials and default region [stored locally in ~/.aws](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files) you will also need to supply:
-                - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using aws configure 
+                - your AWS key and your secret access key (see [getting your AWS access key](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html)) via command line options, environment variables or using AWS configure 
                 - the AWS region id in this format: eu-west-1
             - a username and password (optional) to act as credentials for the initial admin user (you will be prompted to re-enter your password if it is considered weak)
 

@@ -17,5 +17,4 @@ It is not suitable for, nor intended to be used, in production as there are nume
 * Backups
     * Data is stored directly on the host that is created which means that when it is terminated the data will be lost
 * Patching
-    * Once the DevOps Platform has been deployed manual intervention will be required to apply patches
-
+    * Once the DevOps Platform has been deployed, manual intervention will be required to apply patches
