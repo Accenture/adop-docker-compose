@@ -18,6 +18,8 @@
 - title: Provisioning [WIP]
   docs:
   - provisioning
+  - provisioning/quickstart
+  - provisioning/adop_cli
 
 - title: Operating
   docs:
