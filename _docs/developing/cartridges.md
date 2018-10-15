@@ -35,6 +35,7 @@ High-level guidelines for writing Jenkins jobs in Job DSL:
 * Pluggable SCM
     * This is the recommended way!
     * [Pluggable SCM library](https://accenture.github.io/adop-pluggable-scm/docs/about-pluggable-scm/) allows you to clone repositories over SSH, HTTPS and HTTP protocols, at the moment _Gerrit_ and _BitBucket_ are supported.
+    * Multibranch Jenkins pipelines are supported
     * When cloning from external git repositories, ensure that you only clone from trusted git repositories.
     * When cloning a git repository, it better to clone using a reference rather than a branch specifier. The way to do this is by specifying the variable $GERRIT_NEWREV in the "Branch Specifier" variable. This is useful in the case of jobs that need to be rebuilt, and it is preferred that the code from that specific build be cloned as opposed to the latest code on a specific branch.
 * Miscellaneous
@@ -51,6 +52,7 @@ The table below lists some useful Job DSL functions to use when writing your Jen
 |maskPasswords()|Hides the injected passwords so that they are not visible in plan text|
 |sshAgent()|Specify SSH credentials to be used when cloning from repositories over SSH|
 |scm()|Define a repository and a branch specifier to clone|
+|branchSources()|Define a repository for multibranch pipelines |
 |triggers()|Specify an event (e.g. Gerrit trigger) to start a job|
 |steps()|Build steps to execute e.g. shell(), SonarQube()|
 |publishers()|List the post-build actions to execute after build steps have completed|
