@@ -35,6 +35,5 @@ Please check the [prerequisites](http://accenture.github.io/adop-docker-compose/
       Password: YOUR_PASSWORD
     ```
 4. Log in using the username and password you specified in the quickstart script:
-    ```
-<INITIAL_ADMIN_USER> / <INITIAL_ADMIN_PASSWORD>
-    ```
+
+    ```<INITIAL_ADMIN_USER> / <INITIAL_ADMIN_PASSWORD>```

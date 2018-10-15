@@ -16,5 +16,5 @@ If you are new to the platform then the recommended reading is:
 
 Most common provisioning scenarios:
 
-- [Using the quickstart script](/adop-docker-compose/docs/provisioning/quickstart.md)
+- [Using the quickstart script](/adop-docker-compose/docs/provisioning/quickstart)
 - [Using the adop cli](/adop-docker-compose/docs/provisioning/adop_cli)
