@@ -15,4 +15,4 @@ Cartridges are defined according to the [cartridge specification](https://github
 Cartridges can be grouped together into collections so that related cartridges can be loaded in one go.
 
 ## Pluggable modules
-Cartridges can also support Pluggable modules. At the moment [Pluggable SCM](https://accenture.github.io/adop-cartridges-cookbook/docs/recipes/adding-a-pluggable-scm/) is supported with which help you are able to use your desired SCM provider - _Gerrit_ or _BitBucket_
+Cartridges can also support Pluggable modules. At the moment [Pluggable SCM](https://accenture.github.io/adop-cartridges-cookbook/docs/recipes/adding-a-pluggable-scm/) is supported with which help you are able to use your desired SCM provider - _Gerrit_ , _Gitlab_ or _BitBucket_

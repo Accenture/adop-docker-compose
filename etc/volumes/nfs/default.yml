@@ -10,17 +10,22 @@ ldap:
     - ${NFS_HOST}/nfs/ldap_db:/var/lib/ldap
     - ${NFS_HOST}/nfs/ldap_static:/etc/ldap
 
-gerrit-mysql:
+gitlab-postgresql:
   volume_driver: nfs
   volumes:
-    - ${NFS_HOST}/nfs/gerrit_mysql_data:/var/lib/mysql
+    - ${NFS_HOST}/nfs/gitlab_postgresql_data:/var/lib/postgresql:rw
 
-gerrit:
-  user: root
+gitlab:
   volume_driver: nfs
   volumes:
-    - ${NFS_HOST}/nfs/git_repos:/var/git/repos 
-    - ${NFS_HOST}/nfs/gerrit_review_site:/var/gerrit/review_site 
+    - ${NFS_HOST}/nfs/gitlab_config:/etc/gitlab:rw
+    - ${NFS_HOST}/nfs/gitlab_logs:/var/log/gitlab:rw
+    - ${NFS_HOST}/nfs/gitlab_data:/var/opt/gitlab:rw
+
+gitlab-redis:
+  volume_driver: nfs
+  volumes:
+    - ${NFS_HOST}/nfs/gitlab_redis_data:/data
 
 sensu-api:
   volume_driver: nfs

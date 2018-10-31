@@ -182,7 +182,7 @@ Note : For Windows run this command from a terminal (Git Bash) as administrator.
 * Browse the environment
  * Click on the url for your environment from deploy job.
  * You should be able to see the spring petclinic application.
-* Now, you can clone the repository from gerrit and make a code change to see the example pipeline triggered automatically.
+* Now, you can clone the repository from gitlab and make a code change to see the example pipeline triggered automatically.
 
 # Define Default Elastic Search Index Pattern
 

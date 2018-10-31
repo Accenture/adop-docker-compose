@@ -80,13 +80,13 @@ else
 	fi
 	sed -i'' -e "s/###INITIAL_ADMIN_PASSWORD_PLAIN###/$INITIAL_ADMIN_PASSWORD_PLAIN/g" platform.secrets.sh
 		
-	# Generate random passwords for Jenkins, Gerrit, SQL, LDAP Admin and place them in secrets file
-	echo "Generating random passwords for Jenkins, Gerrit, SQL and LDAP admin..."
+	# Generate random passwords for Jenkins, Gitlab, SQL, LDAP Admin and place them in secrets file
+	echo "Generating random passwords for Jenkins, Gitlab, SQL and LDAP admin..."
 	PASSWORD_JENKINS=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_JENKINS_PLAIN###/$PASSWORD_JENKINS/g" platform.secrets.sh
 	
-	PASSWORD_GERRIT=$(createPassword)
-	sed -i'' -e "s/###PASSWORD_GERRIT_PLAIN###/$PASSWORD_GERRIT/g" platform.secrets.sh
+	PASSWORD_GITLAB=$(createPassword)
+	sed -i'' -e "s/###PASSWORD_GITLAB_PLAIN###/$PASSWORD_GITLAB/g" platform.secrets.sh
 	
 	PASSWORD_SQL=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_SQL_PLAIN###/$PASSWORD_SQL/g" platform.secrets.sh
@@ -113,7 +113,7 @@ fi
 # Check to make sure the default tokens are not being used
 if  [ $INITIAL_ADMIN_PASSWORD_PLAIN == "###INITIAL_ADMIN_PASSWORD_PLAIN###" ] || \
 	[ $PASSWORD_JENKINS == "###PASSWORD_JENKINS_PLAIN###" ] || \
-	[ $PASSWORD_GERRIT == "###PASSWORD_GERRIT_PLAIN###" ] || \
+	[ $PASSWORD_GITLAB == "###PASSWORD_GITLAB_PLAIN###" ] || \
 	[ $PASSWORD_SQL == "###PASSWORD_SQL_PLAIN###" ] || \
 	[ $LDAP_PWD == "###LDAP_PWD###" ]; then
 	echo "Your passwords are set to the default tokens provided in the example secrets file, this is not allowed."
@@ -124,4 +124,4 @@ fi
 # Export the passwords in base64 to be passed in as environment variables for LDAP container
 export INITIAL_ADMIN_PASSWORD=$(echo -n $INITIAL_ADMIN_PASSWORD_PLAIN | base64)
 export JENKINS_PWD=$(echo -n $PASSWORD_JENKINS | base64)
-export GERRIT_PWD=$(echo -n $PASSWORD_GERRIT | base64)
+export GITLAB_PWD=$(echo -n $PASSWORD_GITLAB | base64)

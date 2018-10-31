@@ -18,6 +18,6 @@ Once you [generate a project](/adop-docker-compose/docs/operating/projects), you
 	- `CARTRIDGE_FOLDER` - The folder name within the project namespace where your cartridge will be loaded into.
 	- `FOLDER_DISPLAY_NAME` - Display name of the folder where the cartridge is loaded.
 	- `FOLDER_DESCRIPTION` - Description of the folder where the cartridge is loaded.
-	- `ENABLE_CODE_REVIEW` - Enables Gerrit Code Reviewing for the selected cartridge.
+	- `ENABLE_CODE_REVIEW` - Enables Code Reviewing for the selected cartridge (only supports Gerrit).
 	- `OVERWRITE_REPOS` - If ticked, existing code repositories will be overwritten. For first time cartridge runs, this property is redudant.
 1. Click "Build".

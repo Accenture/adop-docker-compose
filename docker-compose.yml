@@ -4,7 +4,7 @@
 proxy:
   container_name: proxy
   restart: always
-  image: accenture/adop-nginx:0.3.2
+  image: accenture/adop-nginx:0.3.5
   #build: ../images/docker-nginx/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -24,7 +24,7 @@ ldap:
   container_name: ldap
   restart: always
   #build: ../images/docker-ldap/
-  image: accenture/adop-ldap:0.1.3
+  image: accenture/adop-ldap:0.2.1
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "389"
@@ -35,65 +35,81 @@ ldap:
     INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
     JENKINS_PLATFORM_USERNAME: ${JENKINS_PLATFORM_USERNAME}
     JENKINS_PASSWORD: ${JENKINS_PWD}
-    GERRIT_PLATFORM_USERNAME: ${GERRIT_PLATFORM_USERNAME}
-    GERRIT_PASSWORD: ${GERRIT_PWD}
+    GITLAB_PLATFORM_USERNAME: ${GITLAB_PLATFORM_USERNAME}
+    GITLAB_PASSWORD: ${GITLAB_PWD}
     SLAPD_PASSWORD: ${LDAP_PWD}
     SLAPD_DOMAIN: ${LDAP_DOMAIN}
     SLAPD_FULL_DOMAIN: ${LDAP_FULL_DOMAIN}
 
-gerrit-mysql:
-  container_name: gerrit-mysql
+gitlab-postgresql:
+  container_name: gitlab-postgresql
   restart: always
-  image: mysql:5.6.25
+  image: postgres:9.6.9-alpine
   net: ${CUSTOM_NETWORK_NAME}
   expose:
-    - "3306"
+    - "5432"
   environment:
-    MYSQL_ROOT_PASSWORD: ${PASSWORD_SQL}
-    MYSQL_USER: ${GERRIT_MYSQL_USER}
-    MYSQL_PASSWORD: ${GERRIT_MYSQL_PASSWORD}
-    MYSQL_DATABASE: ${GERRIT_MYSQL_DATABASE}
+    POSTGRES_USER: ${GITLAB_POSTGRES_USER}
+    POSTGRES_PASSWORD: ${GITLAB_POSTGRES_PASSWORD}
+    POSTGRES_DB: ${GITLAB_POSTGRES_DB}
 
-gerrit:
-  container_name: gerrit
+gitlab:
+  container_name: gitlab
   restart: always
-  #build: ../images/docker-gerrit/
-  image: accenture/adop-gerrit:0.1.3
-  privileged: true
+  image: accenture/adop-gitlab:0.1.1
+  hostname: gitlab
+  links:
+    - gitlab-postgresql:postgresql
+    - gitlab-redis:redis
   net: ${CUSTOM_NETWORK_NAME}
   expose:
-    - "8080"
-    - "29418"
+    - "80"
+    - "22"
   environment:
-    - "dependency:container==gerrit-mysql"
-    - "REPO_PATH=/var/git/repos"
-    - "WEBURL=${PROTO}://${TARGET_HOST}/gerrit/"
-    - "DATABASE_TYPE=mysql"
-    - "DB_HOSTNAME=gerrit-mysql"
-    - "DB_PORT=3306"
-    - "DB_NAME=${GERRIT_MYSQL_DATABASE}"
-    - "DB_USER=${GERRIT_MYSQL_USER}"
-    - "DB_PASSWORD=${GERRIT_MYSQL_PASSWORD}"
-    - "AUTH_LOGOUTURL=${PROTO}://${TARGET_HOST}/gerrit/"
-    - "AUTH_TYPE=LDAP"
-    - "GERRIT_PASSWORD=${PASSWORD_GERRIT}"
-    - "JENKINS_PASSWORD=${PASSWORD_JENKINS}"
-    - "INITIAL_ADMIN_USER=${INITIAL_ADMIN_USER}"
-    - "INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD_PLAIN}"
-    - "LDAP_SERVER=${LDAP_SERVER}"
-    - "LDAP_ACCOUNTBASE=${LDAP_FULL_DOMAIN}"
-    - "LDAP_ACCOUNTPATTERN=${LDAP_ACCOUNTPATTERN}"
-    - "LDAP_ACCOUNTFULLNAME=${LDAP_ACCOUNTFULLNAME}"
-    - "LDAP_ACCOUNTEMAILADDRESS=mail"
-    - "LDAP_USERNAME=${LDAP_ADMIN},${LDAP_FULL_DOMAIN}"
-    - "LDAP_PASSWORD=${LDAP_PWD}"
-    - "LDAP_GROUPBASE=${LDAP_GROUP_BASE_DN},${LDAP_FULL_DOMAIN}"
-    - "LDAP_GROUPPATTERN=${LDAP_GROUPPATTERN}"
-    - "LDAP_GROUPMEMBERPATTERN=${LDAP_GROUPMEMBERPATTERN}"
-    - "HTTPD_LISTENURL=proxy-${PROTO}://0.0.0.0:8080/gerrit"
-    - "USER_NAME=${GERRIT_USER_NAME}"
-    - "USER_EMAIL=${GERRIT_USER_EMAIL}"
-    - "DOWNLOAD_SCHEME=http"
+    INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
+    INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD_PLAIN}
+    JENKINS_USER: ${GITLAB_JENKINS_USERNAME}
+    JENKINS_PASSWORD: ${PASSWORD_JENKINS}
+    GITLAB_OMNIBUS_CONFIG: |
+     external_url "${PROTO}://${TARGET_HOST}/gitlab"
+     postgresql['enable'] = false
+     gitlab_rails['db_username'] = "${GITLAB_POSTGRES_USER}"
+     gitlab_rails['db_password'] = "${GITLAB_POSTGRES_PASSWORD}"
+     gitlab_rails['db_host'] = "gitlab-postgresql"
+     gitlab_rails['db_port'] = "5432"
+     gitlab_rails['db_database'] = "${GITLAB_POSTGRES_DB}"
+     gitlab_rails['db_adapter'] = 'postgresql'
+     gitlab_rails['db_encoding'] = 'utf8'
+     gitlab_rails['monitoring_whitelist'] = ['127.0.0.0/8', '172.0.0.0/8']
+     # Redis Configuration
+     redis['enable'] = false
+     gitlab_rails['redis_host'] = 'gitlab-redis'
+     gitlab_rails['redis_port'] = '6379'
+     # LDAP Configuration
+     gitlab_rails['ldap_enabled'] = true
+     gitlab_rails['ldap_servers'] = YAML.load <<-'EOS'
+       main:
+         label: 'LDAP'
+         host: 'ldap'
+         port: 389
+         uid: 'uid'
+         method: 'plain'
+         bind_dn: '${LDAP_MANAGER_DN}'
+         password: '${LDAP_PWD}'
+         active_directory: true
+         allow_username_or_email_login: false
+         block_auto_created_users: false
+         base: '${LDAP_FULL_DOMAIN}'
+         signin_enabled: false
+     EOS
+
+gitlab-redis:
+  container_name: gitlab-redis
+  restart: always
+  image: redis:3.2.12-alpine
+  net: ${CUSTOM_NETWORK_NAME}
+  expose:
+    - "6379"
 
 sensu-uchiwa:
   container_name: sensu-uchiwa
@@ -109,7 +125,7 @@ sensu-uchiwa:
 sensu-api:
   container_name: sensu-api
   restart: always
-  image: accenture/adop-sensu:0.2.0
+  image: accenture/adop-sensu:0.2.1
   net: ${CUSTOM_NETWORK_NAME}
   command: api
   expose:
@@ -122,7 +138,7 @@ sensu-api:
 sensu-server:
   container_name: sensu-server
   restart: always
-  image: accenture/adop-sensu:0.2.0
+  image: accenture/adop-sensu:0.2.1
   net: ${CUSTOM_NETWORK_NAME}
   command: server
   environment:
@@ -134,7 +150,7 @@ sensu-server:
 sensu-client:
   container_name: sensu-client
   restart: always
-  image: accenture/adop-sensu:0.2.0
+  image: accenture/adop-sensu:0.2.1
   net: ${CUSTOM_NETWORK_NAME}
   command: client
   environment:
@@ -143,7 +159,7 @@ sensu-client:
     CLIENT_ADDRESS: 127.0.0.1
     RABBITMQ_HOST: sensu-rabbitmq
     JENKINS_PREFIX: jenkins
-    CLIENT_SUBSCRIPTIONS: "proxy,gerrit,jenkins,nexus,sonarqube,sensu,kibana"
+    CLIENT_SUBSCRIPTIONS: "proxy,gitlab,jenkins,nexus,sonarqube,sensu,kibana"
 
 sensu-rabbitmq:
   container_name: sensu-rabbitmq
@@ -204,7 +220,7 @@ sonar:
 jenkins:
   container_name: jenkins
   restart: always
-  image: accenture/adop-jenkins:0.3.5
+  image: accenture/adop-jenkins:0.3.6
   #build: ../images/docker-jenkins/
   net: ${CUSTOM_NETWORK_NAME}
   ports:
@@ -232,10 +248,9 @@ jenkins:
     LDAP_GROUP_NAME_ADMIN: "${LDAP_GROUP_NAME_ADMIN}"
     INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER}
     INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD_PLAIN}
-    GERRIT_HOST_NAME: "gerrit"
-    GERRIT_FRONT_END_URL: "http://gerrit:8080/gerrit"
-    GERRIT_JENKINS_USERNAME: "${GERRIT_JENKINS_USERNAME}"
-    GERRIT_JENKINS_PASSWORD: ${PASSWORD_JENKINS}
+    GITLAB_HOST: "gitlab"
+    GITLAB_USERNAME: ${GITLAB_JENKINS_USERNAME}
+    GITLAB_PASSWORD: ${PASSWORD_JENKINS}
     SONAR_SERVER_URL: "http://sonar:9000/sonar/"
     SONAR_ACCOUNT_LOGIN: ${SONAR_ACCOUNT_LOGIN}
     SONAR_ACCOUNT_PASSWORD: ${PASSWORD_JENKINS}

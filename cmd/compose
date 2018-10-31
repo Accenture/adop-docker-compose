@@ -138,11 +138,11 @@ done
     echo "* Bringing up ADOP..."
     run_compose up -d
 
-    # Wait for Jenkins and Gerrit to come up before proceeding
+    # Wait for Jenkins and Gitlab to come up before proceeding
     echo "* Waiting for the Platform to become available - this can take a few minutes"
     TOOL_SLEEP_TIME=30
     until [[ $(docker exec jenkins curl -I -s -u "${JENKINS_PLATFORM_USERNAME}":"${PASSWORD_JENKINS}" localhost:8080/jenkins/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Jenkins; done
-    until [[ $(docker exec gerrit curl -I -s -u "${GERRIT_PLATFORM_USERNAME}":"${PASSWORD_GERRIT}" localhost:8080/gerrit/|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Gerrit; done
+    until [[ $(docker exec gitlab curl -I -s localhost:80/gitlab/-/health|head -n 1|cut -d$' ' -f2) == 200 ]]; do pretty_sleep ${TOOL_SLEEP_TIME} Gitlab; done
     
     # Trigger Load_Platform in Jenkins
     if [ "${LOAD}" = "NO" ]; then

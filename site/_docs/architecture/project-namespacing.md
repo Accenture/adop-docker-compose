@@ -17,7 +17,7 @@ Namespacing involves the following two concepts:
 The following tools support namespacing:
 
 * [Jenkins](#jenkins)
-* [Gerrit](#gerrit)
+* [Gitlab](#gitlab)
 
 ## Jenkins
 Namespacing in Jenkins is achieved using:
@@ -27,8 +27,7 @@ Namespacing in Jenkins is achieved using:
 * [Role Strategy plugin](https://wiki.jenkins-ci.org/display/JENKINS/Role+Strategy+Plugin)
     * To restrict which groups have access to the different namespaces
 
-## Gerrit
-Namespacing in Gerrit is achieved by:
+## Gitlab
+Namespacing in Gitlab is achieved by:
 
-* Creating repositories within directories that are aligned with the namespacing in [Jenkins](#jenkins)
-* Creating a project-specific permissions repository that restricts access to all repositories within that project
+* Creating repositories within group (namespace is same thing with group in Gitlab)

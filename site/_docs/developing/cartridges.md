@@ -31,13 +31,13 @@ High-level guidelines for writing Jenkins jobs in Job DSL:
     * Ensure that you are using the preBuildCleanup() wrapper in your Job DSL to make sure that your Jenkins workspace is cleared before every build.
     * Do not make any credentials visible anywhere in your job i.e. do not echo passwords in your shell script or store credentials as plain-text build parameters. Ensure you are always using the maskPasswords() and injectPasswords() wrappers in your Job DSL.
         * Credentials can also be added manually to the Jenkins credential store and then referenced in your job.
-    * It is highly recommended that the sshAgent() wrapper be used with the Jenkins credentials specified in order to allow Jenkins to clone all local git repositories from Gerrit over SSH.
+    * It is highly recommended that the sshAgent() wrapper be used with the Jenkins credentials specified in order to allow Jenkins to clone all local git repositories from Gitlab over SSH.
 * Pluggable SCM
     * This is the recommended way!
-    * [Pluggable SCM library](https://accenture.github.io/adop-pluggable-scm/docs/about-pluggable-scm/) allows you to clone repositories over SSH, HTTPS and HTTP protocols, at the moment _Gerrit_ and _BitBucket_ are supported.
+    * [Pluggable SCM library](https://accenture.github.io/adop-pluggable-scm/docs/about-pluggable-scm/) allows you to clone repositories over SSH, HTTPS and HTTP protocols, at the moment _Gerrit_ , _Gitlab_ and _BitBucket_ are supported.
     * Multibranch Jenkins pipelines are supported
     * When cloning from external git repositories, ensure that you only clone from trusted git repositories.
-    * When cloning a git repository, it better to clone using a reference rather than a branch specifier. The way to do this is by specifying the variable $GERRIT_NEWREV in the "Branch Specifier" variable. This is useful in the case of jobs that need to be rebuilt, and it is preferred that the code from that specific build be cloned as opposed to the latest code on a specific branch.
+    * When cloning a git repository, it better to clone using a reference rather than a branch specifier. The way to do this is by specifying the variable $GITLAB_NEWREV in the "Branch Specifier" variable. This is useful in the case of jobs that need to be rebuilt, and it is preferred that the code from that specific build be cloned as opposed to the latest code on a specific branch.
 * Miscellaneous
     * It is preferable to set your jobs to build on the Jenkins slave as opposed to the Jenkins master.
     * It is advisable to set up Log Rotation in order to discard old builds and artifacts so as to not occupy unnecessary space on the server. This can be implemented via the logRotator() option in Job DSL.
@@ -53,26 +53,26 @@ The table below lists some useful Job DSL functions to use when writing your Jen
 |sshAgent()|Specify SSH credentials to be used when cloning from repositories over SSH|
 |scm()|Define a repository and a branch specifier to clone|
 |branchSources()|Define a repository for multibranch pipelines |
-|triggers()|Specify an event (e.g. Gerrit trigger) to start a job|
+|triggers()|Specify an event (e.g. Gitlab trigger) to start a job|
 |steps()|Build steps to execute e.g. shell(), SonarQube()|
 |publishers()|List the post-build actions to execute after build steps have completed|
 
 ### Source code
 The src folder in a cartridge will contain a single urls.txt file which will contain a list of clone urls for source code git repositories to be loaded in during cartridge creation.
 
-* It is advisable to use this file to load any repositories containing any source code as opposed to manually creating the repositories in Gerrit and then configuring manually configuring your Jenkins jobs to clone from the created repository.
+* It is advisable to use this file to load any repositories containing any source code as opposed to manually creating the repositories in Gitlab and then configuring manually configuring your Jenkins jobs to clone from the created repository.
 * The repositories must be cloned over HTTPS from the specified repository browsers (Github, BitBucket, etc.) and they must be publicly accessible. If this is not the case, the cartridge loader will fail to load the repositories. If the urls provided are SSH clone urls, then the Jenkins SSH key must be added to the relevant repository browser.
 
 ## Using the Cartridge Development cartridge
-This development cartridge allows you to load a cartridge template, creates a repository for it in Gerrit, load your cartridge from Gerrit, validate it and then publish it to an external Git repository host.
+This development cartridge allows you to load a cartridge template, creates a repository for it in Gitlab, load your cartridge from Gitlab, validate it and then publish it to an external Git repository host.
 
 To use it:
 
 * Create a project to load the cartridge
     * Ideally create a [new project](/adop-docker-compose/docs/operating/projects/) within a [new workspace](/adop-docker-compose/docs/operating/workspaces/)
     * Select "adop-cartridge-cartridge-dev" when loading the cartridge
-* Run the CreateNewCartridge job in Jenkins which will create a repository in Gerrit
-* Clone the Gerrit repository and add the cartridge content
+* Run the CreateNewCartridge job in Jenkins which will create a repository in Gitlab
+* Clone the Gitlab repository and add the cartridge content
 * When the cartridge is ready, you may validate it using the ValidateCartridgeRepo job in Jenkins
 * To test the functionality of the cartridge, you may use LoadDevCartridge to load an instance of your cartridge into your ADOP Core
 * When you are satisfied with the content and functionality of your cartridge, you may use PublishCartridgeRepo to push your cartridge to an external Git repository
@@ -108,7 +108,7 @@ Cartridges can also include jobs for creating and destroying environments, or th
 
 ## Adding Pluggable SCM
 
-To use _Gerrit_ or _BitBucket_ SCM provider, you can now add [Pluggable SCM](https://accenture.github.io/adop-pluggable-scm/docs/about-pluggable-scm/) library to your cartridge. More information can be found here - [Add Pluggable SCM to cartridge](https://accenture.github.io/adop-cartridges-cookbook/docs/recipes/adding-a-pluggable-scm/)
+To use _Gerrit_ , _Gitlab_ or _BitBucket_ SCM provider, you can now add [Pluggable SCM](https://accenture.github.io/adop-pluggable-scm/docs/about-pluggable-scm/) library to your cartridge. More information can be found here - [Add Pluggable SCM to cartridge](https://accenture.github.io/adop-cartridges-cookbook/docs/recipes/adding-a-pluggable-scm/)
 
 ## Testing the Cartridge
 Once a cartridge has been developed it is necessary to test it against the platform in the same way that consuming users would.
@@ -147,10 +147,10 @@ Your very own cartridge should now be visible in the `CARTRIDGE_CLONE_URL` list 
 
 Easiest way to find a path to your custom cartridge:
 
-1. Access Gerrit via ADOP platform.
-1. Click on "Projects", navigate to "List".
-1. Find your cartridge path (i.e. ExampleWorkspace/CartridgesProject/DevCart/my-new-cartridge), copy it - you will need it in the next step.
-1. Adjust the path: ssh://jenkins@gerrit:29418/ `<YOUR_PATH>` .git
+1. Access Gitlab via ADOP platform.
+1. Click on "Projects", select "Your projects".
+1. Find your cartridge repo (i.e. my-new-cartridge), take note the group / namespace of the repo - you will need it in the next step.
+1. Adjust the path: git@gitlab:<gitlab_group>/`<gitlab_repo>`.git
 
 Now you have a full path to your cartridge which, if you wish, you can add it to the `CARTRIDGE_CLONE_URL` list of "Load_Platform" job.
 

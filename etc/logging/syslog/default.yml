@@ -12,17 +12,23 @@ ldap:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
     tag: "ldap"
 
-gerrit-mysql:
+gitlab-postgresql:
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "gerrit-mysql"
+    tag: "gitlab-postgresql"
 
-gerrit:
+gitlab:
   log_driver: "syslog"
   log_opt:
     syslog-address: "udp://${LOGSTASH_HOST}:25826"
-    tag: "gerrit"
+    tag: "gitlab"
+
+gitlab-redis:
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: "udp://${LOGSTASH_HOST}:25826"
+    tag: "gitlab-redis"
 
 sensu-uchiwa:
   log_driver: "syslog"

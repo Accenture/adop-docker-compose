@@ -5,18 +5,22 @@ proxy:
 
 ldap:
   volumes:
-      - ldap_db:/var/lib/ldap
-      - ldap_static:/etc/ldap
+    - ldap_db:/var/lib/ldap
+    - ldap_static:/etc/ldap
 
-gerrit-mysql:
+gitlab-postgresql:
   volumes:
-    - gerrit_mysql_data:/var/lib/mysql
+    - gitlab_postgresql_data:/var/lib/postgresql:rw
 
-gerrit:
-  user: root
+gitlab:
   volumes:
-    - git_repos:/var/git/repos 
-    - gerrit_review_site:/var/gerrit/review_site 
+    - gitlab_config:/etc/gitlab:rw
+    - gitlab_logs:/var/log/gitlab:rw
+    - gitlab_data:/var/opt/gitlab:rw
+
+gitlab-redis:
+  volumes:
+    - gitlab_redis_data:/data
 
 sensu-api:
   volumes:

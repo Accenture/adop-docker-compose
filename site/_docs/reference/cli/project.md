@@ -122,4 +122,4 @@ Used for creating a project space within a workspace in ADOP Jenkins instance.
 ## Examples [WIP]
 
 * `./adop project -p <PROJECT_NAME> -w <WORKSPACE_NAME> create` - creates a project in an existing workspace in ADOP Jenkins instance.
-* `./adop project -p <PROJECT_NAME> -w <WORKSPACE_NAME> load -u ssh://jenkins@gerrit:29418/cartridges/adop-cartridge-java.git` - loads Java reference catridge in ADOP Jenkins instance under existing workspace/project.
+* `./adop project -p <PROJECT_NAME> -w <WORKSPACE_NAME> load -u https://github.com/Accenture/adop-cartridge-java.git` - loads Java reference catridge in ADOP Jenkins instance under existing workspace/project.
