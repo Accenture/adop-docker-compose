@@ -33,6 +33,7 @@ script:
  - sleep 30
  - ./adop workspace -w Travis create
  - ./adop project -p TestProject -w Travis create
+ - ./adop project -p TestProject -w Travis load_collection -c https://raw.githubusercontent.com/Accenture/adop-docker-compose/master/test/resources/cartridge_collection.json
  - ./adop compose down
  - docker-compose ${COMPOSE_FILES} build
  - docker-compose ${COMPOSE_FILES} -p adopdockercompose up -d
