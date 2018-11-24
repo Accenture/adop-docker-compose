@@ -73,7 +73,7 @@ NB. the instructions will also work in anywhere supported by [Docker Machine](ht
       
     You can check if any variables are missing with: ./adop compose config  | grep 'WARNING'
 
-    Navigate to http://11.22.33.44 in your browser to use your new DevOps Platform!
+    Navigate to http://<PROXY IP> in your browser to use your new DevOps Platform!
     Login using the following credentials:
       Username: YOUR_USERNAME
       Password: YOUR_PASSWORD
