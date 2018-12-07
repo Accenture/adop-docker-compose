@@ -28,7 +28,7 @@ before_install:
 
 script:
  - ./adop
- - ./adop compose init
+ - travis_wait 20 ./adop compose init
  - ./adop target set -t http://127.0.0.1 -u ${INITIAL_ADMIN_USER} -p ${INITIAL_ADMIN_PASSWORD_PLAIN}
  - sleep 30
  - ./adop workspace -w Travis create
