@@ -50,7 +50,7 @@ gitlab-postgresql:
     - "5432"
   environment:
     POSTGRES_USER: ${GITLAB_POSTGRES_USER}
-    POSTGRES_PASSWORD: ${GITLAB_POSTGRES_PASSWORD}
+    POSTGRES_PASSWORD: ${PASSWORD_POSTGRESQL}
     POSTGRES_DB: ${GITLAB_POSTGRES_DB}
 
 gitlab:
@@ -74,13 +74,13 @@ gitlab:
      external_url "${PROTO}://${TARGET_HOST}/gitlab"
      postgresql['enable'] = false
      gitlab_rails['db_username'] = "${GITLAB_POSTGRES_USER}"
-     gitlab_rails['db_password'] = "${GITLAB_POSTGRES_PASSWORD}"
+     gitlab_rails['db_password'] = "${PASSWORD_POSTGRESQL}"
      gitlab_rails['db_host'] = "gitlab-postgresql"
      gitlab_rails['db_port'] = "5432"
      gitlab_rails['db_database'] = "${GITLAB_POSTGRES_DB}"
      gitlab_rails['db_adapter'] = 'postgresql'
      gitlab_rails['db_encoding'] = 'utf8'
-     gitlab_rails['monitoring_whitelist'] = ['127.0.0.0/8', '172.0.0.0/8']
+     gitlab_rails['monitoring_whitelist'] = ['127.0.0.0/8', "${DOCKER_NETWORK_SUBNET_CIDR}"]
      # Redis Configuration
      redis['enable'] = false
      gitlab_rails['redis_host'] = 'gitlab-redis'

@@ -188,6 +188,7 @@ create_network() {
     else
         echo "Created Docker network: ${CUSTOM_NETWORK_NAME}"
     fi
+    export DOCKER_NETWORK_SUBNET_CIDR=$( docker network inspect ${CUSTOM_NETWORK_NAME} | grep Subnet | awk '{print $2}' | sed s/\"//g | sed s/,//g )
 }
 
 gen_certs() {

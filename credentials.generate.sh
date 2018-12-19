@@ -88,6 +88,9 @@ else
 	PASSWORD_GITLAB=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_GITLAB_PLAIN###/$PASSWORD_GITLAB/g" platform.secrets.sh
 	
+	PASSWORD_POSTGRESQL=$(createPassword)
+	sed -i'' -e "s/###PASSWORD_POSTGRESQL_PLAIN###/$PASSWORD_POSTGRESQL/g" platform.secrets.sh
+	
 	PASSWORD_SQL=$(createPassword)
 	sed -i'' -e "s/###PASSWORD_SQL_PLAIN###/$PASSWORD_SQL/g" platform.secrets.sh
 
@@ -114,6 +117,7 @@ fi
 if  [ $INITIAL_ADMIN_PASSWORD_PLAIN == "###INITIAL_ADMIN_PASSWORD_PLAIN###" ] || \
 	[ $PASSWORD_JENKINS == "###PASSWORD_JENKINS_PLAIN###" ] || \
 	[ $PASSWORD_GITLAB == "###PASSWORD_GITLAB_PLAIN###" ] || \
+	[ $PASSWORD_POSTGRESQL == "###PASSWORD_POSTGRESQL_PLAIN###" ] || \
 	[ $PASSWORD_SQL == "###PASSWORD_SQL_PLAIN###" ] || \
 	[ $LDAP_PWD == "###LDAP_PWD###" ]; then
 	echo "Your passwords are set to the default tokens provided in the example secrets file, this is not allowed."
