@@ -306,7 +306,7 @@ selenium-node-firefox:
 nexus:
   container_name: nexus
   restart: always
-  image:  accenture/adop-nexus:0.2.2
+  image:  accenture/adop-nexus:0.2.4
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "8081"
