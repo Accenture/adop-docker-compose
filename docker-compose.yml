@@ -339,7 +339,7 @@ ldap-ltb:
 ldap-phpadmin:
   container_name: ldap-phpadmin
   restart: always
-  image: accenture/adop-ldap-phpadmin:0.1.0
+  image: accenture/adop-ldap-phpadmin:0.2.0
   net: ${CUSTOM_NETWORK_NAME}
   expose:
     - "80"
