@@ -20,7 +20,7 @@ export LDAP_GROUP_NAME_ADMIN="administrators"
 # Gerrit MySQL
 
 export GERRIT_MYSQL_USER="gerrit"
-export GERRIT_MYSQL_PASSWORD="***REMOVED***"
+export GERRIT_MYSQL_PASSWORD="gerrit"
 export GERRIT_MYSQL_DATABASE="gerrit"
 
 # Gerrit
@@ -37,7 +37,7 @@ export GERRIT_JENKINS_USERNAME="jenkins"
 # Sonar MySQL
 
 export SONAR_MYSQL_USER="sonar"
-export SONAR_MYSQL_PASSWORD="***REMOVED***"
+export SONAR_MYSQL_PASSWORD="sonar"
 export SONAR_MYSQL_DATABASE="sonar"
 
 # Jenkins
