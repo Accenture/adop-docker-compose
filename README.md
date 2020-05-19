@@ -9,7 +9,7 @@ The platform runs on a [docker container cluster](https://docs.docker.com/swarm/
 
 Here is the front page:
 
-![HomePage](https://raw.githubusercontent.com/accenture/adop-docker-compose/master/img/home.png)
+![HomePage](https://github.com/grass-roots-604/adop-docker-compose/blob/IES-5/img/home.png)
 
 Once you have a stack up and running, you can log in with the username and password created upon start-up.
 
