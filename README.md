@@ -1,3 +1,5 @@
+### As of summer 2020 this repository has been deprecated and is no longer maintained.
+
 [![Build Status](https://travis-ci.org/Accenture/adop-docker-compose.svg?branch=master)](https://travis-ci.org/Accenture/adop-docker-compose)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Accenture/ADOP)
 
